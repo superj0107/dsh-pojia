@@ -19,6 +19,7 @@
     "dsh-pojia": "bin/dsh-pojia.js"
   },
   "files": [
+    "DISCLAIMER.md",
     "armor",
     "test",
     "lib",

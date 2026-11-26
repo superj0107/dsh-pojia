@@ -5,6 +5,8 @@
 [![DSH](https://img.shields.io/badge/DSH-0.2.2--rc.5-blue.svg)](https://github.com/superj0107/dsh-pojia)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18-339933?logo=node.js&logoColor=fff)](https://nodejs.org/)
 
+> ⚠️ **使用前请阅读 [免责声明与使用边界](./DISCLAIMER.md)**：本项目仅供学习研究、非商业使用，仅限你有权管理的本机/授权环境。严禁未授权攻击或任何违法用途，作者不承担使用后果。
+
 把两层破甲能力合成一个插件，**所有功能统一收进 `/pojia` 命令**：
 
 | 层 | 来源 | 作用 |
@@ -127,5 +129,9 @@ presets/ skills/  预设与技能
 - 富江破甲 / Minglink — CC BY-NC-SA 4.0 + 附加条款（[armor/FUJIANG-LICENSE.txt](./armor/FUJIANG-LICENSE.txt)）
 
 再分发必须保留全部三方署名、许可原文并注明修改；**严禁商业使用**。全家福见 [NOTICE](./NOTICE)。
+
+## 免责声明
+
+使用前务必阅读 [DISCLAIMER.md](./DISCLAIMER.md)：合法与授权使用边界、非商业约束、风险自担、不担保、数据隐私与第三方独立性。简而言之——仅在有权管理的环境使用，后果自负，作者免责。
 
 原上游文档保留作参考：[README-upstream-purge-safe.md](./README-upstream-purge-safe.md)。
