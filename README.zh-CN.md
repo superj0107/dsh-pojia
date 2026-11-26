@@ -8,15 +8,29 @@
 
 面向 **DSH 0.2.2-rc.5**（桌面 + Web）。
 
-一键脚本（解压 `dsh-pojia-<版本>-installer.zip` 后）：
+一键安装（解压 `dsh-pojia-<版本>-installer.zip` 后双击，不用开终端）：
+
+| 平台 | 双击 | 作用 |
+|---|---|---|
+| macOS | `点我一键安装-macOS.command` | 安装 |
+| macOS | `点我检查是否生效-macOS.command` | 检查 |
+| macOS | `点我一键卸载-macOS.command` | 卸载 |
+| Windows | `点我一键安装-Windows.bat` | 安装 |
+| Windows | `点我检查是否生效-Windows.bat` | 检查 |
+| Windows | `点我一键卸载-Windows.bat` | 卸载 |
+
+macOS 首次被 Gatekeeper 拦：右键 → 打开，或先 `xattr -dr com.apple.quarantine <解压目录>`。
+
+习惯终端也行：
 
 ```sh
 bash install.sh                 # macOS / Linux / WSL
-bash install.sh --uninstall     # 卸载
+bash uninstall.sh               # 卸载
 ```
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\install.ps1   # Windows
+powershell -ExecutionPolicy Bypass -File .\install.ps1     # Windows
+powershell -ExecutionPolicy Bypass -File .\uninstall.ps1   # 卸载
 ```
 
 或手动用 `dsh plugin`：

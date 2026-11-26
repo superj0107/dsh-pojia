@@ -115,8 +115,8 @@ fi
 check "托管块仍只有一段" has_managed_block_once "$yml"
 check "bundle 没有重复" bundle_appended_once "$pkg"
 
-echo "== 3) 卸载 =="
-if ! bash "$root/install.sh" --dsh-home "$home" --uninstall >"$tmp/uninstall.log" 2>&1; then
+echo "== 3) 卸载（走 uninstall.sh 包装）=="
+if ! bash "$root/uninstall.sh" --dsh-home "$home" >"$tmp/uninstall.log" 2>&1; then
   echo "uninstall 失败：" >&2
   cat "$tmp/uninstall.log" >&2
   exit 1
@@ -127,6 +127,20 @@ check "依赖行已移除" dep_removed "$pkg"
 check "bundle 已移除但保留其它 bundle" bundle_removed "$pkg"
 check "托管块已清空" has_no_managed_block "$yml"
 check "用户原有内容仍在" keeps_user_content "$yml"
+
+echo "== 4) 双击脚本齐备 =="
+for f in "点我一键安装-Windows.bat" "点我一键卸载-Windows.bat" "点我检查是否生效-Windows.bat" \
+         "点我一键安装-macOS.command" "点我一键卸载-macOS.command" "点我检查是否生效-macOS.command" \
+         uninstall.sh uninstall.ps1; do
+  check "存在 $f" test -f "$root/$f"
+done
+check "Windows 安装脚本调用 install.ps1" grep -q "install.ps1" "$root/点我一键安装-Windows.bat"
+check "Windows 卸载脚本调用 uninstall.ps1" grep -q "uninstall.ps1" "$root/点我一键卸载-Windows.bat"
+check "macOS 安装脚本调用 install.sh" grep -q "install.sh" "$root/点我一键安装-macOS.command"
+check "macOS 卸载脚本调用 uninstall.sh" grep -q "uninstall.sh" "$root/点我一键卸载-macOS.command"
+for f in "$root"/*.command "$root/uninstall.sh"; do
+  check "bash 语法 $(basename "$f")" bash -n "$f"
+done
 
 echo
 if [ "$fails" -gt 0 ]; then

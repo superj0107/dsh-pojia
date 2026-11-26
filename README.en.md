@@ -8,18 +8,32 @@ A merged DeepSeek Harness plugin that combines host-level cleaning (from dsh-pur
 
 Targets **DSH 0.2.2-rc.5** (desktop and web).
 
-One-click script (after unzipping `dsh-pojia-<version>-installer.zip`):
+One-click install (unzip `dsh-pojia-<version>-installer.zip`, then double-click — no terminal needed):
+
+| Platform | Double-click | Action |
+|---|---|---|
+| macOS | `点我一键安装-macOS.command` | install |
+| macOS | `点我检查是否生效-macOS.command` | verify |
+| macOS | `点我一键卸载-macOS.command` | uninstall |
+| Windows | `点我一键安装-Windows.bat` | install |
+| Windows | `点我检查是否生效-Windows.bat` | verify |
+| Windows | `点我一键卸载-Windows.bat` | uninstall |
+
+The filenames are Chinese; the script itself prints Chinese messages too. If Gatekeeper blocks the `.command` on macOS: right-click → Open, or run `xattr -dr com.apple.quarantine <unzipped dir>` first.
+
+Terminal equivalent:
 
 ```sh
 bash install.sh                 # macOS / Linux / WSL (bash 3.2+)
-bash install.sh --uninstall     # uninstall
+bash uninstall.sh               # uninstall
 ```
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\install.ps1   # Windows
+powershell -ExecutionPolicy Bypass -File .\install.ps1     # Windows
+powershell -ExecutionPolicy Bypass -File .\uninstall.ps1   # uninstall
 ```
 
-`install.sh` resolves the DSH home in this order: `--dsh-home` → `$DSH_HOME` → `~/Library/Application Support/DeepSeek Harness/dsh-home` (macOS desktop) → `~/.dsh`. If Gatekeeper blocked it once, run `xattr -d com.apple.quarantine install.sh` first.
+`install.sh` resolves the DSH home in this order: `--dsh-home` → `$DSH_HOME` → `~/Library/Application Support/DeepSeek Harness/dsh-home` (macOS desktop) → `~/.dsh`.
 
 Or install manually with `dsh plugin`:
 

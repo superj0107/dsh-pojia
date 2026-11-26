@@ -2,3 +2,9 @@
 *.png binary
 *.jpg binary
 *.ico binary
+# Windows 双击脚本必须是 CRLF，否则 cmd 解析异常
+*.bat text eol=crlf
+*.cmd text eol=crlf
+# macOS 双击脚本 / shell 脚本保持 LF
+*.command text eol=lf
+*.sh text eol=lf

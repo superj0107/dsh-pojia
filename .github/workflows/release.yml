@@ -34,7 +34,9 @@ jobs:
           node --check lib/effect-check.js
           node --check client.js
           bash -n install.sh
+          bash -n uninstall.sh
           bash -n test/install-sh-smoke.sh
+          for f in *.command; do bash -n "$f"; done
 
       - name: Unit tests
         run: npm test
@@ -62,10 +64,11 @@ jobs:
           tar -xzf "dsh-pojia-${version}.tgz"
           cp -a package/. "$staged/"
           rm -rf package
-          cp install.ps1 "$staged/install.ps1"
-          # macOS / Linux / WSL one-click script, keep exec bit
-          cp install.sh "$staged/install.sh"
-          chmod +x "$staged/install.sh"
+          cp install.ps1 uninstall.ps1 install.sh uninstall.sh "$staged/"
+          # 双击即用脚本（Windows .bat / macOS .command），macOS 侧保留可执行位
+          cp "点我一键安装-Windows.bat" "点我一键卸载-Windows.bat" "点我检查是否生效-Windows.bat" "$staged/"
+          cp "点我一键安装-macOS.command" "点我一键卸载-macOS.command" "点我检查是否生效-macOS.command" "$staged/"
+          chmod +x "$staged"/*.sh "$staged"/*.command
           zip -qr "dsh-pojia-${version}-installer.zip" "$staged"
           ls -lh dsh-pojia-*.tgz dsh-pojia-*-installer.zip
 

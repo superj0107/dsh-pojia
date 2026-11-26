@@ -29,7 +29,9 @@ jobs:
       - name: Installer script syntax (bash)
         run: |
           bash -n install.sh
+          bash -n uninstall.sh
           bash -n test/install-sh-smoke.sh
+          for f in *.command; do bash -n "$f"; done
 
       - name: install.sh smoke test (macOS/Linux 一键安装)
         run: bash test/install-sh-smoke.sh

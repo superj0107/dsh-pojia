@@ -22,36 +22,53 @@
 
 面向 **DSH 0.2.2-rc.5**（桌面 + Web）。
 
-**方式一：一键脚本（macOS / Linux / WSL / Windows，最省事）**
+**方式一：双击脚本（最省事，不用开终端）**
 
-到 [Releases](https://github.com/superj0107/dsh-pojia/releases/latest) 下载 `dsh-pojia-<版本>-installer.zip`，解压后按平台跑：
+到 [Releases](https://github.com/superj0107/dsh-pojia/releases/latest) 下载 `dsh-pojia-<版本>-installer.zip`，**完整解压**后按平台双击：
 
-macOS / Linux / WSL（`install.sh`，bash 3.2+，macOS 自带即可）：
+| 平台 | 双击这个文件 | 作用 |
+|---|---|---|
+| macOS | `点我一键安装-macOS.command` | 安装 |
+| macOS | `点我检查是否生效-macOS.command` | 检查装好没、补丁进度 |
+| macOS | `点我一键卸载-macOS.command` | 卸载 |
+| Windows | `点我一键安装-Windows.bat` | 安装 |
+| Windows | `点我检查是否生效-Windows.bat` | 检查装好没、补丁进度 |
+| Windows | `点我一键卸载-Windows.bat` | 卸载 |
+
+脚本会自己找 DSH home（`$DSH_HOME` → macOS 桌面版 `~/Library/Application Support/DeepSeek Harness/dsh-home` → `~/.dsh`），复制插件、写 profile 依赖与 bundle、跑 `pnpm install`，跑完窗口停住给你看结果。
+
+macOS 首次可能被 Gatekeeper 拦（"无法打开，因为来自身份不明的开发者"）：右键 → 打开；或在「终端」里先跑一次
+
+```sh
+xattr -dr com.apple.quarantine <解压目录>
+```
+
+**方式二：终端命令（和双击等价）**
+
+macOS / Linux / WSL：
 
 ```sh
 cd dsh-pojia-<版本>-installer
 bash install.sh                            # 装到自动探测的 DSH home 的 desktop profile
 bash install.sh --profile web              # 装到 web profile
 bash install.sh --dsh-home "$HOME/my-dsh"  # 装到隔离 home
-bash install.sh --uninstall                # 卸载
+bash uninstall.sh                          # 卸载（等价 install.sh --uninstall）
 ```
 
-home 探测顺序：`--dsh-home` → `$DSH_HOME` → `~/Library/Application Support/DeepSeek Harness/dsh-home` → `~/.dsh`。首次被 Gatekeeper 拦过的话先 `xattr -d com.apple.quarantine install.sh`。
-
-Windows（`install.ps1`）：在解压后的目录里右键「用 PowerShell 运行」，或：
+Windows：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\install.ps1
 .\install.ps1 -Profile web                 # 装到 web profile
 .\install.ps1 -DshHome "D:\my\.dsh"        # 装到隔离 home
-.\install.ps1 -Uninstall                   # 卸载
+powershell -ExecutionPolicy Bypass -File .\uninstall.ps1    # 卸载
 ```
 
-两个脚本做同一件事：把插件装到指定 DSH 的 profile（复制插件目录、写 profile 依赖和 bundle、跑 pnpm install），写的 `cordis.patch.yml` 托管块格式一致，可互相卸载。
+两套脚本做同一件事，写的 `cordis.patch.yml` 托管块格式一致，可互相卸载。
 
 装完完全退出并重新打开 DSH，在 dsh-pojia 面板点「应用」。
 
-**方式二：dsh plugin 命令**
+**方式三：dsh plugin 命令**
 
 下载 Release 里的 `dsh-pojia-<版本>.tgz`，解压后：
 
@@ -60,7 +77,7 @@ dsh plugin --profile desktop add /absolute/path/to/dsh-pojia-<版本>
 # 或 Web：把 desktop 换成 web
 ```
 
-**方式三：从源码安装**
+**方式四：从源码安装**
 
 ```sh
 git clone https://github.com/superj0107/dsh-pojia.git

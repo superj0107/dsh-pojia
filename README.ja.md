@@ -8,18 +8,32 @@ DeepSeek Harness 向けの統合プラグインです。**ホスト側クリー�
 
 対象は **DSH 0.2.2-rc.5**（デスクトップ / Web）。
 
-ワンクリックスクリプト（`dsh-pojia-<version>-installer.zip` を展開後）：
+ワンクリックインストール（`dsh-pojia-<version>-installer.zip` を展開し、ダブルクリックするだけ。ターミナル不要）：
+
+| プラットフォーム | ダブルクリック | 動作 |
+|---|---|---|
+| macOS | `点我一键安装-macOS.command` | インストール |
+| macOS | `点我检查是否生效-macOS.command` | 動作確認 |
+| macOS | `点我一键卸载-macOS.command` | アンインストール |
+| Windows | `点我一键安装-Windows.bat` | インストール |
+| Windows | `点我检查是否生效-Windows.bat` | 動作確認 |
+| Windows | `点我一键卸载-Windows.bat` | アンインストール |
+
+ファイル名とスクリプト内のメッセージは中国語です。macOS で Gatekeeper に止められた場合は、右クリック → 開く、または `xattr -dr com.apple.quarantine <展開先>` を先に実行してください。
+
+ターミナルで実行する場合：
 
 ```sh
 bash install.sh                 # macOS / Linux / WSL（bash 3.2 以上）
-bash install.sh --uninstall     # アンインストール
+bash uninstall.sh               # アンインストール
 ```
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\install.ps1   # Windows
+powershell -ExecutionPolicy Bypass -File .\install.ps1     # Windows
+powershell -ExecutionPolicy Bypass -File .\uninstall.ps1   # アンインストール
 ```
 
-`install.sh` の DSH home 解決順：`--dsh-home` → `$DSH_HOME` → `~/Library/Application Support/DeepSeek Harness/dsh-home`（macOS デスクトップ）→ `~/.dsh`。Gatekeeper に一度止められた場合は `xattr -d com.apple.quarantine install.sh` を実行してください。
+`install.sh` の DSH home 解決順：`--dsh-home` → `$DSH_HOME` → `~/Library/Application Support/DeepSeek Harness/dsh-home`（macOS デスクトップ）→ `~/.dsh`。
 
 手動で `dsh plugin` を使う場合：
 
