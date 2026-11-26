@@ -19,6 +19,8 @@
     "dsh-pojia": "bin/dsh-pojia.js"
   },
   "files": [
+    "armor",
+    "test",
     "lib",
     "!lib/default-prompt-inject.md",
     "!lib/default-prompt-inject.md.bak",
