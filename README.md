@@ -1,5 +1,10 @@
 # dsh-pojia — DeepSeek Harness 破甲融合包
 
+[![CI](https://github.com/superj0107/dsh-pojia/actions/workflows/ci.yml/badge.svg)](https://github.com/superj0107/dsh-pojia/actions/workflows/ci.yml)
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](./LICENSE)
+[![DSH](https://img.shields.io/badge/DSH-0.2.2--rc.5-blue.svg)](https://github.com/superj0107/dsh-pojia)
+[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18-339933?logo=node.js&logoColor=fff)](https://nodejs.org/)
+
 把两层破甲能力合成一个插件，**所有功能统一收进 `/pojia` 命令**：
 
 | 层 | 来源 | 作用 |
@@ -15,11 +20,22 @@
 
 面向 **DSH 0.2.2-rc.5**（桌面 + Web）。
 
+**方式一：从 GitHub Release 安装（推荐）**
+
+到 [Releases](https://github.com/superj0107/dsh-pojia/releases/latest) 下载 `dsh-pojia-<版本>.tgz`，解压到本地目录后安装：
+
 ```sh
-# 桌面 profile（本机实际使用的那个）
-dsh plugin --profile desktop add /absolute/path/to/dsh-pojia
+# 解压后（把路径换成你实际解压的位置）
+dsh plugin --profile desktop add /absolute/path/to/dsh-pojia-<版本>
 # 或 Web
-dsh plugin --profile web add /absolute/path/to/dsh-pojia
+dsh plugin --profile web add /absolute/path/to/dsh-pojia-<版本>
+```
+
+**方式二：从源码安装**
+
+```sh
+git clone https://github.com/superj0107/dsh-pojia.git
+dsh plugin --profile desktop add /absolute/path/to/dsh-pojia
 ```
 
 完全退出并重新打开宿主。首次使用在会话标题旁的 **dsh-pojia** 面板点「应用」（Clean → Apply）；成功后宿主自动重启一次。

@@ -1,6 +1,4 @@
-# Release notes — dsh-pojia
-
-## 1.0.0 (2026-11-26)
+# 1.0.0
 
 首个融合版本。把 dsh-purge-safe 与富江破甲合成一个插件，功能统一收进 `/pojia`。
 
