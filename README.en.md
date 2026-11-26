@@ -23,6 +23,8 @@ The filenames are Chinese; the script itself prints Chinese messages too. If Gat
 
 **Missing dependencies are offered, not forced:** if Node.js (or a version < 18) or pnpm is absent, the script prints a `[Y/n]` prompt — Enter or `y` installs it: Node.js via Homebrew, else the official tarball (sha256-verified) into `<DSH home>/toolchain`; pnpm via `npm i -g` → `corepack` → the official standalone script. No sudo and no shell-config edits; `n` only warns. Non-interactive: `--yes` / `-Yes` to auto-install, `--no-deps` / `-NoDeps` to only warn (same on Windows, which uses winget or the official zip).
 
+**A failing `pnpm install` is reported honestly** (never as success): the pnpm error is printed, common causes get concrete fixes, fixable ones are offered interactively (e.g. adding a GitHub package to `onlyBuiltDependencies` and retrying once), and as a last resort the plugin is linked into `node_modules` so DSH can still load it — exit code `2` means "plugin installed, profile dependencies broken".
+
 Terminal equivalent:
 
 ```sh

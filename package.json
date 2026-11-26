@@ -1,6 +1,6 @@
 {
   "name": "dsh-pojia",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "DeepSeek Harness 破甲融合包：宿主清洗（原 dsh-purge-safe）+ 破甲内核（原富江破甲）双层合一，全部功能统一收进 /pojia 命令。免费开源，遵守 CC BY-NC-SA 4.0 与 Apache-2.0 双署名。",
   "type": "module",
   "main": "lib/index.js",

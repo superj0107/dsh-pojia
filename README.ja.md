@@ -23,6 +23,8 @@ DeepSeek Harness 向けの統合プラグインです。**ホスト側クリー�
 
 **依存関係は勝手に入れず、まず確認します**：Node.js（または 18 未満）や pnpm が無い場合、スクリプトは `[Y/n]` を表示します。Enter か `y` で自動インストール（Node.js は Homebrew、無ければ公式 tarball を sha256 検証して `<DSH home>/toolchain` へ。pnpm は `npm i -g` → `corepack` → 公式スタンドアロンの順）。sudo 不要、シェル設定も変更しません。`n` なら警告のみ。非対話なら `--yes` / `-Yes` で自動、`--no-deps` / `-NoDeps` で警告のみ（Windows は winget または公式 zip を使用）。
 
+**`pnpm install` の失敗は正直に報告します**（成功と偽りません）：pnpm のエラーをそのまま表示し、よくある原因には具体的な対処を示し、直せるものは確認のうえ自動修正します（例：GitHub のパッケージを `onlyBuiltDependencies` に追加して 1 回だけ再試行）。それでも駄目ならプラグインを `node_modules` に手動リンクして DSH が読み込める状態を保ちます。終了コード `2` は「プラグインは導入済み、profile の依存に問題あり」を意味します。
+
 ターミナルで実行する場合：
 
 ```sh

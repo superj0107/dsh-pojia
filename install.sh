@@ -461,6 +461,13 @@ BEGIN_NEW_LINE="# >>> dsh-pojia managed block - do not edit inside"
 if [ "$do_uninstall" = 1 ]; then
   step "卸载 $plugin_name"
   node "$helper" uninstall "$plugin_name" "$profile_dir/package.json" "$profile_dir/cordis.patch.yml"
+  # 清掉 fallback 建的 node_modules 链接 / 副本（只删这一项，不碰别的依赖）
+  link_path="$profile_dir/node_modules/$plugin_name"
+  if [ -L "$link_path" ]; then
+    rm -f "$link_path" && ok "已删除 node_modules/$plugin_name 链接"
+  elif [ -d "$link_path" ]; then
+    rm -rf "$link_path" && ok "已删除 node_modules/$plugin_name 副本"
+  fi
   if [ -d "$target_dir" ]; then
     rm -rf "$target_dir"
     ok "已删除 $target_dir"
@@ -509,22 +516,110 @@ ok "插件已复制"
 step "写入 profile 注册"
 node "$helper" install "$plugin_name" "$profile_dir/package.json" "$profile_dir/cordis.patch.yml"
 
-# --- pnpm install（缺 pnpm 会先问你要不要装）---
+# --- 装 profile 依赖（失败要如实说，并保证插件至少能被加载）---
+link_plugin() {
+  nm="$profile_dir/node_modules"
+  link="$nm/$plugin_name"
+  mkdir -p "$nm"
+  rm -rf "$link" 2>/dev/null || true
+  if ln -sfn "$target_dir" "$link" 2>/dev/null; then
+    ok "已手动链接 node_modules/$plugin_name → $target_dir"
+    return 0
+  fi
+  if cp -R "$target_dir" "$link" 2>/dev/null; then
+    ok "已复制插件到 node_modules/$plugin_name（软链不可用时退回复制）"
+    return 0
+  fi
+  warn "手动链接插件也失败了，DSH 可能加载不到它"
+  return 1
+}
+
+show_pnpm_hint() {
+  if printf '%s' "$1" | grep -q 'ERR_PNPM_INVALID_VERSION_UNION'; then
+    warn "profile 里有一条 URL / tarball 形式的依赖，当前 pnpm 不接受这种写法（与本插件无关）。"
+    warn "处理办法：把 package.json 里的 https://…/tar.gz/<sha> 改成 github:owner/repo#<sha>，或临时用 pnpm 9（npm i -g pnpm@9）再装。"
+  elif printf '%s' "$1" | grep -q 'ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED'; then
+    warn "profile 里从 GitHub 拉下来的包要跑构建脚本，pnpm 要求显式放行（与本插件无关）。"
+    warn "处理办法：在 $profile_dir/pnpm-workspace.yaml 加 onlyBuiltDependencies，或跑 pnpm approve-builds。"
+  elif printf '%s' "$1" | grep -q 'ERR_PNPM_'; then
+    warn "pnpm 报错了，完整输出在上面；profile 里原有的依赖问题需要单独修。"
+  fi
+}
+
+add_built_dependency() { # add_built_dependency <包名>：写进 pnpm-workspace.yaml 的 onlyBuiltDependencies
+  ws="$profile_dir/pnpm-workspace.yaml"
+  mkdir -p "$profile_dir"
+  if [ ! -f "$ws" ]; then
+    printf 'onlyBuiltDependencies:\n  - "%s"\n' "$1" >"$ws"
+    return 0
+  fi
+  if grep -q '^onlyBuiltDependencies:' "$ws"; then
+    grep -q -- "$1" "$ws" && return 0
+    awk -v pkg="$1" '{ print } /^onlyBuiltDependencies:/ { print "  - \"" pkg "\"" }' "$ws" >"$ws.tmp" && mv "$ws.tmp" "$ws"
+  else
+    printf '\nonlyBuiltDependencies:\n  - "%s"\n' "$1" >>"$ws"
+  fi
+  return 0
+}
+
+deps_ok=1
 if [ "$skip_pnpm" = 0 ]; then
   if ensure_pnpm; then
     step "安装 profile 依赖（pnpm install）"
-    if ( cd "$profile_dir" && pnpm install --config.confirmModulesPurge=false ); then
+    plog="$tmp_dir/pnpm-install.log"
+    if ( cd "$profile_dir" && pnpm install --config.confirmModulesPurge=false ) >"$plog" 2>&1; then
+      pcode=0
+    else
+      pcode=$?
+    fi
+    cat "$plog"
+    if [ "$pcode" -eq 0 ] && ! grep -qE 'ERR_PNPM_|ERR_[A-Z][A-Z_]+_|ELIFECYCLE' "$plog"; then
       ok "pnpm install 完成"
     else
-      warn "pnpm install 失败，DSH 启动前请在该 profile 目录手动重跑：pnpm install"
+      deps_ok=0
+      warn "pnpm install 失败（退出码 $pcode），这一步的报错不是安装脚本能替你修的。"
+      show_pnpm_hint "$(cat "$plog")"
+
+      # pnpm 自己给了修法的那种（GitHub 包要跑构建脚本）：问一句，替用户改配置再重试
+      if grep -q 'ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED' "$plog"; then
+        blocked_pkg="$(sed -n 's/.*The git-hosted package "\([^"]*\)".*/\1/p' "$plog" | head -n 1 | sed 's/@[^@]*$//')"
+        if [ -n "$blocked_pkg" ] && ask_yes "要不要把 \"$blocked_pkg\" 加进 pnpm-workspace.yaml 的 onlyBuiltDependencies 再重试一次？"; then
+          if add_built_dependency "$blocked_pkg"; then
+            ok "已写入 onlyBuiltDependencies: $blocked_pkg"
+            if ( cd "$profile_dir" && pnpm install --config.confirmModulesPurge=false ) >"$plog" 2>&1; then
+              pcode=0
+            else
+              pcode=$?
+            fi
+            cat "$plog"
+            if [ "$pcode" -eq 0 ] && ! grep -qE 'ERR_PNPM_|ERR_[A-Z][A-Z_]+_|ELIFECYCLE' "$plog"; then
+              deps_ok=1
+              ok "重试后 pnpm install 完成"
+            fi
+          fi
+        fi
+      fi
+
+      if [ "$deps_ok" = 0 ] && link_plugin; then
+        warn "插件已手动链接进 node_modules，DSH 能加载它；profile 里其它依赖修好后，在 $profile_dir 重跑一次 pnpm install。"
+      fi
     fi
   else
-    warn "跳过 pnpm install。装好 pnpm 后手动跑：cd \"$profile_dir\" && pnpm install"
+    warn "跳过 pnpm install（没装 pnpm：按你的选择或当前环境）。"
+    link_plugin || true
   fi
 fi
 
-printf '\n%s安装完成。%s\n' "$c_ok" "$c_off"
-printf '  1) 完全退出并重新打开 DSH\n'
-printf '  2) 在会话标题旁 dsh-pojia 面板点「应用」（Clean → Apply），宿主会自动重启一次\n'
-printf '  3) 之后在会话里用 /pojia status 查看状态\n'
-printf '\n  卸载：bash install.sh --uninstall\n'
+printf '\n'
+if [ "$deps_ok" = 1 ]; then
+  printf '%s安装完成。%s\n' "$c_ok" "$c_off"
+  printf '  1) 完全退出并重新打开 DSH\n'
+  printf '  2) 在会话标题旁 dsh-pojia 面板点「应用」（Clean → Apply），宿主会自动重启一次\n'
+  printf '  3) 之后在会话里用 /pojia status 查看状态\n'
+  printf '\n  卸载：bash install.sh --uninstall\n'
+else
+  printf '%s安装动作做完了，但有依赖没弄好（看上面的 [!]）。%s\n' "$c_warn" "$c_off"
+  printf '  插件本身已就位；把依赖问题修掉后，在 %s 里重跑 pnpm install，再重启 DSH 点「应用」。\n' "$profile_dir"
+  printf '  只想先装插件：bash install.sh --skip-pnpm-install（脚本会手动链接插件）。\n'
+  exit 2
+fi

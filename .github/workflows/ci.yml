@@ -32,6 +32,7 @@ jobs:
           bash -n uninstall.sh
           bash -n test/install-sh-smoke.sh
           bash -n test/install-deps-smoke.sh
+          bash -n test/install-fail-smoke.sh
           for f in *.command; do bash -n "$f"; done
 
       - name: install.sh smoke test (macOS/Linux 一键安装)
@@ -39,3 +40,6 @@ jobs:
 
       - name: dependency handling smoke test (--yes / --no-deps / 缺 Node)
         run: bash test/install-deps-smoke.sh
+
+      - name: pnpm failure reporting smoke test
+        run: bash test/install-fail-smoke.sh

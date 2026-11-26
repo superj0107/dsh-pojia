@@ -76,7 +76,9 @@ powershell -ExecutionPolicy Bypass -File .\install.ps1
 powershell -ExecutionPolicy Bypass -File .\uninstall.ps1    # 卸载
 ```
 
-两套脚本做同一件事，写的 `cordis.patch.yml` 托管块格式一致，可互相卸载。
+两个脚本做同一件事，写的 `cordis.patch.yml` 托管块格式一致，可互相卸载。
+
+**如果 `pnpm install` 失败**（多半是 profile 里原有依赖的问题，不是本插件）：脚本不会假装成功——它把 pnpm 的原始报错打出来，识别常见错误给具体修法，能修的还会问你要不要修（比如 GitHub 包要执行构建脚本时，帮你把包写进 `pnpm-workspace.yaml` 的 `onlyBuiltDependencies` 再重试一次）；实在修不好就把插件手动链接进 `node_modules`，DSH 依然能加载它。这时退出码是 `2`，表示「插件装好了、profile 依赖有问题」。
 
 装完完全退出并重新打开 DSH，在 dsh-pojia 面板点「应用」。
 

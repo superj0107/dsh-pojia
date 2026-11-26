@@ -1,3 +1,27 @@
+# 1.0.3
+
+`pnpm install` 失败不再假装成功：如实报错、能自动修的替你修、修不了也保证插件能加载。
+
+### 中文
+
+- 修 BUG：`pnpm install` 明明报 `ERR_PNPM_*` 失败，脚本却打印「pnpm install 完成」。现在同时看退出码和输出里的错误标记，失败就是失败，退出码 `2` 表示「插件已装好，但 profile 依赖有问题」。
+- 失败时会识别两类 profile 依赖问题并给出具体修法：`ERR_PNPM_INVALID_VERSION_UNION`（profile 里 URL/tarball 形式的依赖不被当前 pnpm 接受，建议改成 `github:owner/repo#<sha>` 或用 pnpm 9）与 `ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED`（GitHub 包要跑构建脚本）。
+- 能自动修的直接问一句就修：后一种错误会问「要不要把 `<包名>` 加进 `pnpm-workspace.yaml` 的 `onlyBuiltDependencies` 再重试一次」，同意就写配置并自动重试，成功则正常收尾；重复运行不会重复写。
+- 收尾兜底：实在装不上时把插件手动链接进 `node_modules`（Windows 用 junction，macOS/Linux 用软链，不可用时退回复制），DSH 照样能加载；`uninstall` 会顺手删掉这个链接，不碰其它依赖。
+- 修 BUG：Windows 双击 `.bat` 在 `chcp 65001` 下会把含中文的 `echo` 行拆开当命令执行，报 `'…' is not recognized as an internal or external command`。三个 `.bat` 现在全部纯 ASCII（中文提示统一由带 BOM 的 PowerShell 脚本输出），并区分成功/有问题两种收尾文案。
+- 新增 `test/install-fail-smoke.sh` 并接入 CI/Release：假 pnpm 模拟失败，断言「不许报 OK」「给对建议」「自动修 onlyBuiltDependencies 后重试成功」「兜底链接」「卸载清链接且不动其它依赖」。
+
+### English
+
+- Fixed: a failing `pnpm install` (e.g. `ERR_PNPM_*`) used to be reported as "pnpm install 完成". Exit code and output markers are now both checked; failures stay failures, and exit code `2` means "plugin installed but profile dependencies are broken".
+- Two profile-dependency errors are recognised with concrete fixes: `ERR_PNPM_INVALID_VERSION_UNION` (URL/tarball specs rejected by the current pnpm — switch to `github:owner/repo#<sha>` or use pnpm 9) and `ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED` (a GitHub package wants to run build scripts).
+- The fixable one is offered interactively: the script asks whether to add `<pkg>` to `onlyBuiltDependencies` in `pnpm-workspace.yaml` and retry once; it writes the config and re-runs on consent, and repeated runs never duplicate the entry.
+- Last-resort fallback: when install still fails the plugin is linked into `node_modules` manually (junction on Windows, symlink elsewhere, copy if neither works) so DSH can load it; `uninstall` removes that link again and leaves other dependencies alone.
+- Fixed: the Windows `.bat` files broke under `chcp 65001` when an `echo` line contained Chinese — cmd split it and printed `'…' is not recognized as an internal or external command`. All three `.bat` files are pure ASCII now (Chinese output comes from the BOM-encoded PowerShell scripts), with distinct success/problem endings.
+- Added `test/install-fail-smoke.sh` (wired into CI and Release): a stub pnpm forces failures and asserts "never report OK", correct hints, automatic `onlyBuiltDependencies` fix + retry, the fallback link, and uninstall cleanup.
+
+---
+
 # 1.0.2
 
 缺依赖不再只是报错：脚本会先问你一句，同意了就自己装好。

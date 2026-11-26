@@ -37,6 +37,7 @@ jobs:
           bash -n uninstall.sh
           bash -n test/install-sh-smoke.sh
           bash -n test/install-deps-smoke.sh
+          bash -n test/install-fail-smoke.sh
           for f in *.command; do bash -n "$f"; done
 
       - name: Unit tests
@@ -47,6 +48,9 @@ jobs:
 
       - name: dependency handling smoke test
         run: bash test/install-deps-smoke.sh
+
+      - name: pnpm failure reporting smoke test
+        run: bash test/install-fail-smoke.sh
 
       - name: Verify release notes
         run: |

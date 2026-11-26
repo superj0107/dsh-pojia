@@ -324,6 +324,19 @@ if ($Uninstall) {
     Write-Step "卸载 $pluginName"
     Edit-ProfilePackage $false
     Edit-ProfilePatch $false
+    # 清掉 fallback 建的 node_modules 链接 / 副本（只删这一项，不碰别的依赖）
+    $linkPath = Join-Path $profileDir "node_modules\$pluginName"
+    if (Test-Path -LiteralPath $linkPath) {
+        $item = Get-Item -LiteralPath $linkPath -Force
+        if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+            # junction：用 rmdir 只删链接，绝不动目标目录内容
+            & cmd /c rmdir "$linkPath" 2>$null | Out-Null
+            if (-not (Test-Path -LiteralPath $linkPath)) { Write-Ok "已删除 node_modules\$pluginName 链接" }
+        } else {
+            Remove-Item -LiteralPath $linkPath -Recurse -Force -ErrorAction SilentlyContinue
+            Write-Ok "已删除 node_modules\$pluginName 副本"
+        }
+    }
     if (Test-Path -LiteralPath $targetDir) {
         Remove-Item -LiteralPath $targetDir -Recurse -Force
         Write-Ok "已删除 $targetDir"
@@ -361,19 +374,123 @@ if (-not $nodeReady) {
     Write-Warn "缺 Node.js：注册已经写好，但 DSH 跑插件需要 Node.js >= 18，装好后重启 DSH。"
 }
 
-if (-not $SkipPnpmInstall) {
-    if (Ensure-Pnpm) {
-        Write-Step "安装 profile 依赖（pnpm install）"
-        Push-Location $profileDir
+# --- 装 profile 依赖（装失败要如实报告，并保证插件至少能被 DSH 加载）---
+function Ensure-PluginLink {
+    $nm = Join-Path $profileDir 'node_modules'
+    $link = Join-Path $nm $pluginName
+    New-Item -ItemType Directory -Path $nm -Force | Out-Null
+    if (Test-Path -LiteralPath $link) {
+        Remove-Item -LiteralPath $link -Recurse -Force -ErrorAction SilentlyContinue
+    }
+    try {
+        New-Item -ItemType Junction -Path $link -Target $targetDir -ErrorAction Stop | Out-Null
+        Write-Ok "已手动链接 node_modules\$pluginName → $targetDir"
+        return $true
+    } catch {
         try {
-            & pnpm install --config.confirmModulesPurge=false 2>&1 | Out-String | Write-Host
-            if ($LASTEXITCODE -eq 0) { Write-Ok "pnpm install 完成" }
-            else { Write-Warn "pnpm install 失败，DSH 启动前请在该 profile 目录手动重跑：pnpm install" }
+            Copy-Item -LiteralPath $targetDir -Destination $link -Recurse -Force -ErrorAction Stop
+            Write-Ok "已复制插件到 node_modules\$pluginName（junction 不可用时退回复制）"
+            return $true
+        } catch {
+            Write-Warn "手动链接插件也失败了：$($_.Exception.Message)"
+            return $false
         }
-        finally { Pop-Location }
-    } else {
-        Write-Warn "跳过 pnpm install。装好 pnpm 后手动跑：cd `"$profileDir`"; pnpm install"
     }
 }
 
-Write-Host "`n安装完成。请完全退出并重新打开 DSH，然后在 dsh-pojia 面板点「应用」。" -ForegroundColor Green
+function Show-PnpmHint([string]$Text) {
+    if ($Text -match 'ERR_PNPM_INVALID_VERSION_UNION') {
+        Write-Warn "profile 里有一条 URL / tarball 形式的依赖，当前 pnpm 不接受这种写法（与本插件无关）。"
+        Write-Warn "处理办法：把 package.json 里的 https://…/tar.gz/<sha> 改成 github:owner/repo#<sha>，或临时用 pnpm 9（npm i -g pnpm@9）再装。"
+    } elseif ($Text -match 'ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED') {
+        Write-Warn "profile 里从 GitHub 拉下来的包要跑构建脚本，pnpm 要求显式放行（与本插件无关）。"
+        Write-Warn "处理办法：在 $profileDir\pnpm-workspace.yaml 加 onlyBuiltDependencies（例如 - ""dsh-providers-hub""），或跑 pnpm approve-builds。"
+    } elseif ($Text -match 'ERR_PNPM_') {
+        Write-Warn "pnpm 报错了，完整输出在上面；profile 里原有的依赖问题需要单独修。"
+    }
+}
+
+function Add-BuiltDependency([string]$Pkg) {
+    $ws = Join-Path $profileDir 'pnpm-workspace.yaml'
+    if (-not (Test-Path -LiteralPath $ws)) {
+        Set-Utf8 $ws ("onlyBuiltDependencies:`n  - `"$Pkg`"`n")
+        return $true
+    }
+    $text = Get-Utf8 $ws
+    if ($text -match [regex]::Escape($Pkg)) { return $true }
+    if ($text -match '(?m)^onlyBuiltDependencies:') {
+        $text = [regex]::Replace($text, '(?m)^onlyBuiltDependencies:', "onlyBuiltDependencies:`n  - `"$Pkg`"")
+    } else {
+        if (-not $text.EndsWith("`n")) { $text += "`n" }
+        $text += "`nonlyBuiltDependencies:`n  - `"$Pkg`"`n"
+    }
+    Set-Utf8 $ws $text
+    return $true
+}
+
+$depsOk = $true
+if (-not $SkipPnpmInstall) {
+    if (Ensure-Pnpm) {
+        Write-Step "安装 profile 依赖（pnpm install）"
+        $outText = ''
+        $code = 0
+        Push-Location $profileDir
+        try {
+            $outText = (& pnpm install --config.confirmModulesPurge=false 2>&1 | Out-String)
+            $code = $LASTEXITCODE
+        }
+        finally { Pop-Location }
+        Write-Host $outText
+        $errHit = ($outText -match 'ERR_PNPM_|ERR_[A-Z][A-Z_]+_|ELIFECYCLE')
+        if (($code -eq 0) -and (-not $errHit)) {
+            Write-Ok "pnpm install 完成"
+        } else {
+            $depsOk = $false
+            Write-Warn "pnpm install 失败（退出码 $code），这一步的报错不是安装脚本能替你修的。"
+            Show-PnpmHint $outText
+
+            # pnpm 自己给了修法的那种（GitHub 包要跑构建脚本）：问一句，替用户改配置再重试
+            if ($outText -match 'ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED') {
+                $m = [regex]::Match($outText, 'The git-hosted package "([^"]+)"')
+                $blocked = ''
+                if ($m.Success) { $blocked = $m.Groups[1].Value -replace '@[^@]*$', '' }
+                if ($blocked -and (Ask-Yes "要不要把 ""$blocked"" 加进 pnpm-workspace.yaml 的 onlyBuiltDependencies 再重试一次？")) {
+                    if (Add-BuiltDependency $blocked) {
+                        Write-Ok "已写入 onlyBuiltDependencies: $blocked"
+                        Push-Location $profileDir
+                        try {
+                            $outText = (& pnpm install --config.confirmModulesPurge=false 2>&1 | Out-String)
+                            $code = $LASTEXITCODE
+                        }
+                        finally { Pop-Location }
+                        Write-Host $outText
+                        if (($code -eq 0) -and (-not ($outText -match 'ERR_PNPM_|ERR_[A-Z][A-Z_]+_|ELIFECYCLE'))) {
+                            $depsOk = $true
+                            Write-Ok "重试后 pnpm install 完成"
+                        }
+                    }
+                }
+            }
+
+            if (-not $depsOk) {
+                if (Ensure-PluginLink) {
+                    Write-Warn "插件已手动链接进 node_modules，DSH 能加载它；profile 里其它依赖修好后，在 $profileDir 重跑一次 pnpm install。"
+                }
+            }
+        }
+    } else {
+        Write-Warn "跳过 pnpm install（没有 pnpm：按你的选择或当前环境）。"
+        [void](Ensure-PluginLink)
+    }
+}
+
+Write-Host ""
+if ($depsOk -and $nodeReady) {
+    Write-Host "安装完成。请完全退出并重新打开 DSH，然后在 dsh-pojia 面板点「应用」。" -ForegroundColor Green
+} else {
+    Write-Host "安装动作做完了，但有依赖没弄好（看上面的 [!]）。" -ForegroundColor Yellow
+    Write-Host "  插件本身已就位；把依赖问题修掉后，在 $profileDir 里重跑 pnpm install，再重启 DSH 点「应用」。" -ForegroundColor Yellow
+    Write-Host "  只想先装插件的话，下次可以直接用 -SkipPnpmInstall（脚本会手动链接插件）。" -ForegroundColor Yellow
+    exit 2
+}
+
