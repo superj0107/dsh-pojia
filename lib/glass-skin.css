@@ -1,0 +1,499 @@
+/* Glass is a material layer; layout, semantic colours and interactions stay
+ * owned by the existing components. No host content is used as a backdrop. */
+:is(.dshp-dock,.dshp-root,.dshp-auth-mask,.dshp-modal-bg,.dshp-restart-mask,.rt-dock,.rt-full) {
+  --ui-glass-blur:blur(22px) saturate(145%);
+  --ui-glass-mask-blur:blur(10px) saturate(110%);
+  --ui-glass-wash:linear-gradient(128deg,var(--ui-glass-glint),transparent 42%,transparent 72%,var(--ui-glass-glint));
+  --ui-material-card:var(--ui-glass-wash),var(--ui-glass-surface);
+  --ui-material-inset:var(--ui-glass-chrome);
+  --ui-material-reading:var(--ui-glass-dense);
+  --ui-water-backdrop:radial-gradient(ellipse at 8% 0%,var(--ui-water-light),transparent 62%),radial-gradient(ellipse at 95% 85%,var(--ui-water-blue),transparent 70%),var(--ui-water-texture),radial-gradient(ellipse at 72% 32%,var(--ui-water-refraction),transparent 52%),linear-gradient(135deg,var(--ui-water-base),var(--ui-water-deep));
+  --ui-water-texture:none;
+}
+
+/* Self-contained, static caustics. The refracted contour light lives behind
+ * the UI, never on text or controls, so it cannot distort their hit targets. */
+:is(.dshp-dock,.dshp-root,.rt-dock,.rt-full) {
+  --ui-water-texture:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%221400%22%20height%3D%221000%22%20viewBox%3D%220%200%201400%201000%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22water%22%20x%3D%22-20%25%22%20y%3D%22-20%25%22%20width%3D%22140%25%22%20height%3D%22140%25%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.004%20.007%22%20numOctaves%3D%222%22%20seed%3D%228%22%20result%3D%22noise%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22noise%22%20scale%3D%22100%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%2F%3E%3CfeGaussianBlur%20stdDeviation%3D%221.3%22%2F%3E%3C%2Ffilter%3E%3ClinearGradient%20id%3D%22light%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23d5fbff%22%20stop-opacity%3D%22.05%22%2F%3E%3Cstop%20offset%3D%22.45%22%20stop-color%3D%22%23d5fbff%22%20stop-opacity%3D%22.6%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23d5fbff%22%20stop-opacity%3D%22.04%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cg%20filter%3D%22url%28%23water%29%22%20fill%3D%22none%22%20stroke%3D%22url%28%23light%29%22%3E%3Cpath%20stroke-width%3D%222%22%20d%3D%22M-100%20175C90-40%20395%2065%20555%20225S925%20425%201490%20100M-110%20310C120%2095%20330%20175%20540%20330S1000%20520%201490%20235M-100%20455C100%20230%20380%20290%20605%20455S1030%20645%201490%20390M-100%20615C130%20390%20370%20440%20600%20590S1055%20780%201490%20540M-100%20780C180%20555%20440%20610%20670%20760S1100%20905%201490%20700M-100%20930C200%20715%20430%20770%20695%20910S1130%201060%201490%20875%22%2F%3E%3Cpath%20stroke-width%3D%229%22%20opacity%3D%22.12%22%20d%3D%22M-100%20185C90-30%20395%2075%20555%20235S925%20435%201490%20110M-100%20465C100%20240%20380%20300%20605%20465S1030%20655%201490%20400M-100%20790C180%20565%20440%20620%20670%20770S1100%20915%201490%20710%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+}
+
+/* Water belongs to one root in each window. Nested pages reveal that same
+ * backdrop instead of restarting a wallpaper in every card. */
+.dshp-dock.dshp-studio-dock,
+.dshp-root:not(.dshp-dock .dshp-root),
+:is(.rt-dock.rt-studio:not(.rt-embedded),.rt-full.rt-studio) {
+  background-color:var(--ui-water-base) !important;
+  background-image:var(--ui-water-backdrop) !important;
+  color:var(--ui-text) !important;
+  background-size:auto,auto,1400px 1000px,auto,auto;
+  background-position:center,center,center top,center,center;
+  border-color:var(--ui-glass-edge);
+  box-shadow:0 24px 80px rgb(0 10 24 / .3),inset 0 1px 0 var(--ui-glass-rim),inset 1px 0 0 var(--ui-glass-edge);
+}
+.dshp-dock.dshp-studio-dock {border-radius:22px;}
+.rt-full.rt-studio {border-radius:0;box-shadow:none;}
+.dshp-dock.dshp-studio-dock .dshp-dock-head {border-radius:21px 21px 0 0;}
+
+/* Legacy page aliases consume the new material too. This also covers older
+ * high-specificity split-pane rules without overriding their layout/state. */
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) {
+  --rt-studio-white:var(--ui-glass-surface);
+  --rt-studio-dark:var(--ui-glass-dense);
+  --rt-studio-detail:var(--ui-glass-dense);
+  --rt-studio-soft:var(--ui-glass-chrome);
+  --rt-studio-detail-soft:var(--ui-glass-chrome);
+  --rt-bg-surface:var(--ui-glass-surface);
+  --rt-bg-subtle:var(--ui-glass-chrome);
+}
+:is(.dshp-dock,.dshp-root,.dshp-modal,.dshp-auth-modal,.dshp-restart-card) {
+  --dshp-paper:var(--ui-glass-surface);
+  --dshp-fill:var(--ui-glass-dense);
+}
+
+/* Continuous backdrop through both products; scrolling ownership unchanged. */
+.dshp-dock.dshp-studio-dock :is(.dshp-dock-body,.dshp-root,.dshp-studio-layout,.dshp-studio-main,.dshp-studio-purgify-host),
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) :is(
+  .rt-body,.rt-page-content,.rt-workspace-pagehead,.rt-main,.rt-pane:where(:not(:has(>.rt-score-form))),
+  .rt-ov-scroll,.rt-settings,.rt-settings-scroll,.rt-ledger,.rt-ledger-main,.rt-ledger-page,
+  .rt-collab,.rt-collab-scroll,.rt-sessions,.rt-sessions-scroll,
+  .rt-artifacts,.rt-artifacts-scroll,.rt-skills,.rt-skills-workspace,
+  .rt-chain,.rt-ap,.rt-ap-h,.rt-hflow-wrap,.rt-rep-list
+),
+.dshp-dock.dshp-studio-dock .rt-dock.rt-embedded.rt-studio {
+  background:transparent !important;
+}
+.dshp-dock.dshp-studio-dock .rt-dock.rt-embedded.rt-studio {
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+}
+
+/* Chrome has a stronger frost than cards. Insets form a thin lit upper rim
+ * and a darker lower bevel, rather than an opaque outline around every box. */
+.dshp-dock.dshp-studio-dock .dshp-dock-head,
+.dshp-root.dshp-studio-root .dshp-studio-nav,
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) > .rt-chrome > :is(.rt-nav,.rt-cmd),
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) > :is(.rt-subnav,.rt-foot) {
+  background:var(--ui-glass-wash),var(--ui-glass-chrome) !important;
+  border-color:var(--ui-glass-edge);
+  box-shadow:inset 0 1px 0 var(--ui-glass-glint);
+  backdrop-filter:var(--ui-glass-blur);
+  -webkit-backdrop-filter:var(--ui-glass-blur);
+}
+
+/* Shared material for all page families, including the clean workbench. */
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] :is(
+  .rt-card,.rt-ov-facts,.rt-ov-rail,.rt-ov-card,.rt-ledger-stats,.rt-ledger-table,.rt-ledger-list-pane,
+  .rt-ledger-detail,.rt-ledger-segments,.rt-table,.rt-settings-summary,.rt-settings-card,
+  .rt-collab-section,.rt-collab-config,.rt-collab-card,.rt-collab-role-card,
+  .rt-sessions-summary,.rt-sessions-group,.rt-sessions-empty-banner,
+  .rt-artifacts-section,.rt-skills-summary,.rt-skills-section,
+  .rt-skills-catalog,.rt-skills-detail,.rt-skills-card,.rt-skills-overview,
+  .rt-r2-proof,.rt-r2-section,.rt-r2-table-wrap,.rt-r2-group,.rt-r2-item,
+  .rt-rep,.rt-rep-group,.rt-rep-step,.rt-evi,.rt-shots,.rt-kb,
+  .rt-ap-stage,.rt-ap-col,.rt-hcol,.rt-kb-cat,.rt-kb-tpl,.rt-clip,.rt-hit-row,.rt-atest,.rt-sess
+),
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-card,
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page=scores] > .rt-main > .rt-pane,
+:is(.dshp-dock,.dshp-root) :is(
+  .dshp-clean-card,.dshp-clean-overview .dshp-metrics,.dshp-group,
+  .dshp-studio-chapter > .dshp-panel,.dshp-rulelist,.dshp-skilllist,
+  .dshp-studio-main .dshp-panel
+) {
+  background:var(--ui-material-card);
+  border:1px solid var(--ui-glass-edge);
+  border-radius:var(--ui-radius-panel);
+  box-shadow:var(--ui-glass-shadow);
+  backdrop-filter:var(--ui-glass-blur);
+  -webkit-backdrop-filter:var(--ui-glass-blur);
+}
+/* Joined summary metrics share one glass slab with quiet inner dividers. */
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] :is(.rt-ledger-stat,.rt-settings-summary-card,.rt-skills-stat,.rt-sessions-stat),
+.dshp-studio-root .dshp-clean-overview .dshp-metric {
+  background:transparent;
+  box-shadow:none;
+  border-color:var(--ui-glass-edge);
+  border-radius:0;
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] :is(.rt-ledger-stats,.rt-settings-summary,.rt-skills-summary,.rt-skills-overview,.rt-sessions-summary) {overflow:hidden;}
+
+/* Controls use the same glaze in all modules. Semantic primary, danger and
+ * selection fills remain owned by the components; this adds only material. */
+:is(.dshp-dock,.dshp-root,.rt-dock.rt-studio,.rt-full.rt-studio) :is(
+  button,.rt-btn,.rt-icon-btn,.rt-hbtn,.rt-session-map-button,.dshp-btn,
+  .rt-input,.rt-textarea,.rt-settings-control,.rt-skills-search,.dshp-field,.rt-eng-select,select
+) {
+  box-shadow:var(--ui-glass-control-shadow);
+  border-color:var(--ui-glass-edge);
+}
+:is(.dshp-dock,.dshp-root,.rt-dock.rt-studio,.rt-full.rt-studio) :is(button,input,textarea,select):focus-visible {
+  outline:2px solid var(--ui-link);
+  outline-offset:3px;
+}
+:is(.dshp-dock,.dshp-root,.rt-dock.rt-studio,.rt-full.rt-studio) button:not(:disabled):where(:not(.dshp-btn-primary,.dshp-btn-danger,.dshp-btn-solid-danger,.rt-btn-primary,.rt-btn-danger)):hover {
+  border-color:var(--ui-line-strong);
+}
+:is(.dshp-dock,.dshp-root,.rt-dock.rt-studio,.rt-full.rt-studio) :is(
+  .rt-input,.rt-textarea,.rt-settings-control,.rt-skills-search,.rt-eng-select,.dshp-field,.dshp-area,.dshp-editor,textarea,select
+) {
+  /* Source forms have inline/high-specificity fills; all native fields still
+   * use this one reading material. Background images retain their carets. */
+  background-color:var(--ui-material-reading) !important;
+  color:var(--ui-text);
+}
+/* Native option popups must be opaque; an alpha colour becomes unreadable on
+ * Windows where the popup has no relationship to the product backdrop. */
+:is(.dshp-dock,.dshp-root,.rt-dock.rt-studio,.rt-full.rt-studio) select option {
+  background:var(--ui-surface) !important;
+  color:var(--ui-text) !important;
+}
+
+/* Reading surfaces keep a dense tint. No per-row blur and no filters on text. */
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] :is(
+  .rt-skills-content,.rt-skills-diagnostics-content,
+  .rt-md,.rt-evi-body,.rt-hit-evi,.rt-atest-notes,.rt-clip-body,.rt-kb-body,
+  .rt-code,.rt-md-code,.rt-r2-code,.rt-r2-pre,.rt-rep-http
+) {
+  background:var(--ui-glass-dense);
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] :is(.rt-row,.rt-vrow,.rt-score-row,.rt-r2-table) {
+  background:transparent;
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] :is(.rt-row.head,.rt-vrow.head,.rt-score-row.head,.rt-ledger-table-head) {
+  background:var(--ui-glass-chrome);
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] :is(.rt-row,.rt-vrow,.rt-score-row):hover {
+  background:var(--ui-hover);
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] :is(.rt-row.sel,.rt-vrow.sel,.rt-row.selected,.rt-row.is-selected) {
+  background:var(--ui-selected);
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] :is(.rt-toolbar,.rt-livebar,.rt-subtabs,.rt-r2-toolbar,.rt-settings-toolbar,.rt-sessions-toolbar,.rt-collab-toolbar,.rt-session-map-toolbar,.rt-skills-detail-toolbar,.rt-concl,.rt-session-map-header,.rt-session-map-summary,.rt-session-map-metadata,.rt-rep-tools,.rt-evi-head,.rt-rep-req-head,.rt-ap-head,.rt-ap-goal,.rt-rep-stage,.rt-sec,.rt-score-group) {
+  background:var(--ui-glass-chrome);
+  border-color:var(--ui-glass-edge);
+}
+/* The canvas owns an opaque water layer so the pale card wash cannot bleach it. */
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] .rt-session-map-graph-pane {
+  background-color:var(--ui-water-base);
+  background-image:var(--ui-water-texture),linear-gradient(135deg,var(--ui-water-base),var(--ui-water-deep));
+  background-size:1400px 1000px,auto;
+  background-position:center top,center;
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] .rt-session-map-graph {background:transparent;}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map {background:var(--ui-material-card);border:1px solid var(--ui-glass-edge);border-radius:var(--ui-radius-panel);box-shadow:var(--ui-glass-shadow);backdrop-filter:var(--ui-glass-blur);-webkit-backdrop-filter:var(--ui-glass-blur);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map.rt-session-map-expanded {background:var(--ui-glass-dense);}
+
+/* The main score has a refracted light band, brighter only at its rim. */
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-ov-score-feature {
+  background:
+    radial-gradient(ellipse at 0% 0%,rgb(157 222 255 / .19),transparent 68%),
+    linear-gradient(120deg,rgb(48 103 159 / .5),rgb(21 58 91 / .88)),
+    var(--ui-feature-surface);
+  border-color:rgb(176 223 255 / .4);
+  box-shadow:var(--ui-glass-shadow),inset 0 0 28px rgb(135 210 255 / .08);
+  backdrop-filter:var(--ui-glass-blur);
+  -webkit-backdrop-filter:var(--ui-glass-blur);
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-ov-score-feature::before {
+  background:linear-gradient(180deg,transparent,var(--ui-feature-accent) 25%,rgb(226 248 255 / .95) 50%,var(--ui-feature-accent) 75%,transparent);
+  box-shadow:0 0 16px rgb(127 208 255 / .25);
+}
+
+/* Floating sheets use the same frost but stronger opacity than the canvas. */
+:is(.dshp-modal-bg,.dshp-auth-mask,.dshp-restart-mask) {
+  background:rgb(5 16 28 / .42);
+  backdrop-filter:var(--ui-glass-mask-blur);
+  -webkit-backdrop-filter:var(--ui-glass-mask-blur);
+}
+:is(.dshp-dock,.dshp-root,.dshp-modal-bg,.dshp-auth-mask,.dshp-restart-mask,.rt-dock.rt-studio,.rt-full.rt-studio) :is(
+  .dshp-modal,.dshp-auth-modal,.dshp-restart-card,.rt-modal-box,.rt-shot-zoom
+) {
+  background:var(--ui-glass-wash),var(--ui-glass-dense);
+  border:1px solid var(--ui-glass-edge);
+  border-radius:var(--ui-radius-panel);
+  box-shadow:var(--ui-glass-shadow);
+  backdrop-filter:var(--ui-glass-blur);
+  -webkit-backdrop-filter:var(--ui-glass-blur);
+}
+
+/* Graceful accessibility fallbacks: no animation or full-canvas displacement
+ * is required for this skin. Unsupported blur keeps the same legible layout. */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
+  :is(.dshp-dock,.dshp-root,.rt-dock,.rt-full) {--ui-glass-surface:var(--ui-surface);--ui-glass-chrome:var(--ui-nav);--ui-glass-dense:var(--ui-surface);}
+}
+@media (prefers-reduced-transparency:reduce) {
+  :is(.dshp-dock,.dshp-root,.dshp-auth-mask,.dshp-modal-bg,.dshp-restart-mask,.rt-dock,.rt-full) {--ui-glass-surface:var(--ui-surface);--ui-glass-chrome:var(--ui-nav);--ui-glass-dense:var(--ui-surface);--ui-glass-blur:none;--ui-glass-mask-blur:none;--ui-water-texture:none;--ui-glass-wash:none;}
+}
+@media (forced-colors:active) {
+  :is(.dshp-dock,.dshp-root,.dshp-auth-mask,.dshp-modal-bg,.dshp-restart-mask,.rt-dock,.rt-full) {--ui-glass-shadow:none;--ui-glass-control-shadow:none;--ui-water-texture:none;--ui-glass-wash:none;--ui-glass-blur:none;--ui-glass-mask-blur:none;}
+}
+
+/* Blur creates a containing block for fixed descendants. Drop only ancestor
+ * frost while a local fullscreen map or confirmation sheet is open. */
+:is(.dshp-dock,.dshp-root,.rt-dock.rt-studio,.rt-full.rt-studio) :has(.rt-session-map-expanded,.dshp-modal-bg,.rt-modal,.rt-shot-zoom) {
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+/* Semantic borders must survive the material's neutral edge treatment. */
+:is(.dshp-dock,.dshp-root,.rt-dock.rt-studio,.rt-full.rt-studio) :is(.dshp-btn-danger,.dshp-btn-solid-danger,.rt-btn-danger) {border-color:var(--ui-danger);}
+:is(.dshp-dock,.dshp-root,.rt-dock.rt-studio,.rt-full.rt-studio) :is(.dshp-btn-primary,.rt-btn-primary) {border-color:var(--ui-primary);}
+
+/* These compounds outrank the older page-specific layout skins. */
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] :is(
+  .rt-main > .rt-toolbar,
+  .rt-session-map .rt-session-map-head,.rt-session-map .rt-session-map-note,
+  .rt-session-map .rt-session-map-toolbar,.rt-session-map .rt-session-map-foot
+) {background:var(--ui-glass-chrome);border-color:var(--ui-glass-edge);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map :is(.rt-session-map-layout,.rt-session-map-stats) {background:transparent;}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map .rt-session-map-stat {background:var(--ui-glass-chrome);border-color:var(--ui-glass-edge);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map-toolbar .rt-input {background:var(--ui-glass-dense);}
+
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] :is(.rt-sec-body,.rt-sessions-group-content) {background:transparent;}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] .rt-cred {background:var(--ui-glass-dense);}
+/* This clean wrapper is structural; frost only the actual cards inside it. */
+.dshp-studio-root .dshp-studio-purgify {backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;}
+
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-shot-zoom-cap {color:var(--ui-text);line-height:var(--ui-leading-body);}
+
+/* Detail content belongs to the enclosing card, just like Overview content.
+ * Only code, raw evidence and editable fields receive the denser reading tint. */
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] :is(
+  .rt-ledger-detail-body,.rt-ledger-detail-head,.rt-skills-detail-scroll,
+  .rt-artifacts-content,.rt-session-map-layout,.rt-skills-list
+) {background:transparent;}
+.dshp-studio-root .dshp-studio-nav-item:not([aria-selected=true]) {background:transparent;}
+
+/* Tables, filters and action rows align to the same content lane as Overview.
+ * Individual pages keep their own grid columns and scroll containers. */
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] > .rt-main > .rt-table {
+  min-height:0;
+  margin:0 var(--rt-page-x) var(--rt-page-y);
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] > .rt-main > .rt-toolbar {
+  padding:0 var(--rt-page-x) 14px;
+  background:transparent;
+  border-bottom:0;
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] > .rt-main > :is(.rt-concl,.rt-subtabs) {
+  margin:0 var(--rt-page-x) 12px;
+  padding:8px 12px;
+  background:var(--ui-material-inset);
+  border:1px solid var(--ui-glass-edge);
+  border-radius:var(--ui-radius-control);
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page=knowledge] :is(.rt-kb-filter,.rt-kb-cats) {
+  background:transparent;
+  padding:8px var(--rt-page-x) 12px;
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-kb-cats:empty {display:none;}
+
+/* Connections keep their visual weight when the camera zooms out. */
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map-edge {
+  stroke:color-mix(in srgb,var(--ui-link) 75%,var(--ui-muted));
+  stroke-width:2.25;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  opacity:.9;
+  vector-effect:non-scaling-stroke;
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map-edge.orphan {
+  stroke:var(--ui-warning);
+}
+
+/* Graph nodes and local metadata use the same surface palette as the cards. */
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map-node rect {
+  fill:var(--ui-glass-surface);
+  stroke:color-mix(in srgb,var(--ui-muted) 60%,var(--ui-line-strong));
+  stroke-width:1.25;
+  vector-effect:non-scaling-stroke;
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map-node.orphan rect {
+  stroke:var(--ui-warning);
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map-node:hover rect {
+  stroke:var(--ui-link);
+  stroke-width:1.75;
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map-node.selected rect {
+  fill:var(--ui-selected);
+  stroke:var(--ui-link);
+  stroke-width:2;
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map-node:focus-visible rect {
+  stroke:var(--ui-link);
+  stroke-width:2.5;
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content .rt-foot {
+  background:transparent;
+  color:var(--ui-muted);
+  border-color:var(--ui-glass-edge);
+}
+
+/* Nested records are insets inside a glass card, not another elevated panel.
+ * This keeps dense record pages as quiet as Overview's score list. */
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] :is(
+  .rt-sessions-group .rt-sess,.rt-artifacts-content .rt-cred,
+  .rt-artifacts-content .rt-file,.rt-artifacts-content .rt-access,
+  .rt-score-detail .rt-hit-row,.rt-r2-section .rt-r2-item,
+  .rt-r2-section .rt-r2-group,.rt-rep-group .rt-rep-step
+) {
+  background:var(--ui-material-inset);
+  border:1px solid var(--ui-glass-edge);
+  border-radius:var(--ui-radius-control);
+  box-shadow:none;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page=scores] > .rt-main > .rt-pane {
+  margin:0 var(--rt-page-x) 16px;
+  padding:16px;
+  border-bottom-color:var(--ui-glass-edge) !important;
+}
+
+/* Compact filters and native field variants share one inset/control material. */
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] :is(
+  .rt-ledger-advanced,.rt-settings-localnav,.rt-settings-pagehead-context,
+  .rt-skills-filters,.rt-skills-catalog-head
+) {background:var(--ui-material-inset);border-color:var(--ui-glass-edge);border-radius:var(--ui-radius-control);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] .rt-concl-i:not(.on) {background:var(--ui-material-inset);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map-toolbar :is(.rt-input,.rt-session-map-button) {background:var(--ui-material-reading);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] .rt-skills-card[aria-pressed=true] {background:var(--ui-selected);border-color:var(--ui-link);box-shadow:none;}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] .rt-skills-card:not([aria-pressed=true]):hover {background:var(--ui-hover);border-color:var(--ui-line-strong);}
+
+/* A map is the card; its layout section is only a transparent frame. */
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-collab-page .rt-collab-scope {background:transparent;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] .rt-session-map-detail {background:var(--ui-material-reading);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] :is(.rt-empty,.rt-r2-empty,.rt-skills-empty,.rt-skills-no-results,.rt-skills-status,.rt-skills-loading,.rt-settings-diagnostic-empty,.rt-settings-loading,.rt-sessions-loading,.rt-session-map-empty-info,.rt-ap-none,.rt-rep-no) {
+  background:var(--ui-material-inset);
+  color:var(--ui-muted);
+  border-color:var(--ui-glass-edge);
+  border-radius:var(--ui-radius-control);
+  font-size:var(--ui-text-helper);
+  line-height:var(--ui-leading-body);
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) :is(.rt-session-map-empty,.rt-ledger-detail-empty) {color:var(--ui-muted);font-size:var(--ui-text-body);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] :is(.rt-ap-none,.rt-rep-no) {padding:12px;}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-collab-prompts > .rt-split {background:transparent;border-color:var(--ui-glass-edge);border-radius:var(--ui-radius-control);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-collab-prompts > .rt-split > .rt-list {background:var(--ui-material-inset);border-color:var(--ui-glass-edge);}
+
+/* Mouse focus and keyboard focus both keep an explicit field accent. */
+:is(.dshp-dock,.dshp-root) :is(.dshp-field,.dshp-area,.dshp-editor,select,textarea):focus,
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] :is(.rt-input,.rt-textarea,.rt-settings-control,select,textarea):focus {
+  border-color:var(--ui-link);
+  box-shadow:var(--ui-glass-control-shadow),0 0 0 1px var(--ui-link);
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map.rt-session-map-expanded {
+  background-color:var(--ui-water-base);
+  background-image:var(--ui-water-backdrop);
+  background-size:auto,auto,1400px 1000px,auto,auto;
+  background-position:center,center,center top,center,center;
+}
+/* Embedded clean lists are quiet insets within the enclosing glass panel. */
+.dshp-studio-root .dshp-studio-main :is(.dshp-rulelist,.dshp-skilllist) {
+  background:var(--ui-material-inset);
+  border-radius:var(--ui-radius-control);
+  box-shadow:none;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+
+/* Report sections use the same heading/content inset as Overview panels. */
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-r2-section {padding:20px;margin-bottom:16px;}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-r2-section > .rt-r2-h3 {margin:0 0 16px;}
+
+/* Running is host metadata, not inferred traffic or a task handoff. */
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map-flow {
+  fill:none;
+  stroke:var(--ui-success);
+  stroke-linecap:round;
+  stroke-dasharray:.01 99.99;
+  vector-effect:non-scaling-stroke;
+  pointer-events:none;
+  animation:dsh-session-map-flow 2.8s linear infinite;
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map-flow-halo{stroke-width:14;opacity:.26}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map-flow-point{stroke-width:6;opacity:1}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map-live-ring {
+  fill:none;
+  stroke:var(--ui-success);
+  stroke-width:1.5;
+  pointer-events:none;
+  animation:dsh-session-map-live 2.8s ease-in-out infinite;
+}
+@keyframes dsh-session-map-flow{from{stroke-dashoffset:0}to{stroke-dashoffset:-100}}
+@keyframes dsh-session-map-live{0%,100%{opacity:.25}50%{opacity:.9}}
+@media(prefers-reduced-motion:reduce){
+  :is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map-flow{animation:none;stroke-dashoffset:-50}
+  :is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map-live-ring{animation:none;opacity:.65}
+}
+
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map .rt-session-map-node{cursor:grab;touch-action:none}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map-graph-pane[data-dragging=true] .rt-session-map-node{cursor:grabbing}
+
+/* Keep an opaque, viewport-sized backing store under asynchronous scroll
+ * tiles. Never promote the entire long document with transform/will-change:
+ * that also changes the containing block of the map and confirmation sheets. */
+.dshp-dock.dshp-studio-dock,
+.dshp-root.dshp-studio-root,
+.rt-full.rt-studio {
+  isolation:isolate;
+}
+.dshp-dock.dshp-studio-dock > .dshp-dock-body,
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) > .rt-body {
+  background:var(--ui-water-backdrop) !important;
+  background-color:var(--ui-water-base) !important;
+  background-size:auto,auto,1400px 1000px,auto,auto;
+  background-position:center,center,center top,center,center;
+  background-attachment:scroll;
+}
+
+/* Tall reading panels keep the tint, glint and rim without allocating a live
+ * blur layer as tall as their content. Bounded chrome and floating sheets
+ * retain the original frost; no scrolling or fixed-position semantics change. */
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] :is(
+  .rt-settings-card,.rt-ledger-list-pane,.rt-ledger-detail,.rt-ledger-table,
+  .rt-table,.rt-r2-section,.rt-r2-group,.rt-rep,.rt-rep-group,
+  .rt-sessions-group,.rt-artifacts-section,.rt-skills-catalog,.rt-skills-detail,
+  .rt-collab-section,.rt-kb
+),
+.dshp-studio-root .dshp-studio-main :is(.dshp-clean-card,.dshp-panel) {
+  background:var(--ui-glass-wash),var(--ui-glass-dense);
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+
+/* Fullscreen scroll tiles must not sample another viewport-sized live blur
+ * or dozens of nested card filters. Keep the water, tint, glint and borders;
+ * only bounded chrome and dialog overlays retain live backdrop sampling. */
+:is(
+  .dshp-dock.dshp-studio-dock[data-fullscreen=true],
+  .dshp-dock.dshp-studio-dock:fullscreen,
+  .rt-full.rt-studio,
+  .rt-dock.rt-studio[data-fullscreen=true]
+) {
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+:is(
+  .dshp-dock.dshp-studio-dock[data-fullscreen=true],
+  .dshp-dock.dshp-studio-dock:fullscreen,
+  .rt-full.rt-studio,
+  .rt-dock.rt-studio[data-fullscreen=true]
+) :is(.rt-page-content[data-page],.dshp-studio-main),
+:is(
+  .dshp-dock.dshp-studio-dock[data-fullscreen=true],
+  .dshp-dock.dshp-studio-dock:fullscreen,
+  .rt-full.rt-studio,
+  .rt-dock.rt-studio[data-fullscreen=true]
+) :is(.rt-page-content[data-page],.dshp-studio-main) :where(*):not(:where(
+  .rt-modal,.rt-modal *,.rt-modal-box,.rt-modal-box *,
+  .rt-shot-zoom,.rt-shot-zoom *,
+  .dshp-modal-bg,.dshp-modal-bg *,
+  .dshp-auth-mask,.dshp-auth-mask *,
+  .dshp-restart-mask,.dshp-restart-mask *,
+  [role=dialog],[role=dialog] *
+)) {
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}

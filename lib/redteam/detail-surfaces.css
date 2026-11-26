@@ -1,0 +1,327 @@
+/* Detail surfaces are the last presentation layer for dense, expanded data.
+ * The source components keep their data and interaction semantics; this file
+ * only gives them the same material hierarchy as the surrounding workbench. */
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-artifacts-section {
+  border: 1px solid var(--ui-glass-edge);
+  border-radius: var(--ui-radius-panel);
+  background: var(--ui-material-card);
+  box-shadow: var(--ui-glass-shadow);
+  overflow: hidden;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-artifacts-summary {
+  display: block;
+  padding: var(--ui-space-3) var(--ui-space-4);
+  border-radius: var(--ui-radius-panel);
+  color: var(--ui-text);
+  cursor: pointer;
+  font-size: var(--ui-text-control);
+  font-weight: 600;
+  line-height: var(--ui-leading-body);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-artifacts-section[open] > .rt-artifacts-summary {
+  border-radius: var(--ui-radius-panel) var(--ui-radius-panel) 0 0;
+  background: var(--ui-material-inset);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-artifacts-summary::before {
+  content: '›';
+  display: inline-block;
+  margin-right: var(--ui-space-2);
+  color: var(--ui-muted);
+  transform: rotate(0deg);
+}
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-artifacts-section[open] > .rt-artifacts-summary::before {
+  transform: rotate(90deg);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-artifacts-summary:hover {
+  background: var(--ui-hover);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-artifacts-summary:focus-visible {
+  outline: 2px solid var(--ui-link);
+  outline-offset: -3px;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-artifacts-content {
+  border-top: 1px solid var(--ui-glass-edge);
+  background: var(--ui-material-inset);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-artifacts-content > :is(.rt-credential-list, .rt-access-list) {
+  display: grid;
+  gap: var(--ui-space-3);
+  background: transparent;
+  padding: var(--ui-space-3) var(--ui-space-4);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(
+  .rt-credential-card,
+  .rt-access-card,
+  .rt-file-row,
+  .rt-file-detail-row
+) {
+  min-width: 0;
+  border: 1px solid var(--ui-glass-edge);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-material-inset);
+  box-shadow: none;
+  color: var(--ui-text);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-credential-card {
+  display: block;
+  margin: 0;
+  padding: var(--ui-space-3);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-credential-header {
+  min-width: 0;
+  gap: var(--ui-space-2);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-credential-host {
+  min-width: 0;
+  color: var(--ui-text);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-credential-copy {
+  margin-left: auto;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-credential-secret {
+  min-width: 0;
+  margin-top: var(--ui-space-2);
+  padding: var(--ui-space-2) var(--ui-space-3);
+  border: 1px solid var(--ui-glass-edge);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-material-reading);
+  color: var(--ui-text);
+  overflow-wrap: anywhere;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-credential-secret .rt-secret {
+  display: inline-flex;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+  color: var(--ui-text);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-credential-secret .rt-secret-none {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: var(--ui-muted);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-credential-meta {
+  margin-top: var(--ui-space-2);
+  color: var(--ui-muted);
+  overflow-wrap: anywhere;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-credential-note {
+  padding-top: var(--ui-space-2);
+  border-top: 1px solid var(--ui-glass-edge);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-access-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(100px, .8fr) auto minmax(84px, .7fr) minmax(0, 1.3fr);
+  gap: var(--ui-space-2);
+  padding: var(--ui-space-3);
+  cursor: default;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-access-card:hover {
+  background: var(--ui-hover);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-access-host, .rt-access-user, .rt-access-method, .rt-access-privilege, .rt-access-session) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-file-artifacts {
+  min-width: 0;
+  color: var(--ui-text);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-file-artifacts .rt-sec-body {
+  display: grid;
+  gap: var(--ui-space-2);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-file-row {
+  grid-template-columns: 18px minmax(0, 1.2fr) 60px minmax(0, 1.6fr);
+  gap: var(--ui-space-2);
+  padding: var(--ui-space-2) var(--ui-space-3);
+  cursor: pointer;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-file-row:hover {
+  background: var(--ui-hover);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-file-row :is(.rt-file-name, .rt-file-description) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-file-description {
+  color: var(--ui-muted);
+  font-size: var(--ui-text-helper);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-file-detail-row {
+  grid-template-columns: minmax(0, 1fr);
+  padding: var(--ui-space-2) var(--ui-space-3);
+  cursor: default;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-file-detail {
+  min-width: 0;
+  padding: 0;
+  color: var(--ui-muted);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-file-detail-field {
+  min-width: 0;
+  margin-bottom: var(--ui-space-2);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-file-detail-field > b {
+  color: var(--ui-text);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-file-path {
+  overflow-wrap: anywhere;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-file-content {
+  max-height: 40vh;
+  margin: var(--ui-space-2) 0 0;
+  padding: var(--ui-space-3);
+  border: 1px solid var(--ui-glass-edge) !important;
+  border-radius: var(--ui-radius-control) !important;
+  background: var(--ui-material-reading) !important;
+  color: var(--ui-text);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-concurrency-warning {
+  display: grid;
+  gap: var(--ui-space-2);
+  margin-top: var(--ui-space-3);
+  padding: var(--ui-space-4);
+  border: 1px solid color-mix(in srgb, var(--ui-warning) 35%, var(--ui-glass-edge));
+  border-radius: var(--ui-radius-panel);
+  background: linear-gradient(color-mix(in srgb, var(--ui-warning) 10%, transparent), color-mix(in srgb, var(--ui-warning) 5%, transparent)), var(--ui-material-card);
+  color: var(--ui-text);
+  box-shadow: inset 0 1px 0 var(--ui-glass-rim);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-concurrency-summary {
+  margin-bottom: var(--ui-space-2);
+  color: var(--ui-text);
+  font-size: var(--ui-text-helper);
+  line-height: var(--ui-leading-body);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-concurrency-warning-head {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  color: var(--ui-warning);
+  line-height: var(--ui-leading-title);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-concurrency-warning-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--ui-warning);
+  border-radius: 50%;
+  color: var(--ui-warning);
+  font-size: var(--ui-text-label);
+  font-weight: 600;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-concurrency-warning p {
+  margin: 0;
+  color: var(--ui-text);
+  font-size: var(--ui-text-helper);
+  line-height: var(--ui-leading-body);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-concurrency-warning p strong {
+  color: var(--ui-warning);
+  font-weight: 600;
+}
+
+@container rt (max-width: 720px) {
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-access-card {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-file-row {
+    grid-template-columns: 18px minmax(0, 1fr) auto;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-file-description {
+    grid-column: 2 / -1;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-concurrency-warning {
+    background: var(--ui-warning-bg);
+    box-shadow: none;
+  }
+}
+
+/* Expanded headers and evidence use the same inset and reading layers. */
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] :is(
+  .rt-rep-stage,.rt-ap-head,.rt-ap-goal,.rt-evi-head,.rt-sessions-group .rt-sec
+) {
+  background: var(--ui-material-inset);
+  color: var(--ui-text);
+  border-color: var(--ui-glass-edge);
+  border-radius: var(--ui-radius-control);
+  box-shadow: none;
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] :is(.rt-rep-stage,.rt-sessions-group .rt-sec):hover {
+  background: var(--ui-hover);
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] .rt-evi-body {
+  background: var(--ui-material-reading);
+  color: var(--ui-text);
+  border-color: var(--ui-glass-edge);
+  border-radius: var(--ui-radius-control);
+  box-shadow: none;
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] .rt-session-map-empty {
+  background: var(--ui-material-inset);
+  color: var(--ui-muted);
+  border-radius: var(--ui-radius-control);
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] .rt-session-map-alert {
+  margin: 8px 12px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--ui-warning) 35%, var(--ui-glass-edge));
+  border-radius: var(--ui-radius-control);
+  background: linear-gradient(color-mix(in srgb, var(--ui-warning) 10%, transparent), color-mix(in srgb, var(--ui-warning) 5%, transparent)), var(--ui-material-inset);
+  color: var(--ui-text);
+}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] .rt-sessions-group .rt-sec{border-left-color:var(--ui-link)}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] .rt-sessions-group .rt-sec.t-queue{border-left-color:var(--ui-warning)}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-page-content[data-page] .rt-sessions-group .rt-sec.t-test{border-left-color:var(--ui-success)}

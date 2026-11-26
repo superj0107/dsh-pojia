@@ -1,0 +1,230 @@
+/* One product palette for the outer frame, clean workspace, drill and dialogs.
+ * Component styles consume these tokens; they do not define local palettes. */
+:where(.dshp-dock,.dshp-root,.dshp-auth-mask,.dshp-modal-bg,.dshp-restart-mask,.rt-dock,.rt-full) {
+  --ui-canvas:#f1f4f8;
+  --ui-surface:#ffffff;
+  --ui-subtle:#f6f8fb;
+  --ui-hover:#e9eef6;
+  --ui-line:#d8e1ed;
+  --ui-line-strong:#a3b5cc;
+  --ui-text:#1b2b40;
+  --ui-muted:#43566d;
+  --ui-primary:#336acb;
+  --ui-primary-hover:#2a59ad;
+  --ui-on-primary:#ffffff;
+  --ui-link:#285fbb;
+  --ui-selected:#e6effd;
+  --ui-selected-text:#204f9b;
+  --ui-nav:#ffffff;
+  --ui-success:#237650;
+  --ui-success-bg:#e9f5ee;
+  --ui-warning:#8e641a;
+  --ui-warning-bg:#fcf4e4;
+  --ui-danger:#b63f3f;
+  --ui-danger-bg:#fbeeed;
+  --ui-on-danger:#ffffff;
+  --ui-radius-control:9px;
+  --ui-radius-panel:16px;
+  --ui-control-height:34px;
+  --ui-feature-surface:#193858;
+  --ui-feature-line:#45698e;
+  --ui-feature-text:#f0f6ff;
+  --ui-feature-muted:#bed2ea;
+  --ui-feature-accent:#91baff;
+  --ui-feature-hover:#254c73;
+  --ui-panel-shadow:0 4px 14px rgb(27 43 64 / .04);
+
+  --ui-glass-surface:rgb(249 253 255 / .66);
+  --ui-glass-chrome:rgb(238 249 255 / .72);
+  --ui-glass-dense:rgb(245 251 255 / .9);
+  --ui-glass-edge:rgb(255 255 255 / .82);
+  --ui-glass-rim:rgb(255 255 255 / .94);
+  --ui-glass-glint:rgb(255 255 255 / .44);
+  --ui-glass-shadow:0 14px 34px rgb(35 77 104 / .09),inset 0 1px 0 var(--ui-glass-rim),inset 1px 0 0 rgb(255 255 255 / .35),inset 0 -1px 0 rgb(38 83 113 / .08);
+  --ui-glass-control-shadow:inset 0 1px 0 rgb(255 255 255 / .6),0 2px 5px rgb(33 64 90 / .04);
+  --ui-water-base:#c8e0ec;
+  --ui-water-deep:#b6cbdf;
+  --ui-water-light:rgb(238 255 255 / .92);
+  --ui-water-blue:rgb(128 181 219 / .54);
+  --ui-water-refraction:rgb(255 255 255 / .36);
+  --ui-text-display:40px;
+  --ui-text-body:13px;
+  --ui-text-control:13px;
+  --ui-text-label:12px;
+  --ui-text-helper:12px;
+  --ui-text-table:12px;
+  --ui-text-title:22px;
+  --ui-text-section:14px;
+  --ui-text-metric:24px;
+  --ui-leading-body:1.6;
+  --ui-leading-control:1.3;
+  --ui-leading-title:1.35;
+  --ui-space-1:4px;
+  --ui-space-2:8px;
+  --ui-space-3:12px;
+  --ui-space-4:16px;
+  --ui-space-5:24px;
+  --ui-font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif;
+  --ui-mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  font-family:var(--ui-font);
+  --ui-scheme:light;
+  accent-color:var(--ui-primary);
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* Explicit host/theme choices take precedence over the system fallback. */
+@media (prefers-color-scheme:dark) {
+  :where(.dshp-dock,.dshp-root,.dshp-auth-mask,.dshp-modal-bg,.dshp-restart-mask,.rt-dock,.rt-full):where(:not([data-theme=white]):not([data-theme=light])) {
+    --ui-canvas:#111820;--ui-surface:#1b2430;--ui-subtle:#222e3d;--ui-hover:#29394b;
+    --ui-line:#344253;--ui-line-strong:#52657b;--ui-text:#e9f0f8;--ui-muted:#a5b3c5;
+    --ui-link:#9ac3ff;--ui-selected:#243c5c;--ui-selected-text:#bed9ff;--ui-nav:#141c26;
+    --ui-success:#82c7a4;--ui-success-bg:#1d342b;--ui-warning:#dfbd78;--ui-warning-bg:#382f20;
+    --ui-danger:#f0a3a2;--ui-danger-bg:#3a2529;--ui-on-danger:#25161b;
+    --ui-feature-surface:#18304c;--ui-feature-line:#3b5e86;--ui-feature-text:#f0f6ff;--ui-feature-muted:#aec7e8;--ui-feature-hover:#234568;
+    --ui-panel-shadow:0 5px 16px rgb(0 0 0 / .14);
+    --ui-glass-surface:rgb(22 48 66 / .68);
+    --ui-glass-chrome:rgb(15 34 49 / .74);
+    --ui-glass-dense:rgb(17 37 53 / .93);
+    --ui-glass-edge:rgb(173 220 248 / .24);
+    --ui-glass-rim:rgb(211 239 255 / .3);
+    --ui-glass-glint:rgb(190 229 255 / .1);
+    --ui-glass-shadow:0 14px 34px rgb(0 10 22 / .2),inset 0 1px 0 var(--ui-glass-rim),inset 1px 0 0 rgb(185 228 255 / .09),inset 0 -1px 0 rgb(0 11 25 / .26);
+    --ui-glass-control-shadow:inset 0 1px 0 rgb(216 241 255 / .12),0 2px 5px rgb(0 10 22 / .12);
+    --ui-water-base:#0b2333;
+    --ui-water-deep:#10293f;
+    --ui-water-light:rgb(70 166 191 / .42);
+    --ui-water-blue:rgb(49 101 177 / .43);
+    --ui-water-refraction:rgb(175 235 255 / .13);
+    --ui-scheme:dark;
+  }
+}
+:where([dark],[data-theme=dusk],[data-theme=dark],html[data-ds-dark-theme],body[data-ds-dark-theme]) :where(.dshp-dock,.dshp-root,.dshp-auth-mask,.dshp-modal-bg,.dshp-restart-mask,.rt-dock,.rt-full):where(:not([data-theme=white]):not([data-theme=light])),
+:where(.dshp-dock,.dshp-root,.dshp-auth-mask,.dshp-modal-bg,.dshp-restart-mask,.rt-dock,.rt-full):is([dark],[data-theme=dusk],[data-theme=dark]) {
+  --ui-canvas:#111820;--ui-surface:#1b2430;--ui-subtle:#222e3d;--ui-hover:#29394b;
+  --ui-line:#344253;--ui-line-strong:#52657b;--ui-text:#e9f0f8;--ui-muted:#a5b3c5;
+  --ui-link:#9ac3ff;--ui-selected:#243c5c;--ui-selected-text:#bed9ff;--ui-nav:#141c26;
+  --ui-success:#82c7a4;--ui-success-bg:#1d342b;--ui-warning:#dfbd78;--ui-warning-bg:#382f20;
+  --ui-danger:#f0a3a2;--ui-danger-bg:#3a2529;--ui-on-danger:#25161b;
+  --ui-feature-surface:#18304c;--ui-feature-line:#3b5e86;--ui-feature-text:#f0f6ff;--ui-feature-muted:#aec7e8;--ui-feature-hover:#234568;
+  --ui-panel-shadow:0 5px 16px rgb(0 0 0 / .14);
+
+  --ui-glass-surface:rgb(22 48 66 / .68);
+  --ui-glass-chrome:rgb(15 34 49 / .74);
+  --ui-glass-dense:rgb(17 37 53 / .93);
+  --ui-glass-edge:rgb(173 220 248 / .24);
+  --ui-glass-rim:rgb(211 239 255 / .3);
+  --ui-glass-glint:rgb(190 229 255 / .1);
+  --ui-glass-shadow:0 14px 34px rgb(0 10 22 / .2),inset 0 1px 0 var(--ui-glass-rim),inset 1px 0 0 rgb(185 228 255 / .09),inset 0 -1px 0 rgb(0 11 25 / .26);
+  --ui-glass-control-shadow:inset 0 1px 0 rgb(216 241 255 / .12),0 2px 5px rgb(0 10 22 / .12);
+  --ui-water-base:#0b2333;
+  --ui-water-deep:#10293f;
+  --ui-water-light:rgb(70 166 191 / .42);
+  --ui-water-blue:rgb(49 101 177 / .43);
+  --ui-water-refraction:rgb(175 235 255 / .13);
+  --ui-scheme:dark;
+}
+:where([data-theme=white],[data-theme=light]) :where(.dshp-dock,.dshp-root,.dshp-auth-mask,.dshp-modal-bg,.dshp-restart-mask,.rt-dock,.rt-full):where(:not([data-theme=dusk]):not([data-theme=dark]):not([dark])),
+:where(.dshp-dock,.dshp-root,.dshp-auth-mask,.dshp-modal-bg,.dshp-restart-mask,.rt-dock,.rt-full):is([data-theme=white],[data-theme=light]) {
+  --ui-canvas:#f1f4f8;--ui-surface:#ffffff;--ui-subtle:#f6f8fb;--ui-hover:#e9eef6;
+  --ui-line:#d8e1ed;--ui-line-strong:#a3b5cc;--ui-text:#1b2b40;--ui-muted:#43566d;
+  --ui-link:#285fbb;--ui-selected:#e6effd;--ui-selected-text:#204f9b;--ui-nav:#ffffff;
+  --ui-success:#237650;--ui-success-bg:#e9f5ee;--ui-warning:#8e641a;--ui-warning-bg:#fcf4e4;
+  --ui-danger:#b63f3f;--ui-danger-bg:#fbeeed;--ui-on-danger:#ffffff;
+  --ui-feature-surface:#193858;--ui-feature-line:#45698e;--ui-feature-text:#f0f6ff;--ui-feature-muted:#bed2ea;--ui-feature-hover:#254c73;
+  --ui-panel-shadow:0 4px 14px rgb(27 43 64 / .04);
+
+  --ui-glass-surface:rgb(249 253 255 / .66);
+  --ui-glass-chrome:rgb(238 249 255 / .72);
+  --ui-glass-dense:rgb(245 251 255 / .9);
+  --ui-glass-edge:rgb(255 255 255 / .82);
+  --ui-glass-rim:rgb(255 255 255 / .94);
+  --ui-glass-glint:rgb(255 255 255 / .44);
+  --ui-glass-shadow:0 14px 34px rgb(35 77 104 / .09),inset 0 1px 0 var(--ui-glass-rim),inset 1px 0 0 rgb(255 255 255 / .35),inset 0 -1px 0 rgb(38 83 113 / .08);
+  --ui-glass-control-shadow:inset 0 1px 0 rgb(255 255 255 / .6),0 2px 5px rgb(33 64 90 / .04);
+  --ui-water-base:#c8e0ec;
+  --ui-water-deep:#b6cbdf;
+  --ui-water-light:rgb(238 255 255 / .92);
+  --ui-water-blue:rgb(128 181 219 / .54);
+  --ui-water-refraction:rgb(255 255 255 / .36);
+  --ui-scheme:light;
+}
+
+:where(.dshp-dock,.dshp-root,.dshp-auth-mask,.dshp-modal-bg,.dshp-restart-mask,.rt-dock,.rt-full) :where(button,input,select,textarea) {
+  font-family:inherit;
+  touch-action:manipulation;
+}
+:where(.dshp-dock,.dshp-root,.dshp-auth-mask,.dshp-modal-bg,.dshp-restart-mask,.rt-dock,.rt-full) :where(button,input,select,textarea,summary,[tabindex]):focus-visible {
+  outline:2px solid var(--ui-link);
+  outline-offset:2px;
+}
+:where(.dshp-dock,.dshp-root,.rt-dock,.rt-full) :where(table,.dshp-metric,.rt-ov-metric,.rt-session-map-stat) {
+  font-variant-numeric:tabular-nums;
+}
+
+/* Typography is a product contract, including nested host components. */
+:is(.dshp-dock,.dshp-root,.dshp-auth-mask,.dshp-modal-bg,.dshp-restart-mask,.rt-dock,.rt-full) * {
+  font-family:var(--ui-font) !important;
+  letter-spacing:normal;
+}
+:is(.dshp-dock,.dshp-root,.dshp-auth-mask,.dshp-modal-bg,.dshp-restart-mask,.rt-dock,.rt-full) :is(pre,code,kbd,.rt-mono,.rt-code,.rt-md-code,.rt-r2-code,.rt-r2-pre,.rt-rep-http,.rt-skills-content,.rt-skills-diagnostics-content,.dshp-area,.dshp-editor),
+:is(.dshp-dock,.dshp-root,.rt-dock,.rt-full) :is(pre,code,.rt-mono,.rt-code,.rt-md-code,.rt-r2-code,.rt-r2-pre,.rt-rep-http,.rt-skills-content,.rt-skills-diagnostics-content) * {
+  font-family:var(--ui-mono) !important;
+  font-variant-ligatures:none;
+}
+:is(.dshp-dock,.dshp-root,.dshp-auth-mask,.dshp-modal-bg,.dshp-restart-mask,.rt-dock,.rt-full) :is(.dshp-btn,.dshp-dock-head button,.dshp-dock-tab,.dshp-auth-ops button,.rt-btn,.rt-icon-btn,.rt-hbtn,.rt-session-map-button,.rt-tab,.rt-subtab,.rt-concl-i,.rt-settings-localnav button) {
+  min-height:var(--ui-control-height);
+  border-radius:var(--ui-radius-control) !important;
+  font-family:var(--ui-font) !important;
+  font-size:var(--ui-text-control) !important;
+  font-weight:500 !important;
+  line-height:var(--ui-leading-control) !important;
+}
+:is(.dshp-dock,.dshp-root,.rt-dock,.rt-full) :is(.dshp-title,.rt-workspace-pagehead h1,.rt-ledger-heading h1,.rt-skills-pagehead h1,.rt-sessions-pagehead h1,.rt-settings-pagehead h1,.rt-collab-pagehead h1) {
+  font-size:var(--ui-text-title) !important;
+  font-weight:600;
+  line-height:var(--ui-leading-title);
+}
+:is(.dshp-dock,.dshp-root) .dshp-btn.dshp-btn-solid-danger {
+  background:var(--ui-danger-bg);
+  border-color:var(--ui-danger);
+  color:var(--ui-danger);
+}
+:is(.dshp-dock,.dshp-root) .dshp-btn.dshp-btn-solid-danger:hover:not(:disabled) {
+  background:var(--ui-danger);
+  color:var(--ui-canvas);
+}
+:is(.dshp-dock,.dshp-root,.rt-dock,.rt-full) :is(.dshp-pill,.dshp-cwd-badge,.dshp-now-mark,.rt-tag,.rt-sev,.rt-test,.rt-pri,.rt-avail,.rt-skills-badge,.rt-skills-card-badge,.rt-collab-readonly-badge,.rt-collab-config-badge,.rt-kb-kind,.rt-stage-tag,.rt-scorepts,.rt-ov-stage-chip) {
+  display:inline-flex;
+  align-items:center;
+  min-height:22px !important;
+  padding:1px 6px !important;
+  border-radius:4px !important;
+  font-family:var(--ui-font) !important;
+  font-size:var(--ui-text-label) !important;
+  font-weight:500 !important;
+  line-height:var(--ui-leading-control) !important;
+  white-space:nowrap;
+}
+:is(.dshp-dock,.dshp-root,.rt-dock,.rt-full) :is(.dshp-field,.rt-input,.rt-eng-select,select) {
+  font-size:var(--ui-text-control) !important;
+  font-weight:400 !important;
+  line-height:var(--ui-leading-control) !important;
+  border-radius:var(--ui-radius-control) !important;
+}
+/* A CSS caret keeps selects aligned with inputs across native widget themes. */
+:is(.dshp-dock,.dshp-root,.rt-dock,.rt-full) select {
+  appearance:none !important;
+  height:var(--ui-control-height) !important;
+  padding:0 30px 0 12px !important;
+  background-image:linear-gradient(45deg,transparent 50%,var(--ui-muted) 50%),linear-gradient(135deg,var(--ui-muted) 50%,transparent 50%) !important;
+  background-position:calc(100% - 14px) 50%,calc(100% - 10px) 50% !important;
+  background-size:4px 4px !important;
+  background-repeat:no-repeat !important;
+}
+
+/* Older skins cannot reset native widgets to a different scheme. */
+:is(.dshp-dock,.dshp-root,.rt-dock,.rt-full) select option {
+  background:var(--ui-surface);
+  color:var(--ui-text);
+}
+:is(.dshp-dock,.dshp-root,.dshp-auth-mask,.dshp-modal-bg,.dshp-restart-mask,.rt-dock,.rt-full){color-scheme:var(--ui-scheme)!important;}

@@ -1,0 +1,82 @@
+/* Shared page rhythm. Page-specific layouts keep ownership of scrolling. */
+.rt-dock,.rt-full{--rt-page-x:28px;--rt-page-y:24px;--rt-gap:16px;--rt-card-radius:var(--ui-radius-panel);--rt-control-radius:7px}
+:is(.rt-embedded,.rt-full)>.rt-body{position:relative}
+:is(.rt-dock,.rt-full) .rt-workspace-pagehead{padding:var(--rt-page-y) var(--rt-page-x) 18px;background:var(--rt-bg-base);flex:none}
+:is(.rt-dock,.rt-full) .rt-workspace-heading{min-width:0}
+:is(.rt-dock,.rt-full) .rt-workspace-eyebrow{margin:0 0 4px;font-size:var(--ui-text-helper);line-height:var(--ui-leading-body);letter-spacing:normal;color:var(--rt-muted)}
+:is(.rt-dock,.rt-full) .rt-workspace-pagehead h1{margin:0;font-size:var(--ui-text-title);font-weight:600;line-height:var(--ui-leading-title);letter-spacing:normal;color:var(--rt-ink)}
+:is(.rt-dock,.rt-full) .rt-workspace-pagehead p{margin:7px 0 0;font-size:var(--ui-text-helper);line-height:var(--ui-leading-body);color:var(--rt-muted)}
+:is(.rt-dock,.rt-full) .rt-page-content>.rt-main>.rt-toolbar{flex:none;padding:0 var(--rt-page-x) 14px;min-height:0;background:var(--rt-bg-base);gap:8px}
+:is(.rt-dock,.rt-full) .rt-page-content>.rt-main>.rt-pane{padding:20px var(--rt-page-x) var(--rt-page-y)}
+:is(.rt-dock,.rt-full) .rt-page-content>.rt-main>.rt-body{padding:20px var(--rt-page-x) var(--rt-page-y)}
+
+/* One visible page heading; retain every original status and action control. */
+:is(.rt-dock,.rt-full) .rt-ledger-heading,
+:is(.rt-dock,.rt-full) .rt-collab-hero,
+:is(.rt-dock,.rt-full) .rt-settings-pagehead-copy{display:none}
+:is(.rt-dock,.rt-full) .rt-ledger-page{padding:0 var(--rt-page-x) var(--rt-page-y);gap:var(--rt-gap)}
+:is(.rt-dock,.rt-full) .rt-ledger-header{position:absolute;top:var(--rt-page-y);right:var(--rt-page-x);gap:0}
+:is(.rt-dock,.rt-full) .rt-ledger-header-actions{padding-top:0}
+:is(.rt-dock,.rt-full)>.rt-body[data-page=assets]>.rt-workspace-pagehead{padding-right:330px}
+:is(.rt-dock,.rt-full) .rt-ov-head{padding:0 var(--rt-page-x) 16px;gap:var(--rt-gap)}
+:is(.rt-dock,.rt-full) .rt-ov-title{font-size:var(--ui-text-body);line-height:var(--ui-leading-body);letter-spacing:0;font-weight:600;color:var(--rt-ink)}
+:is(.rt-dock,.rt-full) .rt-ov-scroll{padding:0 var(--rt-page-x) var(--rt-page-y)}
+:is(.rt-dock,.rt-full) .rt-skills-workspace{padding:0 var(--rt-page-x) var(--rt-page-y);gap:var(--rt-gap)}
+:is(.rt-dock,.rt-full) .rt-collab-page .rt-collab-pane{padding:20px var(--rt-page-x) var(--rt-page-y)}
+:is(.rt-dock,.rt-full) .rt-settings-scroll{padding:20px var(--rt-page-x) var(--rt-page-y)}
+:is(.rt-dock,.rt-full) .rt-settings-pagehead{margin:0 0 16px;max-width:none;justify-content:flex-end}
+:is(.rt-dock,.rt-full) .rt-settings-pagehead-context{max-width:100%;padding:8px 12px;border-radius:var(--rt-control-radius)}
+:is(.rt-dock,.rt-full) .rt-settings-summary{margin-bottom:20px}
+:is(.rt-dock,.rt-full) .rt-artifacts-scroll{padding:20px var(--rt-page-x) var(--rt-page-y)}
+:is(.rt-dock,.rt-full) .rt-chain,
+:is(.rt-dock,.rt-full) .rt-ap,
+:is(.rt-dock,.rt-full) .rt-r2-scroll,
+:is(.rt-dock,.rt-full) .rt-rep-list{padding:20px var(--rt-page-x) var(--rt-page-y)}
+:is(.rt-dock,.rt-full) .rt-page-content[data-page=knowledge]>.rt-split{margin:0 var(--rt-page-x) var(--rt-page-y);border:1px solid var(--rt-border);border-radius:var(--rt-card-radius);overflow:hidden}
+:is(.rt-dock,.rt-full) .rt-page-content[data-page=knowledge]>.rt-split>.rt-list{width:300px;padding:14px;background:var(--rt-bg-surface)}
+:is(.rt-dock,.rt-full) .rt-page-content[data-page=findings] .rt-table{margin:0 var(--rt-page-x) var(--rt-page-y);border:1px solid var(--rt-border);border-radius:var(--rt-card-radius)}
+:is(.rt-dock,.rt-full) .rt-ledger-stats,
+:is(.rt-dock,.rt-full) .rt-skills-overview{border-radius:var(--rt-card-radius);background:var(--rt-border)}
+:is(.rt-dock,.rt-full) .rt-ledger-stat,
+:is(.rt-dock,.rt-full) .rt-skills-stat,
+:is(.rt-dock,.rt-full) .rt-settings-summary-card{min-height:76px;padding:14px 18px}
+:is(.rt-dock,.rt-full) .rt-ledger-stat-value,
+:is(.rt-dock,.rt-full) .rt-skills-stat strong,
+:is(.rt-dock,.rt-full) .rt-settings-summary-card strong{font-size:var(--ui-text-metric);line-height:var(--ui-leading-body);font-weight:600;font-variant-numeric:tabular-nums}
+:is(.rt-dock,.rt-full) .rt-ledger-stat-label,
+:is(.rt-dock,.rt-full) .rt-skills-stat small{font-size:var(--ui-text-helper);line-height:var(--ui-leading-body);color:var(--rt-muted)}
+@container workspace (max-width:900px){
+ .rt-dock{--rt-page-x:18px;--rt-page-y:20px}
+ :is(.rt-dock,.rt-full) .rt-ledger-header{position:static;justify-content:flex-end}
+ :is(.rt-dock,.rt-full)>.rt-body[data-page=assets]>.rt-workspace-pagehead{padding-right:var(--rt-page-x)}
+}
+@container rt (max-width:900px){
+ :is(.rt-dock,.rt-full) .rt-ledger-header{position:static;justify-content:flex-end}
+ :is(.rt-dock,.rt-full)>.rt-body[data-page=assets]>.rt-workspace-pagehead{padding-right:var(--rt-page-x)}
+}
+@container workspace (max-width:720px){
+ .rt-dock{--rt-page-x:16px;--rt-page-y:20px}
+ :is(.rt-dock,.rt-full) .rt-workspace-pagehead h1{font-size:var(--ui-text-title)}
+ :is(.rt-dock,.rt-full) .rt-page-content[data-page=knowledge]>.rt-split{flex-direction:column}
+ :is(.rt-dock,.rt-full) .rt-page-content[data-page=knowledge]>.rt-split>.rt-list{width:auto;max-height:240px;border-right:0;border-bottom:1px solid var(--rt-border)}
+}
+@container rt (max-width:720px){
+ :is(.rt-dock,.rt-full) .rt-workspace-pagehead h1{font-size:var(--ui-text-title)}
+ :is(.rt-dock,.rt-full) .rt-page-content[data-page=knowledge]>.rt-split{flex-direction:column}
+ :is(.rt-dock,.rt-full) .rt-page-content[data-page=knowledge]>.rt-split>.rt-list{width:auto;max-height:240px;border-right:0;border-bottom:1px solid var(--rt-border)}
+}
+@media(max-width:720px){.rt-full{--rt-page-x:16px;--rt-page-y:20px}}
+/* Keep the configuration-file context aligned with header actions. */
+:is(.rt-dock,.rt-full) .rt-settings-pagehead{position:absolute;top:var(--rt-page-y);right:var(--rt-page-x);margin:0;max-width:300px}
+:is(.rt-dock,.rt-full)>.rt-body[data-page=env]>.rt-workspace-pagehead{padding-right:350px}
+@container workspace (max-width:900px){:is(.rt-dock,.rt-full) .rt-settings-pagehead{position:static;max-width:none;margin-bottom:16px}:is(.rt-dock,.rt-full)>.rt-body[data-page=env]>.rt-workspace-pagehead{padding-right:var(--rt-page-x)}}
+@container rt (max-width:900px){:is(.rt-dock,.rt-full) .rt-settings-pagehead{position:static;max-width:none;margin-bottom:16px}:is(.rt-dock,.rt-full)>.rt-body[data-page=env]>.rt-workspace-pagehead{padding-right:var(--rt-page-x)}}
+
+/* A floating dock must respond to its own width as well as its host workspace. */
+@container rt (max-width:720px){
+ :is(.rt-dock,.rt-full) :is(.rt-workspace-pagehead,.rt-page-content,.rt-cmd){--rt-page-x:16px;--rt-page-y:20px}
+ :is(.rt-dock,.rt-full)>.rt-chrome>.rt-cmd{flex-wrap:wrap;gap:6px;padding:12px 16px}
+ :is(.rt-dock,.rt-full) .rt-breadcrumb{max-width:100%;flex:1 1 100%}
+ :is(.rt-dock,.rt-full) .rt-breadcrumb-project{max-width:140px}
+ :is(.rt-dock,.rt-full) .rt-breadcrumb>span:first-child,:is(.rt-dock,.rt-full) .rt-breadcrumb>i:first-of-type{display:none}
+}

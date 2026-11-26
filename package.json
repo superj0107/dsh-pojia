@@ -1,0 +1,100 @@
+{
+  "name": "dsh-pojia",
+  "version": "1.0.0",
+  "description": "DeepSeek Harness 破甲融合包：宿主清洗（原 dsh-purge-safe）+ 破甲内核（原富江破甲）双层合一，全部功能统一收进 /pojia 命令。免费开源，遵守 CC BY-NC-SA 4.0 与 Apache-2.0 双署名。",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": "./client.js",
+    "./redteam": "./lib/redteam/index.js",
+    "./redteam/store": "./lib/redteam/store.js",
+    "./redteam/ui": "./lib/redteam/ui.js",
+    "./redteam/tools": "./lib/redteam/tools.js",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "dsh-pojia": "bin/dsh-pojia.js"
+  },
+  "files": [
+    "lib",
+    "!lib/default-prompt-inject.md",
+    "!lib/default-prompt-inject.md.bak",
+    "!lib/default-prompt-inject.zh.md",
+    "!lib/default-prompt-inject.en.md",
+    "bin",
+    "docs",
+    "!docs/agents",
+    "presets",
+    "skills",
+    "scripts",
+    "client.js",
+    "cordis.patch.yml",
+    "README.md",
+    "README.en.md",
+    "release-notes.md",
+    "LICENSE",
+    "CONTRIBUTORS.md",
+    "CONTRIBUTING.md",
+    "NOTICE",
+    "README.zh-CN.md",
+    "README.ja.md",
+    "!**/.git",
+    "!**/.{git,idea,vscode,codex,claude,agents,windsurf,cursor,ssh,aws,azure,secrets,scratch}/**",
+    "!**/.config/gcloud/**",
+    "!**/secrets/**",
+    "!**/.env",
+    "!**/.env.*",
+    "!**/{.npmrc,.pypirc,.netrc,_netrc}",
+    "!**/*.{pem,key,p12,pfx,keystore,jks}",
+    "!**/{id_rsa,id_dsa,id_ecdsa,id_ed25519}",
+    "!**/{credentials,credentials.*,service-account*}.json",
+    "!**/default-prompt-inject*.md",
+    "!**/*.{bak,asar,tgz,log}",
+    "!**/{.DS_Store,Thumbs.db}",
+    "!**/*.{iml,ipr,iws,code-workspace}",
+    "!scripts/{tmp,test}-*.mjs"
+  ],
+  "scripts": {
+    "embed-prompt": "node scripts/embed-default-prompt.mjs",
+    "build:client": "node scripts/build-client.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "license": "CC-BY-NC-SA-4.0",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "破甲",
+    "jailbreak",
+    "red-team",
+    "prompt-eval",
+    "harness-security",
+    "deepseek-harness",
+    "pojia"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-connection",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-settings"
+      ]
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dshTarget": "0.2.2-rc.5",
+  "dshTargets": [
+    "0.2.2-rc.5"
+  ]
+}

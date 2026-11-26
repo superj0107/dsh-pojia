@@ -1,0 +1,292 @@
+/* Shared inner visuals. Loaded after page skins; layout stays with each source component. */
+
+/* Opaque cards: one border, one radius, no elevation. */
+:is(.rt-dock, .rt-full) :is(.rt-card, .rt-ov-card, .rt-ov-score, .rt-ov-rail,
+  .rt-ledger-table, .rt-ledger-list-pane, .rt-ledger-detail, .rt-skills-section,
+  .rt-skills-card, .rt-skills-catalog, .rt-skills-detail, .rt-settings-card,
+  .rt-collab-section, .rt-collab-config, .rt-collab-card, .rt-collab-role,
+  .rt-collab-role-card,
+  .rt-r2-proof, .rt-rep, .rt-evi, .rt-shots, .rt-kb) {
+  border: 1px solid var(--rt-border);
+  border-radius: 10px;
+  color: var(--rt-ink);
+  background: var(--rt-bg-surface);
+  box-shadow: none;
+}
+
+:is(.rt-dock, .rt-full) .rt-settings-note-card {
+  border-left-width: 3px;
+  border-left-color: var(--rt-accent);
+}
+
+:is(.rt-dock, .rt-full) .rt-rep {
+  border-left-width: 3px;
+  border-left-color: var(--rt-success);
+}
+
+:is(.rt-dock, .rt-full) :is(.rt-skills-card[aria-pressed='true']) {
+  border-color: var(--rt-accent);
+  background: var(--rt-accent-soft);
+  box-shadow: none;
+}
+
+:is(.rt-dock, .rt-full) :is(.rt-card h4, .rt-ov-card-title, .rt-skills-section h2,
+  .rt-skills-section h3, .rt-settings-card > h3, .rt-settings-card-head h3,
+  .rt-collab-role-card h4, .rt-r2-h3, .rt-r2-h4, .rt-r2-h5) {
+  color: var(--rt-ink);
+  line-height:var(--ui-leading-title);
+}
+
+/* Controls. Textareas retain their source min-height and typeface. */
+:is(.rt-dock, .rt-full) :is(.rt-btn, .rt-icon-btn, .rt-hbtn, .rt-session-map-button,
+  .rt-settings-localnav button, .rt-skills-detail-actions button, .rt-skills-actions button) {
+  min-height: 32px;
+  border: 1px solid var(--rt-border);
+  border-radius: 7px;
+  color: var(--rt-ink);
+  background: var(--rt-bg-surface);
+  box-shadow: none;
+  font-size:var(--ui-text-helper);
+  line-height: 1.35;
+}
+
+:is(.rt-dock, .rt-full) :is(.rt-btn:hover:not(:disabled), .rt-icon-btn:hover:not(:disabled), .rt-hbtn:hover:not(:disabled),
+  .rt-session-map-button:hover:not(:disabled), .rt-settings-localnav button:hover:not(:disabled),
+  .rt-skills-detail-actions button:hover:not(:disabled), .rt-skills-actions button:hover:not(:disabled)) {
+  border-color: var(--rt-border-strong);
+  color: var(--rt-ink);
+  background: var(--rt-bg-raised);
+}
+
+:is(.rt-dock, .rt-full) :is(.rt-btn.rt-btn-primary, .rt-btn[data-variant='primary']) {
+  border-color: var(--rt-primary, var(--rt-accent));
+  color: var(--rt-accent-ink, #fff);
+  background: var(--rt-primary, var(--rt-accent));
+}
+
+:is(.rt-dock, .rt-full) :is(.rt-btn.rt-btn-danger, .rt-btn[data-variant='danger']) {
+  border-color: var(--rt-danger);
+  color: var(--rt-danger);
+  background: var(--rt-danger-bg);
+}
+
+:is(.rt-dock, .rt-full) .rt-settings-localnav button[aria-selected='true'] {
+  border-color: var(--rt-border);
+  color: var(--rt-accent);
+  background: var(--rt-accent-soft);
+}
+
+:is(.rt-dock, .rt-full) :is(.rt-btn.rt-btn-primary:hover:not(:disabled), .rt-btn[data-variant='primary']:hover:not(:disabled)) {
+  border-color: var(--rt-accent-strong, var(--rt-primary, var(--rt-accent)));
+  color: var(--rt-accent-ink, #fff);
+  background: var(--rt-accent-strong, var(--rt-primary, var(--rt-accent)));
+}
+
+:is(.rt-dock, .rt-full) :is(.rt-btn.rt-btn-danger:hover:not(:disabled), .rt-btn[data-variant='danger']:hover:not(:disabled)) {
+  border-color: var(--rt-danger);
+  color: var(--rt-danger);
+  background: var(--rt-danger-bg);
+}
+
+:is(.rt-dock, .rt-full) :is(.rt-input, .rt-eng-select, .rt-score-form input,
+  .rt-score-form select, .rt-session-map-search, .rt-session-map-filter,
+  .rt-settings-control:not(.rt-settings-textarea), .rt-skills-search,
+  .rt-skills-filters input[type='search'], .rt-skills-filters input[type='text']) {
+  min-height: 32px;
+  border: 1px solid var(--rt-border);
+  border-radius: 7px;
+  color: var(--rt-ink);
+  background: var(--rt-bg-surface);
+  font-size:var(--ui-text-control);
+}
+
+:is(.rt-dock, .rt-full) :is(.rt-textarea, .rt-settings-textarea) {
+  border: 1px solid var(--rt-border);
+  border-radius: 7px;
+  color: var(--rt-ink);
+  background: var(--rt-bg-surface);
+  font-size:var(--ui-text-control);
+}
+
+:is(.rt-dock, .rt-full) :is(.rt-input, .rt-eng-select, .rt-textarea, .rt-settings-control,
+  .rt-skills-search)::placeholder {
+  color: var(--rt-muted);
+  opacity: .86;
+}
+
+/* Div-based findings, score, and access tables keep display/grid/overflow/height rules. */
+:is(.rt-dock, .rt-full) :is(.rt-row, .rt-vrow, .rt-score-row) {
+  padding: 10px 12px;
+  color: var(--rt-ink);
+  background: var(--rt-bg-surface);
+  border-color: var(--rt-border);
+  font-size:var(--ui-text-helper);
+}
+
+:is(.rt-dock, .rt-full) :is(.rt-row.head, .rt-vrow.head, .rt-score-row.head,
+  .rt-ledger-table-head) {
+  padding: 10px 12px;
+  color: var(--rt-muted);
+  background: var(--rt-bg-subtle);
+  border-color: var(--rt-border-strong);
+  font-size:var(--ui-text-helper);
+  font-weight:600;
+}
+
+:is(.rt-dock, .rt-full) :is(.rt-row:hover:not(:disabled), .rt-vrow:hover:not(:disabled), .rt-score-row:hover:not(:disabled)) {
+  background: var(--rt-accent-soft);
+}
+
+:is(.rt-dock, .rt-full) .rt-score-group {
+  padding: 10px 12px;
+  color: var(--rt-muted);
+  background: var(--rt-bg-subtle);
+  border-color: var(--rt-border);
+  font-size:var(--ui-text-helper);
+}
+
+/* Native report/markdown tables use the same body/header rhythm. */
+:is(.rt-dock, .rt-full) :is(.rt-r2-table, .rt-markdown table) :is(th, td) {
+  padding: 10px 12px;
+  color: var(--rt-ink);
+  border-color: var(--rt-border);
+}
+
+:is(.rt-dock, .rt-full) :is(.rt-r2-table, .rt-markdown table) thead {
+  color: var(--rt-muted);
+  font-size:var(--ui-text-helper);
+}
+
+:is(.rt-dock, .rt-full) :is(.rt-r2-table, .rt-markdown table) tbody {
+  color: var(--rt-ink);
+  font-size:var(--ui-text-helper);
+}
+
+/* Badges keep their semantic distinctions instead of becoming one accent color. */
+:is(.rt-dock, .rt-full) :is(.rt-tag, .rt-sev, .rt-test, .rt-pri, .rt-avail,
+  .rt-skills-badge, .rt-skills-card-badge, .rt-collab-readonly-badge,
+  .rt-collab-config-badge, .rt-kb-kind, .rt-stage-tag, .rt-scope, .rt-scorepts,
+  .rt-ov-stage-chip) {
+  border-radius: 5px;
+  font-size:var(--ui-text-helper);
+  line-height:var(--ui-leading-body);
+}
+
+:is(.rt-dock, .rt-full) :is(.rt-tag-live, .rt-test-tested, .rt-avail-available,
+  .rt-skills-badge.is-available, .rt-skills-badge[data-status='available']) {
+  color: var(--rt-success);
+  border-color: var(--rt-success);
+  background: var(--rt-success-bg);
+}
+
+:is(.rt-dock, .rt-full) :is(.rt-tag-active, .rt-tag-warn, .rt-test-testing, .rt-sev-medium,
+  .rt-avail-unknown, .rt-skills-badge.is-unknown, .rt-skills-badge[data-status='unknown']) {
+  color: var(--rt-warning);
+  border-color: var(--rt-warning);
+  background: var(--rt-warning-bg);
+}
+
+:is(.rt-dock, .rt-full) :is(.rt-avail-broken,
+  .rt-skills-badge.is-broken, .rt-skills-badge[data-status='broken'], .rt-sev-high) {
+  color: var(--rt-danger);
+  border-color: var(--rt-danger);
+  background: var(--rt-danger-bg);
+}
+
+:is(.rt-dock, .rt-full) .rt-pri-high {
+  color: var(--rt-danger);
+  border-color: var(--rt-danger);
+  background: var(--rt-danger-bg);
+}
+
+:is(.rt-dock, .rt-full) .rt-pri-medium {
+  color: var(--rt-ink);
+  border-color: var(--rt-warning);
+  background: var(--rt-warning-bg);
+}
+
+:is(.rt-dock, .rt-full) .rt-pri-low {
+  color: var(--rt-muted);
+  border-color: var(--rt-border);
+  background: var(--rt-bg-subtle);
+}
+
+/* Critical/blocked remain strong danger badges; primary badges retain their own colors. */
+:is(.rt-dock, .rt-full) :is(.rt-test-blocked, .rt-sev-critical) {
+  color: #fff;
+  border-color: #c54c66;
+  background: #c54c66;
+}
+
+/* Empty, loading, help, and error states share a clear hierarchy. */
+:is(.rt-dock, .rt-full) :is(.rt-empty, .rt-r2-empty, .rt-skills-empty,
+  .rt-skills-no-results, .rt-skills-status, .rt-skills-loading,
+  .rt-settings-diagnostic-empty, .rt-settings-loading) {
+  color: var(--rt-muted);
+  background: var(--rt-bg-subtle);
+  border: 1px dashed var(--rt-border-strong);
+  border-radius: 8px;
+  font-size:var(--ui-text-helper);
+  line-height:var(--ui-leading-body);
+}
+
+:is(.rt-dock, .rt-full) :is(.rt-hint, .rt-note) {
+  border: 1px solid var(--rt-warning);
+  border-radius: 7px;
+  color: var(--rt-ink);
+  background: var(--rt-warning-bg);
+  font-size:var(--ui-text-helper);
+  line-height:var(--ui-leading-body);
+}
+
+:is(.rt-dock, .rt-full) :is(.rt-err, .rt-settings-alert-error) {
+  border: 1px solid var(--rt-danger);
+  border-radius: 7px;
+  color: var(--rt-danger);
+  background: var(--rt-danger-bg);
+  font-size:var(--ui-text-helper);
+  line-height:var(--ui-leading-body);
+}
+
+:is(.rt-dock, .rt-full) .rt-settings-alert:not(.rt-settings-alert-error) {
+  border: 1px solid var(--rt-border);
+  border-radius: 7px;
+  color: var(--rt-muted);
+  background: var(--rt-bg-subtle);
+  font-size:var(--ui-text-helper);
+  line-height:var(--ui-leading-body);
+}
+
+/* Code stays monospace while sharing the same opaque surface and border. */
+:is(.rt-dock, .rt-full) :is(.rt-inline-code, .rt-code, .rt-md, .rt-md-code,
+  .rt-r2-code, .rt-r2-pre, .rt-rep-http, .rt-clip-body, .rt-evi-body, .rt-hit-evi,
+  .rt-atest-notes, .rt-skills-content, .rt-skills-diagnostics-content) {
+  color: var(--rt-ink);
+  background: var(--rt-bg-subtle);
+  border-color: var(--rt-border);
+}
+
+:is(.rt-dock, .rt-full) :is(.rt-code, .rt-md, .rt-md-code, .rt-r2-code, .rt-r2-pre,
+  .rt-rep-http, .rt-clip-body, .rt-evi-body, .rt-hit-evi, .rt-atest-notes,
+  .rt-skills-content, .rt-skills-diagnostics-content) {
+  border-radius: 7px;
+}
+
+:is(.rt-dock, .rt-full) .rt-inline-code {
+  padding: 0 4px;
+  border: 1px solid var(--rt-border);
+  border-radius: 4px;
+  color: var(--rt-accent);
+  background: var(--rt-accent-soft);
+}
+
+/* Native report tables and session cards use the same paper surface. */
+:is(.rt-dock,.rt-full) .rt-r2-table-wrap{border-color:var(--rt-border);border-radius:10px;background:var(--rt-bg-surface)}
+:is(.rt-dock,.rt-full) .rt-r2-table{background:var(--rt-bg-surface)}
+:is(.rt-dock,.rt-full) .rt-r2-table th{background:var(--rt-bg-subtle);color:var(--rt-muted)}
+:is(.rt-dock,.rt-full) .rt-sess{border-color:var(--rt-border);border-radius:10px;background:var(--rt-bg-surface);box-shadow:none}
+
+/* Disabled controls retain their visual variant while pointer hover is inert. */
+:is(.rt-dock,.rt-full) .rt-btn:disabled{background:var(--rt-bg-surface);color:var(--rt-ink);border-color:var(--rt-border);opacity:.45;cursor:not-allowed}
+:is(.rt-dock,.rt-full) .rt-btn.rt-btn-primary:disabled{background:var(--rt-primary);border-color:var(--rt-primary);color:var(--rt-accent-ink,#fff)}
+:is(.rt-dock,.rt-full) .rt-btn.rt-btn-danger:disabled{background:var(--rt-danger-bg);border-color:var(--rt-danger);color:var(--rt-danger)}

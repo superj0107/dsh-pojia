@@ -1,0 +1,23 @@
+dsh-pojia — DeepSeek Harness 破甲融合包
+Copyright (c) 2026 dsh-pojia contributors
+
+本产品为融合作品，包含以下第三方来源，均须保留署名：
+
+--------------------------------------------------------------------------------
+1) dsh-purge-safe (Apache License 2.0)
+   Copyright 2026 CallMeGuLab
+   Source: https://github.com/CallMeGuLab/dsh-purge-safe
+   License: Apache-2.0 (see LICENSE-APACHE.txt)
+   本包的宿主补丁引擎、清洗面板、演练台、规则/技能/回退等功能改编自此项目。
+
+--------------------------------------------------------------------------------
+2) 富江破甲 / dsh-infinite-gen-4 (CC BY-NC-SA 4.0)
+   Copyright (c) 2026 Minglink
+   Source: https://github.com/Minglink/dsh-infinite-gen-4
+   License: CC BY-NC-SA 4.0 + 附加非商业/禁止二次开发商用条款
+            (see armor/FUJIANG-LICENSE.txt, armor/FUJIANG-THIRD-PARTY-NOTICES.md)
+   本包的破甲内核、提示词注入与会话投影评分器改编自此项目。
+
+--------------------------------------------------------------------------------
+融合包整体许可：CC BY-NC-SA 4.0（见 LICENSE）。非商业使用；相同方式共享；
+再分发须保留以上全部署名与许可声明，并注明所作的修改。

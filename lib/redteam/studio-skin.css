@@ -1,0 +1,1744 @@
+/*
+ * Studio skin
+ *
+ * This file is intentionally scoped to the panel roots carrying rt-studio.
+ * It is loaded after the shared RedTeam skins, so the shell can keep its
+ * existing DOM and page-owned scrolling while this layer supplies the visual
+ * system and the top navigation layout.
+ */
+
+/* Semantic aliases only. Palette and type scales live in ../ui-theme.css. */
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) {
+  --rt-studio-bg:var(--ui-canvas);
+  --rt-studio-ink:var(--ui-text);
+  --rt-studio-muted:var(--ui-muted);
+  --rt-studio-soft:var(--ui-subtle);
+  --rt-studio-line:var(--ui-line);
+  --rt-studio-strong-line:var(--ui-line-strong);
+  --rt-studio-hover:var(--ui-hover);
+  --rt-studio-white:var(--ui-surface);
+  --rt-studio-dark:var(--ui-surface);
+  --rt-studio-dark-ink:var(--ui-text);
+  --rt-studio-dark-muted:var(--ui-muted);
+  --rt-studio-dark-line:var(--ui-line);
+  --rt-studio-dark-hover:var(--ui-hover);
+  --rt-studio-detail:var(--ui-surface);
+  --rt-studio-detail-soft:var(--ui-subtle);
+  --rt-studio-detail-ink:var(--ui-text);
+  --rt-studio-detail-muted:var(--ui-muted);
+  --rt-studio-primary:var(--ui-primary);
+  --rt-studio-primary-ink:var(--ui-on-primary);
+  --rt-studio-success:var(--ui-success);
+  --rt-studio-success-bg:var(--ui-success-bg);
+  --rt-studio-warning:var(--ui-warning);
+  --rt-studio-warning-bg:var(--ui-warning-bg);
+  --rt-studio-danger:var(--ui-danger);
+  --rt-studio-danger-bg:var(--ui-danger-bg);
+  --rt-bg-base:var(--ui-canvas);
+  --rt-bg-surface:var(--ui-surface);
+  --rt-bg-subtle:var(--ui-subtle);
+  --rt-bg-raised:var(--ui-hover);
+  --rt-bg-elevated:var(--ui-surface);
+  --rt-rail:var(--ui-surface);
+  --rt-border:var(--ui-line);
+  --rt-border-strong:var(--ui-line-strong);
+  --rt-ink:var(--ui-text);
+  --rt-muted:var(--ui-muted);
+  --rt-mute:var(--ui-muted);
+  --rt-ink-soft:var(--ui-muted);
+  --rt-accent:var(--ui-link);
+  --rt-primary:var(--ui-primary);
+  --rt-accent-strong:var(--ui-primary-hover);
+  --rt-accent-soft:var(--ui-selected);
+  --rt-accent-ink:var(--ui-on-primary);
+  --rt-success:var(--ui-success);
+  --rt-success-bg:var(--ui-success-bg);
+  --rt-warning:var(--ui-warning);
+  --rt-warning-bg:var(--ui-warning-bg);
+  --rt-danger:var(--ui-danger);
+  --rt-danger-bg:var(--ui-danger-bg);
+  --rt-shadow:transparent;
+  --rt-card-radius:var(--ui-radius-panel);
+  --rt-control-radius:var(--ui-radius-control);
+  --rt-ledger-radius:var(--ui-radius-panel);
+  --rt-gap:var(--ui-space-4);
+  --rt-page-x:var(--ui-space-5);
+  --rt-page-y:var(--ui-space-4);
+  --dsw-alias-bg-base:var(--ui-canvas);
+  --dsw-alias-bg-layer-1:var(--ui-surface);
+  --dsw-alias-bg-layer-2:var(--ui-subtle);
+  --dsw-alias-label-primary:var(--ui-text);
+  --dsw-alias-label-secondary:var(--ui-muted);
+  --dsw-alias-border-l1:var(--ui-line);
+  --dsw-alias-border-l2:var(--ui-line-strong);
+  --dsw-alias-brand-primary:var(--ui-primary);
+  --dsw-alias-state-error-primary:var(--ui-danger);
+  --dsw-alias-state-warn-primary:var(--ui-warning);
+  color:var(--ui-text);
+  background:var(--ui-canvas);
+  font:400 var(--ui-text-body)/var(--ui-leading-body) var(--ui-font);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) *,
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) *::before,
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) *::after {
+  box-sizing: border-box;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Shell: top navigation, command row, sub-navigation, body, footer.        */
+
+:is(.rt-dock.rt-studio[data-open="1"], .rt-dock.rt-studio.rt-embedded, .rt-full.rt-studio) {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  grid-template-areas: "nav" "cmd" "sub" "body" "foot";
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--rt-studio-line);
+  border-radius: var(--ui-radius-panel);
+  background: var(--rt-studio-bg) !important;
+  color: var(--rt-studio-ink);
+}
+
+:is(.rt-full.rt-studio) {
+  border-radius: 0;
+}
+
+:is(.rt-dock.rt-studio.rt-embedded) {
+  border-radius: var(--ui-radius-panel);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) > .rt-chrome {
+  display: contents !important;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) > .rt-chrome > .rt-nav {
+  grid-area: nav !important;
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  display: flex !important;
+  flex: none;
+  align-items: center;
+  align-content: flex-start;
+  width: 100%;
+  min-width: 0;
+  gap: 10px;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  overflow: visible;
+  padding:12px 16px;
+  border: 0;
+  border-bottom: 1px solid var(--rt-studio-line);
+  border-radius: 0;
+  background: var(--rt-studio-bg) !important;
+  color: var(--rt-studio-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-workspace-brand {
+  order: 1;
+  display: flex;
+  flex: 0 1 auto;
+  align-items: center;
+  min-width: max-content;
+  gap: 8px;
+  padding: 0;
+  color: var(--rt-studio-ink);
+  font-size:var(--ui-text-body);
+  font-weight:600;
+  letter-spacing: normal;
+  white-space: nowrap;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-workspace-brand small {
+  display: block;
+  margin-top: 1px;
+  color: var(--rt-studio-muted);
+  font-size: var(--ui-text-helper);
+  font-weight:400;
+  letter-spacing: normal;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-workspace-mark {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  place-items: center;
+  border: 1px solid var(--rt-studio-primary);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-primary);
+  color: var(--ui-on-primary);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-project-card {
+  order: 2;
+  display: flex;
+  width: min(218px, 100%);
+  min-width: 140px;
+  min-height: var(--ui-control-height);
+  flex: 0 1 218px;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  padding: 4px 8px;
+  border: 1px solid var(--rt-studio-dark-line);
+  border-radius: var(--ui-radius-control);
+  background: var(--rt-studio-dark-hover);
+  color: var(--rt-studio-dark-ink);
+  font-size: var(--ui-text-body);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-project-card:focus-within {
+  outline: 2px solid var(--rt-studio-primary);
+  outline-offset: 2px;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-project-avatar {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  place-items: center;
+  border: 1px solid var(--rt-studio-dark-line);
+  border-radius: 7px;
+  background: var(--rt-studio-dark);
+  color: var(--rt-studio-dark-ink);
+  font-size: var(--ui-text-helper);
+  font-weight: 600;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-project-info {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: center;
+  flex-wrap: wrap;
+  overflow: hidden;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-project-info small {
+  display: block;
+  flex: 1 1 100%;
+  min-width: 0;
+  margin-top: 1px;
+  overflow: hidden;
+  color: var(--rt-studio-dark-muted);
+  font-size: var(--ui-text-helper);
+  line-height:var(--ui-leading-body);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-project-card .rt-eng-select {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: var(--ui-control-height);
+  min-height: var(--ui-control-height);
+  padding: 0 18px 0 0;
+  border: 0 !important;
+  border-radius: 0;
+  outline: 0;
+  background-color: var(--rt-studio-dark-hover) !important;
+  box-shadow: none !important;
+  color: var(--rt-studio-dark-ink) !important;
+  color-scheme: var(--ui-scheme);
+  font-size:var(--ui-text-control);
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-project-card .rt-eng-select option {
+  background-color: var(--ui-surface) !important;
+  color: var(--ui-text) !important;
+}
+
+/* The project selector lives in the command row in the studio shell. Keep it
+ * on the paper surface there; the dark selector rules above only serve older
+ * hosts that still place this card in the navigation container. */
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-cmd .rt-project-card {
+  order: 0;
+  display: flex;
+  width: min(218px, 100%);
+  min-width: 140px;
+  min-height: var(--ui-control-height);
+  flex: 0 1 218px;
+  margin: 0;
+  padding: 4px 8px;
+  border: 1px solid var(--rt-studio-line);
+  border-radius: var(--ui-radius-control);
+  background: var(--rt-studio-white) !important;
+  color: var(--rt-studio-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-cmd .rt-project-card .rt-project-avatar {
+  border-color: var(--rt-studio-line);
+  background: var(--rt-studio-soft);
+  color: var(--rt-studio-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-cmd .rt-project-info small {
+  color: var(--rt-studio-muted);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-cmd .rt-project-card .rt-eng-select {
+  border: 0 !important;
+  background-color: var(--rt-studio-white) !important;
+  color: var(--rt-studio-ink) !important;
+  color-scheme: inherit;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-cmd .rt-project-card .rt-eng-select option {
+  background-color: var(--ui-surface) !important;
+  color: var(--ui-text) !important;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-section {
+  order: 3;
+  display: block;
+  min-width: max-content;
+  padding: 0;
+  color: var(--rt-studio-dark-muted);
+  font-size: var(--ui-text-helper);
+  letter-spacing: normal;
+  white-space: nowrap;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-groups {
+  order: 4;
+  display: flex;
+  min-width: 250px;
+  max-width: 100%;
+  flex: 1 1 360px;
+  align-items: center;
+  align-content: flex-start;
+  gap: 4px;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  padding: 4px;
+  border: 1px solid var(--rt-studio-dark-line);
+  border-radius: var(--ui-radius-panel);
+  background: var(--ui-canvas);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav .rt-tab-group {
+  display: inline-flex;
+  min-width: max-content;
+  min-height: var(--ui-control-height);
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin: 0;
+  padding: 7px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--ui-radius-control);
+  background: transparent;
+  color: var(--rt-studio-dark-muted);
+  font-size:var(--ui-text-control);
+  font-weight:500;
+  line-height:var(--ui-leading-control);
+  white-space: nowrap;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav .rt-tab-group:hover:not(:disabled) {
+  border-color: var(--rt-studio-dark-line);
+  background: var(--rt-studio-dark-hover);
+  color: var(--rt-studio-dark-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav .rt-tab-group.on,
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav .rt-tab-group.on:hover:not(:disabled) {
+  border-color: var(--rt-studio-primary);
+  background: var(--ui-selected);
+  color: var(--ui-selected-text);
+  font-weight:600;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-symbol {
+  display: grid;
+  width: 17px;
+  height: 17px;
+  flex: none;
+  place-items: center;
+  color: currentColor;
+  font-size: 15px;
+  line-height: 1;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-symbol svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav .rt-tab-dot {
+  margin-left: auto;
+  box-shadow: 0 0 0 2px var(--rt-studio-dark);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav .rt-tab-group.on .rt-tab-dot {
+  box-shadow: 0 0 0 2px var(--rt-studio-primary);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-bottom {
+  order: 5;
+  display: flex;
+  min-width: 0;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 0 auto;
+  padding: 0 0 0 10px;
+  border-left: 1px solid var(--rt-studio-dark-line);
+  color: var(--rt-studio-dark-muted);
+  font-size: var(--ui-text-helper);
+  line-height:var(--ui-leading-body);
+  white-space: nowrap;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-bottom span {
+  display: inline;
+  padding: 0;
+  border: 0;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-bottom small {
+  display: inline;
+  margin: 0;
+  color: var(--rt-studio-dark-muted);
+  font-size: var(--ui-text-helper);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) > .rt-chrome > .rt-cmd {
+  grid-area: cmd !important;
+  display: flex !important;
+  width: 100%;
+  min-width: 0;
+  min-height: 52px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding:8px 16px;
+  border: 0;
+  border-bottom: 1px solid var(--rt-studio-line);
+  background: var(--rt-studio-white) !important;
+  color: var(--rt-studio-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-breadcrumb {
+  display: flex;
+  min-width: 0;
+  max-width: none;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 9px;
+  color: var(--rt-studio-muted);
+  font-size: var(--ui-text-helper);
+  line-height:var(--ui-leading-body);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-breadcrumb strong {
+  color: var(--rt-studio-ink);
+  font-weight:600;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-breadcrumb-project {
+  max-width: min(260px, 30vw);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-breadcrumb > span:first-child,
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-breadcrumb > i:first-of-type {
+  display: inline;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-cmd > .rt-spacer {
+  flex: 1 1 16px;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) > .rt-subnav {
+  grid-area: sub !important;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  overflow: auto;
+  padding: 6px 18px 7px;
+  border: 0;
+  border-bottom: 1px solid var(--rt-studio-line);
+  background: var(--rt-studio-bg) !important;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-subnav .rt-tab {
+  display: inline-flex;
+  min-height: var(--ui-control-height);
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid var(--rt-studio-line);
+  border-radius: var(--ui-radius-control);
+  background: var(--rt-studio-white);
+  color: var(--rt-studio-muted);
+  font-size:var(--ui-text-control);
+  line-height:var(--ui-leading-control);
+  white-space: nowrap;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-subnav .rt-tab:hover:not(:disabled) {
+  border-color: var(--rt-studio-strong-line);
+  background: var(--rt-studio-hover);
+  color: var(--rt-studio-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-subnav .rt-tab.on,
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-subnav .rt-tab.on:hover:not(:disabled) {
+  border-color: var(--rt-studio-primary);
+  background: var(--ui-selected);
+  color: var(--ui-selected-text);
+  font-weight:600;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) > .rt-body {
+  grid-area: body !important;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--rt-studio-bg) !important;
+  color: var(--rt-studio-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) > .rt-foot {
+  grid-area: foot !important;
+  display: flex;
+  min-width: 0;
+  min-height: 32px;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 6px 18px;
+  border: 0;
+  border-top: 1px solid var(--rt-studio-line);
+  background: var(--rt-studio-soft) !important;
+  color: var(--rt-studio-muted);
+  font-size: var(--ui-text-helper);
+  line-height:var(--ui-leading-body);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) > .rt-foot .rt-nav-bottom {
+  order: 0;
+  display: inline-flex;
+  min-width: 0;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--rt-studio-muted);
+  font-size: var(--ui-text-helper);
+  line-height:var(--ui-leading-body);
+  white-space: nowrap;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) > .rt-foot .rt-nav-bottom span,
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) > .rt-foot .rt-nav-bottom small {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--rt-studio-muted);
+  font-size: inherit;
+  line-height: inherit;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) > .rt-foot .rt-nav-section {
+  order: 0;
+  display: inline;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--rt-studio-muted);
+  font-size: var(--ui-text-helper);
+  letter-spacing: normal;
+  line-height:var(--ui-leading-body);
+  white-space: nowrap;
+}
+
+/* Keep the flex/overflow chain intact: pages still own their own scrolling. */
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-page-content, .rt-main, .rt-pane, .rt-table, .rt-chain, .rt-ap, .rt-ap-h, .rt-hflow-wrap, .rt-rep-list, .rt-ov-scroll, .rt-settings-scroll, .rt-sessions-scroll, .rt-artifacts-scroll, .rt-skills-detail-scroll) {
+  min-width: 0;
+  min-height: 0;
+  color: var(--rt-studio-ink);
+  background: var(--rt-studio-bg);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-page-content {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-workspace-pagehead {
+  flex: 0 0 auto;
+  padding:16px 24px;
+  background: var(--rt-studio-bg);
+  color: var(--rt-studio-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-workspace-pagehead h1 {
+  margin: 0;
+  color: var(--rt-studio-ink);
+  font-size:var(--ui-text-title);
+  font-weight:600;
+  letter-spacing: normal;
+  line-height:var(--ui-leading-title);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-workspace-pagehead p {
+  margin: 6px 0 0;
+  color: var(--rt-studio-muted);
+  font-size: var(--ui-text-body);
+  line-height:var(--ui-leading-body);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-workspace-eyebrow {
+  margin: 0 0 4px;
+  color: var(--rt-studio-muted);
+  font-size: var(--ui-text-helper);
+  letter-spacing: normal;
+  line-height:var(--ui-leading-body);
+}
+
+/* ------------------------------------------------------------------------- */
+/* Shared controls consume the product control height and radius. */
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(
+  .rt-btn,
+  .rt-icon-btn,
+  .rt-hbtn,
+  .rt-session-map-button,
+  .rt-tab,
+  .rt-subtab,
+  .rt-concl-i,
+  .rt-settings-localnav button,
+  .rt-skills-detail-actions button,
+  .rt-skills-actions button,
+  .rt-ov-score-tab
+) {
+  min-height: var(--ui-control-height);
+  border: 1px solid var(--rt-studio-line);
+  border-radius: var(--ui-radius-control);
+  color: var(--rt-studio-ink);
+  background: var(--rt-studio-white);
+  box-shadow: none;
+  font-size: var(--ui-text-body);
+  line-height: 1.35;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-btn, .rt-icon-btn, .rt-hbtn, .rt-session-map-button) {
+  padding: 7px 12px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(
+  .rt-btn:hover:not(:disabled),
+  .rt-icon-btn:hover:not(:disabled),
+  .rt-hbtn:hover:not(:disabled),
+  .rt-session-map-button:hover:not(:disabled),
+  .rt-settings-localnav button:hover:not(:disabled),
+  .rt-skills-detail-actions button:hover:not(:disabled),
+  .rt-skills-actions button:hover:not(:disabled),
+  .rt-ov-score-tab:hover:not(:disabled)
+) {
+  border-color: var(--rt-studio-strong-line);
+  background: var(--rt-studio-hover);
+  color: var(--rt-studio-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(
+  .rt-btn:disabled,
+  .rt-icon-btn:disabled,
+  .rt-hbtn:disabled,
+  .rt-session-map-button:disabled,
+  .rt-settings-localnav button:disabled,
+  .rt-skills-detail-actions button:disabled,
+  .rt-skills-actions button:disabled,
+  .rt-ov-score-tab:disabled
+) {
+  cursor: not-allowed;
+  opacity: .48;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(
+  .rt-btn-primary,
+  .rt-btn[data-variant="primary"],
+  .rt-settings-action
+) {
+  border-color: var(--rt-studio-primary) !important;
+  background: var(--ui-primary) !important;
+  color: var(--ui-on-primary) !important;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(
+  .rt-btn-primary:hover:not(:disabled),
+  .rt-btn[data-variant="primary"]:hover:not(:disabled),
+  .rt-settings-action:hover:not(:disabled)
+) {
+  border-color: var(--ui-primary-hover) !important;
+  background: var(--ui-primary-hover) !important;
+  color: var(--ui-on-primary) !important;
+  filter:none;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(
+  .rt-btn-danger,
+  .rt-btn[data-variant="danger"]
+) {
+  border-color: var(--rt-studio-danger);
+  background: var(--rt-studio-danger-bg);
+  color: var(--rt-studio-danger);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(
+  .rt-btn-danger:hover:not(:disabled),
+  .rt-btn[data-variant="danger"]:hover:not(:disabled)
+) {
+  border-color: var(--rt-studio-danger);
+  background: var(--rt-studio-danger-bg);
+  color: var(--rt-studio-danger);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(
+  .rt-input,
+  .rt-eng-select,
+  .rt-score-form input,
+  .rt-score-form select,
+  .rt-session-map-search,
+  .rt-session-map-filter,
+  .rt-settings-control:not(.rt-settings-textarea),
+  .rt-skills-search,
+  .rt-skills-filters input[type="search"],
+  .rt-skills-filters input[type="text"],
+  input[type="text"],
+  input[type="search"],
+  input[type="url"],
+  input[type="number"],
+  input[type="date"],
+  select
+) {
+  min-height: var(--ui-control-height);
+  border: 1px solid var(--rt-studio-line);
+  border-radius: var(--ui-radius-control);
+  color: var(--rt-studio-ink);
+  background-color: var(--rt-studio-white);
+  box-shadow: none;
+  font-size:var(--ui-text-control);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(
+  .rt-input,
+  .rt-eng-select,
+  .rt-score-form input,
+  .rt-score-form select,
+  .rt-session-map-search,
+  .rt-session-map-filter,
+  .rt-settings-control:not(.rt-settings-textarea),
+  .rt-skills-search,
+  .rt-skills-filters input[type="search"],
+  .rt-skills-filters input[type="text"],
+  input[type="text"],
+  input[type="search"],
+  input[type="url"],
+  input[type="number"],
+  input[type="date"],
+  select
+) {
+  padding: 7px 10px;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-textarea, .rt-settings-textarea, textarea) {
+  border: 1px solid var(--rt-studio-line);
+  border-radius: var(--ui-radius-control);
+  color: var(--rt-studio-ink);
+  background: var(--rt-studio-white);
+  box-shadow: none;
+  font-size:var(--ui-text-control);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(input, select, textarea, button):focus-visible,
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) summary:focus-visible {
+  outline: 2px solid var(--ui-link);
+  outline-offset: 3px;
+  box-shadow: none;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav :is(button, input, select):focus-visible,
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-toolbar :is(button, input, select):focus-visible {
+  outline-color: var(--rt-studio-primary);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(input, select, textarea)::placeholder {
+  color: var(--rt-studio-muted);
+  opacity: .9;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-follow, .rt-follow.on, .rt-follow.warn) {
+  display: inline-flex;
+  min-height: var(--ui-control-height);
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px;
+  border: 1px solid var(--rt-studio-line);
+  border-radius: var(--ui-radius-control);
+  background: var(--rt-studio-soft);
+  color: var(--rt-studio-muted);
+  font-size: var(--ui-text-body);
+  line-height:var(--ui-leading-body);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-follow.on {
+  border-color: var(--rt-studio-success);
+  background: var(--rt-studio-success-bg);
+  color: var(--rt-studio-success);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-follow.warn {
+  border-color: var(--rt-studio-warning);
+  background: var(--rt-studio-warning-bg);
+  color: var(--rt-studio-warning);
+  cursor: pointer;
+}
+
+/* Navigation and filters use the same selection state. */
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(
+  .rt-tab.on,
+  .rt-tab[aria-selected="true"],
+  .rt-subtab.on,
+  .rt-subtab[aria-selected="true"],
+  .rt-concl-i.on,
+  .rt-settings-localnav button[aria-selected="true"],
+  .rt-ov-score-tab.on
+),
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(
+  .rt-tab.on:hover,
+  .rt-tab[aria-selected="true"]:hover,
+  .rt-subtab.on:hover,
+  .rt-subtab[aria-selected="true"]:hover,
+  .rt-concl-i.on:hover,
+  .rt-settings-localnav button[aria-selected="true"]:hover,
+  .rt-ov-score-tab.on:hover
+) {
+  border-color: var(--rt-studio-primary) !important;
+  background: var(--ui-selected) !important;
+  color: var(--ui-selected-text) !important;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Shared opaque page surfaces and readable content.                         */
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(
+  .rt-card,
+  .rt-ov-card,
+  .rt-ov-score,
+  .rt-ov-rail,
+  .rt-ov-metric,
+  .rt-ov-score-tab,
+  .rt-ledger-table,
+  .rt-ledger-segments,
+  .rt-ledger-detail,
+  .rt-skills-section,
+  .rt-skills-card,
+  .rt-skills-catalog,
+  .rt-skills-detail,
+  .rt-settings-card,
+  .rt-collab-section,
+  .rt-collab-config,
+  .rt-collab-card,
+  .rt-collab-role-card,
+  .rt-r2-proof,
+  .rt-rep,
+  .rt-evi,
+  .rt-shots,
+  .rt-kb,
+  .rt-r2-table-wrap,
+  .rt-sess
+) {
+  border: 1px solid var(--rt-studio-line);
+  border-radius: var(--ui-radius-panel);
+  color: var(--rt-studio-ink);
+  background: var(--rt-studio-white);
+  box-shadow:var(--ui-panel-shadow);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(
+  .rt-toolbar,
+  .rt-livebar,
+  .rt-concl,
+  .rt-subtabs,
+  .rt-r2-toolbar,
+  .rt-rep-tools,
+  .rt-settings-toolbar,
+  .rt-sessions-toolbar,
+  .rt-collab-toolbar,
+  .rt-evi-head,
+  .rt-rep-req-head,
+  .rt-ap-head,
+  .rt-ap-goal,
+  .rt-rep-stage,
+  .rt-sec
+) {
+  border-color: var(--rt-studio-line);
+  background: var(--rt-studio-white);
+  color: var(--rt-studio-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(h1, h2, h3, h4, h5, strong, b) {
+  color: var(--rt-studio-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-row, .rt-vrow, .rt-score-row) {
+  border-color: var(--rt-studio-line);
+  background: var(--rt-studio-white);
+  color: var(--rt-studio-ink);
+  font-size: var(--ui-text-body);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-row.head, .rt-vrow.head, .rt-score-row.head, .rt-ledger-table-head) {
+  border-color: var(--rt-studio-line);
+  background: var(--rt-studio-soft);
+  color: var(--rt-studio-muted);
+  font-size: var(--ui-text-helper);
+  font-weight:600;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-row:hover, .rt-vrow:hover, .rt-score-row:hover) {
+  background: var(--rt-studio-detail-soft);
+  color: var(--rt-studio-detail-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-score-group, .rt-sec, .rt-rep-stage, .rt-evi-head, .rt-ap-head) {
+  border-color: var(--rt-studio-line);
+  background: var(--rt-studio-soft);
+  color: var(--rt-studio-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-r2-table, .rt-markdown table) {
+  border-color: var(--rt-studio-line);
+  background: var(--rt-studio-white);
+  color: var(--rt-studio-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-r2-table, .rt-markdown table) :is(th, td) {
+  border-color: var(--rt-studio-line);
+  color: var(--rt-studio-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-r2-table, .rt-markdown table) th {
+  background: var(--rt-studio-soft);
+  color: var(--rt-studio-muted);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(
+  .rt-code,
+  .rt-md,
+  .rt-md-code,
+  .rt-r2-code,
+  .rt-r2-pre,
+  .rt-rep-http,
+  .rt-clip-body,
+  .rt-evi-body,
+  .rt-hit-evi,
+  .rt-atest-notes,
+  .rt-skills-content,
+  .rt-skills-diagnostics-content
+) {
+  border-color: var(--rt-studio-line);
+  border-radius: var(--ui-radius-control);
+  background: var(--rt-studio-soft);
+  color: var(--rt-studio-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-empty, .rt-r2-empty, .rt-skills-empty, .rt-skills-no-results, .rt-skills-status, .rt-skills-loading, .rt-settings-diagnostic-empty, .rt-settings-loading) {
+  border-color: var(--rt-studio-strong-line);
+  border-radius: var(--ui-radius-control);
+  background: var(--rt-studio-soft);
+  color: var(--rt-studio-muted);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-hint, .rt-note) {
+  border-color: var(--rt-studio-warning);
+  border-radius: var(--ui-radius-control);
+  background: var(--rt-studio-warning-bg);
+  color: var(--rt-studio-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-err, .rt-settings-alert-error) {
+  border-color: var(--rt-studio-danger);
+  border-radius: var(--ui-radius-control);
+  background: var(--rt-studio-danger-bg);
+  color: var(--rt-studio-danger);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-tag, .rt-sev, .rt-test, .rt-pri, .rt-avail, .rt-skills-badge, .rt-skills-card-badge, .rt-collab-readonly-badge, .rt-collab-config-badge, .rt-kb-kind, .rt-stage-tag, .rt-scope, .rt-scorepts, .rt-ov-stage-chip) {
+  border-radius: 4px;
+  font-size: var(--ui-text-helper);
+  line-height:var(--ui-leading-body);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-tag-live, .rt-test-tested, .rt-avail-available, .rt-skills-badge.is-available, .rt-skills-badge[data-status="available"]) {
+  border-color: var(--rt-studio-success);
+  background: var(--rt-studio-success-bg);
+  color: var(--rt-studio-success);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-tag-warn, .rt-test-testing, .rt-sev-medium, .rt-avail-unknown, .rt-skills-badge.is-unknown, .rt-skills-badge[data-status="unknown"]) {
+  border-color: var(--rt-studio-warning);
+  background: var(--rt-studio-warning-bg);
+  color: var(--rt-studio-warning);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-avail-broken, .rt-skills-badge.is-broken, .rt-skills-badge[data-status="broken"], .rt-sev-high, .rt-pri-high) {
+  border-color: var(--rt-studio-danger);
+  background: var(--rt-studio-danger-bg);
+  color: var(--rt-studio-danger);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-test-blocked, .rt-sev-critical) {
+  border-color: var(--rt-studio-danger);
+  background: var(--rt-studio-danger);
+  color: #fff;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Consistent list / detail compositions.                            */
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :where(
+  .rt-ledger-list-pane,
+  .rt-skills-catalog,
+  .rt-page-content[data-page="knowledge"] > .rt-split > .rt-list,
+  .rt-page-content[data-page="agents"] .rt-collab-prompts > .rt-split > .rt-list
+) {
+  border-color: var(--rt-studio-dark-line);
+  background: var(--rt-studio-dark);
+  color: var(--rt-studio-dark-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :where(
+  .rt-ledger-list-pane > .rt-row,
+  .rt-skills-catalog .rt-skills-catalog-head,
+  .rt-skills-catalog .rt-skills-filters,
+  .rt-skills-catalog .rt-skills-list,
+  .rt-page-content[data-page="knowledge"] > .rt-split > .rt-list .rt-item,
+  .rt-page-content[data-page="agents"] .rt-collab-prompts > .rt-split > .rt-list .rt-item
+) {
+  border-color: var(--rt-studio-dark-line);
+  background: var(--rt-studio-dark);
+  color: var(--rt-studio-dark-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :where(
+  .rt-ledger-list-pane > .rt-row:hover,
+  .rt-skills-catalog .rt-skills-card:hover,
+  .rt-page-content[data-page="knowledge"] > .rt-split > .rt-list .rt-item:hover,
+  .rt-page-content[data-page="agents"] .rt-collab-prompts > .rt-split > .rt-list .rt-item:hover
+) {
+  border-color: var(--rt-studio-dark-line);
+  background: var(--rt-studio-dark-hover);
+  color: var(--rt-studio-dark-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :where(
+  .rt-ledger-list-pane > .rt-ledger-table-head,
+  .rt-skills-catalog .rt-skills-group,
+  .rt-skills-catalog .rt-skills-group-header
+) {
+  border-color: var(--rt-studio-dark-line);
+  background: var(--rt-studio-dark-hover);
+  color: var(--rt-studio-dark-muted);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :where(
+  .rt-ledger-list-pane > .rt-ledger-row.selected,
+  .rt-skills-catalog .rt-skills-card[aria-pressed="true"],
+  .rt-page-content[data-page="knowledge"] > .rt-split > .rt-list .rt-item.on,
+  .rt-page-content[data-page="agents"] .rt-collab-prompts > .rt-split > .rt-list .rt-item.on
+) {
+  border-color: var(--ui-line);
+  background: var(--ui-selected);
+  color: var(--ui-selected-text);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :where(
+  .rt-ledger-list-pane > .rt-row .rt-muted,
+  .rt-ledger-list-pane > .rt-row small,
+  .rt-skills-catalog .rt-skills-description,
+  .rt-skills-catalog .rt-skills-source,
+  .rt-skills-catalog .rt-skills-group-count,
+  .rt-page-content[data-page="knowledge"] > .rt-split > .rt-list .rt-item-desc,
+  .rt-page-content[data-page="agents"] .rt-collab-prompts > .rt-split > .rt-list .rt-item-desc
+) {
+  color: var(--rt-studio-dark-muted);
+}
+
+/* Skills catalog text has explicit light-surface tokens in skills-view.css.
+ * Keep headings and filter labels readable on the graphite catalog surface. */
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-skills-catalog :is(
+  .rt-skills-catalog-head h2,
+  .rt-skills-catalog-head h3,
+  .rt-skills-filter-heading,
+  .rt-skills-filter-heading strong,
+  .rt-skills-group,
+  .rt-skills-group-header,
+  .rt-skills-name
+) {
+  color: var(--rt-studio-dark-ink) !important;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-skills-catalog :is(
+  .rt-skills-catalog-head p,
+  .rt-skills-catalog-count,
+  .rt-skills-filter-heading span,
+  .rt-skills-search-label,
+  .rt-skills-filter-check,
+  .rt-skills-check,
+  .rt-skills-filters .rt-kb-check,
+  .rt-skills-list > section > .rt-skills-group > span,
+  .rt-skills-group-header small,
+  .rt-skills-group-count
+) {
+  color: var(--rt-studio-dark-muted) !important;
+}
+
+/* A selected catalog/list row keeps its selection tint on hover; its secondary
+ * copy must follow the detail palette instead of the graphite palette. */
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :where(
+  .rt-ledger-list-pane > .rt-ledger-row.selected,
+  .rt-skills-catalog .rt-skills-card[aria-pressed="true"],
+  .rt-page-content[data-page="knowledge"] > .rt-split > .rt-list .rt-item.on,
+  .rt-page-content[data-page="agents"] .rt-collab-prompts > .rt-split > .rt-list .rt-item.on
+):hover {
+  border-color: var(--ui-line) !important;
+  background: var(--ui-selected) !important;
+  color: var(--ui-selected-text) !important;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :where(
+  .rt-skills-catalog .rt-skills-card[aria-pressed="true"],
+  .rt-page-content[data-page="knowledge"] > .rt-split > .rt-list .rt-item.on,
+  .rt-page-content[data-page="agents"] .rt-collab-prompts > .rt-split > .rt-list .rt-item.on
+) :where(.rt-skills-name, .rt-item-name) {
+  color: var(--rt-studio-detail-ink) !important;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :where(
+  .rt-skills-catalog .rt-skills-card[aria-pressed="true"],
+  .rt-page-content[data-page="knowledge"] > .rt-split > .rt-list .rt-item.on,
+  .rt-page-content[data-page="agents"] .rt-collab-prompts > .rt-split > .rt-list .rt-item.on
+) :where(.rt-skills-description, .rt-skills-source, .rt-item-desc) {
+  color: var(--rt-studio-detail-muted) !important;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-ledger-list-pane > .rt-ledger-row.selected {
+  color: var(--rt-studio-detail-ink) !important;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-ledger-list-pane > .rt-ledger-row.selected :is(.rt-muted, small) {
+  color: var(--rt-studio-detail-muted) !important;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-ledger-list-pane > .rt-ledger-row.selected > .rt-mono > span[style*="font-size"] {
+  color: var(--rt-studio-detail-muted) !important;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :where(
+  .rt-ledger-detail,
+  .rt-skills-detail,
+  .rt-page-content[data-page="knowledge"] > .rt-split > .rt-main,
+  .rt-page-content[data-page="agents"] .rt-collab-prompts > .rt-split > .rt-main
+) {
+  border-color: var(--ui-line);
+  background: var(--rt-studio-detail);
+  color: var(--rt-studio-detail-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :where(
+  .rt-ledger-detail-head,
+  .rt-ledger-detail-body,
+  .rt-skills-detail-toolbar,
+  .rt-skills-detail-scroll,
+  .rt-page-content[data-page="knowledge"] > .rt-split > .rt-main > .rt-toolbar,
+  .rt-page-content[data-page="knowledge"] > .rt-split > .rt-main > .rt-pane,
+  .rt-page-content[data-page="agents"] .rt-collab-prompts > .rt-split > .rt-main > .rt-toolbar,
+  .rt-page-content[data-page="agents"] .rt-collab-prompts > .rt-split > .rt-main > .rt-pane
+) {
+  border-color: var(--ui-line);
+  background: var(--rt-studio-detail);
+  color: var(--rt-studio-detail-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :where(
+  .rt-ledger-detail .rt-card,
+  .rt-ledger-detail .rt-table,
+  .rt-skills-detail .rt-skills-section,
+  .rt-page-content[data-page="knowledge"] > .rt-split > .rt-main .rt-kb
+) {
+  border-color: var(--ui-line);
+  background: var(--rt-studio-detail-soft);
+  color: var(--rt-studio-detail-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :where(.rt-ledger-detail h2, .rt-ledger-detail h3, .rt-ledger-detail h4, .rt-skills-detail h1, .rt-skills-detail h2, .rt-skills-detail h3, .rt-page-content[data-page="knowledge"] > .rt-split > .rt-main h2, .rt-page-content[data-page="knowledge"] > .rt-split > .rt-main h3) {
+  color: var(--rt-studio-detail-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :where(.rt-ledger-detail .rt-ledger-detail-ip, .rt-ledger-detail .rt-ledger-detail-scope, .rt-ledger-detail .rt-kv b, .rt-skills-detail .rt-skills-kicker, .rt-skills-detail .rt-skills-description, .rt-skills-detail .rt-skills-facts dt, .rt-page-content[data-page="knowledge"] > .rt-split > .rt-main .rt-kb-sub) {
+  color: var(--rt-studio-detail-muted);
+}
+
+/* ------------------------------------------------------------------------- */
+/* Session map and related graph surfaces.                                   */
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map {
+  border-color: var(--rt-studio-line);
+  border-radius: var(--ui-radius-panel);
+  background: var(--rt-studio-white);
+  color: var(--rt-studio-ink);
+  box-shadow: none;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-session-map-head, .rt-session-map-toolbar, .rt-session-map-note, .rt-session-map-foot) {
+  border-color: var(--rt-studio-dark-line);
+  background: var(--rt-studio-dark);
+  color: var(--rt-studio-dark-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-session-map-subtitle, .rt-session-map-status, .rt-session-map-zoom, .rt-session-map-foot) {
+  color: var(--rt-studio-dark-muted);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-toolbar :is(.rt-input, .rt-session-map-button) {
+  border-color: var(--rt-studio-dark-line);
+  background: var(--rt-studio-dark-hover);
+  color: var(--rt-studio-dark-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-toolbar :is(.rt-input, .rt-session-map-button):hover:not(:disabled) {
+  border-color: var(--rt-studio-primary);
+  background: var(--rt-studio-dark-hover);
+  color: var(--rt-studio-dark-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-toolbar :is(.rt-session-map-search, .rt-session-map-filter)::placeholder {
+  color: var(--rt-studio-dark-muted) !important;
+  opacity: .9;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-graph-pane,
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-graph {
+  border-color: var(--rt-studio-dark-line);
+  background: var(--ui-canvas);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-detail {
+  border-color: var(--ui-line);
+  background: var(--rt-studio-detail);
+  color: var(--rt-studio-detail-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-detail :is(.rt-session-map-detail-title, .rt-session-map-detail-name, .rt-session-map-detail-grid dd, .rt-session-map-detail-section b) {
+  color: var(--rt-studio-detail-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-detail :is(.rt-session-map-detail-status, .rt-session-map-detail-updated, .rt-session-map-detail-grid dt, .rt-session-map-status-explainer, .rt-session-map-detail-section p, .rt-session-map-subtitle) {
+  color: var(--rt-studio-detail-muted);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-detail :is(.rt-session-map-detail-section, .rt-session-map-metadata) {
+  border-color: var(--ui-line);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-detail .rt-session-map-detail-section h4 {
+  color: var(--rt-studio-detail-ink) !important;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-detail .rt-session-map-detail-section h4 small {
+  color: var(--rt-studio-detail-muted) !important;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-detail :is(
+  .rt-session-map-todos,
+  .rt-session-map-todo,
+  .rt-session-map-todo-content,
+  .rt-session-map-task-summary
+) {
+  color: var(--rt-studio-detail-ink) !important;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-detail .rt-session-map-todo::marker {
+  color: var(--rt-studio-detail-muted) !important;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-detail .rt-session-map-todo-state {
+  border-color: var(--ui-line) !important;
+  color: var(--rt-studio-detail-muted) !important;
+  background: var(--rt-studio-detail-soft) !important;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-detail .rt-session-map-todo[data-status="in_progress"] .rt-session-map-todo-state {
+  border-color: var(--ui-line) !important;
+  color: var(--rt-studio-detail-ink) !important;
+  background: var(--rt-studio-detail-soft) !important;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-detail .rt-session-map-todo[data-status="completed"] .rt-session-map-todo-state {
+  border-color: var(--rt-studio-success) !important;
+  color: var(--rt-studio-success) !important;
+  background: var(--rt-studio-success-bg) !important;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-detail .rt-session-map-todo[data-status="completed"] .rt-session-map-todo-content {
+  color: var(--rt-studio-detail-muted) !important;
+  text-decoration-color: var(--rt-studio-detail-muted) !important;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-detail .rt-session-map-clipped {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  padding: 2px 5px;
+  border-radius: 6px;
+  color: var(--rt-studio-warning) !important;
+  background: var(--rt-studio-warning-bg);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-detail .rt-session-map-empty-info {
+  border-color: var(--ui-line);
+  background: var(--rt-studio-detail-soft);
+  color: var(--rt-studio-detail-muted) !important;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-node rect {
+  fill: var(--rt-studio-dark-hover);
+  stroke: var(--rt-studio-dark-line);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-node:hover rect {
+  stroke: var(--rt-studio-detail-muted);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-node.selected rect {
+  fill: var(--ui-selected);
+  stroke: var(--rt-studio-primary);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-edge {
+  stroke: var(--rt-studio-dark-line);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: .72;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-session-map-node-id, .rt-session-map-node-task, .rt-session-map-node-foot) {
+  fill: var(--rt-studio-dark-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-node-meta {
+  fill: var(--rt-studio-dark-muted);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-session-map-node.selected :is(.rt-session-map-node-id, .rt-session-map-node-meta, .rt-session-map-node-task, .rt-session-map-node-foot) {
+  fill: var(--ui-selected-text);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-session-map-ancestor, .rt-session-map-relation) {
+  border-color: var(--ui-line);
+  border-radius: var(--ui-radius-control);
+  background: var(--rt-studio-detail-soft);
+  color: var(--rt-studio-detail-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-session-map-ancestor, .rt-session-map-relation):hover {
+  border-color: var(--rt-studio-primary);
+  background: var(--ui-selected);
+  color: var(--ui-selected-text);
+}
+
+/* ------------------------------------------------------------------------- */
+/* Page families not covered by a dedicated component stylesheet.             */
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-ov-score, .rt-ov-rail, .rt-ov-card, .rt-ov-metric, .rt-ov-score-tab, .rt-ov-entry, .rt-ov-gap) {
+  border-color: var(--rt-studio-line);
+  background: var(--rt-studio-white);
+  color: var(--rt-studio-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-ov-score, .rt-ov-rail) {
+  border-radius: var(--ui-radius-panel);
+  background: var(--rt-studio-detail);
+  color: var(--rt-studio-detail-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-ov-score-tab.on, .rt-ov-score-tab.on:hover) {
+  border-color: var(--rt-studio-primary);
+  background: var(--ui-selected);
+  color: var(--ui-selected-text);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-collab-section, .rt-collab-config, .rt-collab-card, .rt-collab-role-card, .rt-settings-card, .rt-sessions-group, .rt-sessions-empty-banner) {
+  border-color: var(--rt-studio-line);
+  border-radius: var(--ui-radius-panel);
+  background: var(--rt-studio-white);
+  color: var(--rt-studio-ink);
+  box-shadow: none;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-collab-readonly-badge, .rt-collab-config-badge, .rt-settings-pagehead-context) {
+  border-color: var(--ui-line);
+  background: var(--rt-studio-detail-soft);
+  color: var(--rt-studio-detail-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-settings-pagehead-copy {
+  display: block;
+  color: var(--rt-studio-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-collab-config-summary-state {
+  display: inline;
+  color: var(--rt-studio-muted);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-artifacts-section, .rt-artifacts-content, .rt-r2-section, .rt-r2-group, .rt-r2-item, .rt-ap-stage, .rt-ap-col, .rt-rep-group, .rt-rep-step, .rt-clip, .rt-hit-row, .rt-atest, .rt-kb-cat, .rt-kb-tpl) {
+  border-color: var(--rt-studio-line);
+  border-radius: var(--ui-radius-panel);
+  background: var(--rt-studio-white);
+  color: var(--rt-studio-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-artifacts-content, .rt-r2-section, .rt-r2-group, .rt-rep-step, .rt-clip-body, .rt-kb-body) {
+  background: var(--rt-studio-soft);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-settings-summary-card, .rt-skills-stat, .rt-ledger-stat, .rt-sessions-stat) {
+  border-color: var(--rt-studio-line);
+  border-radius: var(--ui-radius-panel);
+  background: var(--rt-studio-white);
+  color: var(--rt-studio-ink);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-settings-localnav {
+  border-color: var(--rt-studio-line);
+  border-radius: var(--ui-radius-panel);
+  background: var(--rt-studio-soft);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-settings-localnav button {
+  background: transparent;
+  color: var(--rt-studio-muted);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-settings-localnav button[aria-selected="true"] {
+  border-color: var(--rt-studio-primary);
+  background: var(--ui-selected);
+  color: var(--ui-selected-text);
+}
+
+/* Opaque overlays and menus stay legible in either theme. */
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-modal, .rt-modal-box, .rt-shot-zoom, [role="dialog"], [role="menu"]) {
+  border-color: var(--rt-studio-line);
+  border-radius: var(--ui-radius-panel);
+  background: var(--rt-studio-white);
+  color: var(--rt-studio-ink);
+  box-shadow: none;
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-modal {
+  background: var(--ui-canvas);
+}
+
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-shot-zoom {
+  background: var(--rt-studio-dark);
+  color: var(--rt-studio-dark-ink);
+}
+
+/* ------------------------------------------------------------------------- */
+/* Narrow containers: wrap the six groups rather than hiding any of them.    */
+
+@container workspace (max-width: 900px) {
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) > .rt-chrome > .rt-nav,
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) > .rt-chrome > .rt-cmd,
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) > .rt-subnav {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-groups {
+    min-width: 0;
+    flex-basis: 100%;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-bottom {
+    flex-basis: 100%;
+    margin-left: 0;
+    padding-top: 6px;
+    padding-left: 0;
+    border-top: 1px solid var(--rt-studio-dark-line);
+    border-left: 0;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-breadcrumb-project {
+    max-width: 180px;
+  }
+}
+
+@container rt (max-width: 900px) {
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) > .rt-chrome > .rt-nav,
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) > .rt-chrome > .rt-cmd,
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) > .rt-subnav {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-groups {
+    min-width: 0;
+    flex-basis: 100%;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-bottom {
+    flex-basis: 100%;
+    margin-left: 0;
+    padding-top: 6px;
+    padding-left: 0;
+    border-top: 1px solid var(--rt-studio-dark-line);
+    border-left: 0;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-breadcrumb-project {
+    max-width: 180px;
+  }
+}
+
+@container workspace (max-width: 620px) {
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) > .rt-chrome > .rt-nav {
+    align-items: stretch;
+    padding: 10px 12px;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-workspace-brand,
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-project-card,
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-section,
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-groups,
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-bottom {
+    flex-basis: 100%;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-project-card {
+    width: 100%;
+    max-width: none;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-section {
+    padding-top: 2px;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-groups {
+    justify-content: flex-start;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav .rt-tab-group {
+    flex: 1 1 auto;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) > .rt-chrome > .rt-cmd {
+    align-items: stretch;
+    padding: 8px 12px;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-breadcrumb {
+    flex-basis: 100%;
+    max-width: 100%;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-breadcrumb-project {
+    max-width: 130px;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-workspace-pagehead {
+    padding: 18px 16px 12px;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-workspace-pagehead h1 {
+    font-size:var(--ui-text-title);
+  }
+}
+
+@container rt (max-width: 620px) {
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) > .rt-chrome > .rt-nav {
+    align-items: stretch;
+    padding: 10px 12px;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-workspace-brand,
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-project-card,
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-section,
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-groups,
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-bottom {
+    flex-basis: 100%;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-project-card {
+    width: 100%;
+    max-width: none;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-section {
+    padding-top: 2px;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav-groups {
+    justify-content: flex-start;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-nav .rt-tab-group {
+    flex: 1 1 auto;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) > .rt-chrome > .rt-cmd {
+    align-items: stretch;
+    padding: 8px 12px;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-breadcrumb {
+    flex-basis: 100%;
+    max-width: 100%;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-breadcrumb-project {
+    max-width: 130px;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-workspace-pagehead {
+    padding: 18px 16px 12px;
+  }
+
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) .rt-workspace-pagehead h1 {
+    font-size:var(--ui-text-title);
+  }
+}
+
+@media (max-width: 720px) {
+  :is(.rt-full.rt-studio) > .rt-chrome > .rt-nav,
+  :is(.rt-full.rt-studio) > .rt-chrome > .rt-cmd,
+  :is(.rt-full.rt-studio) > .rt-subnav {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) *,
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) *::before,
+  :is(.rt-dock.rt-studio, .rt-full.rt-studio) *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
+
+/* Numeric and rich-text children follow the selected control's foreground. */
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-concl-i.on,.rt-ov-score-tab.on,.rt-btn-primary,.rt-tab-group.on,.rt-settings-localnav button[aria-selected="true"]) :is(b,strong,span){color:inherit;}
+:is(.rt-dock.rt-studio, .rt-full.rt-studio) :is(.rt-test-blocked,.rt-sev-critical){color:var(--ui-on-primary);}
+
+/* Small docks scroll their shell instead of collapsing the functional page. */
+:is(.rt-dock.rt-studio[data-open="1"],.rt-dock.rt-studio.rt-embedded,.rt-full.rt-studio){
+  grid-template-rows:auto auto auto minmax(300px,1fr) auto;
+  overflow:auto;
+  scrollbar-gutter:stable;
+  overscroll-behavior:contain;
+}
+
+/* Details, filters and table text keep the same role across all 12 pages. */
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) :is(b,strong) {font-weight:600;}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-concl-i>span {font-size:var(--ui-text-control);line-height:var(--ui-leading-control);color:inherit;}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-concl-i>b {font-size:var(--ui-text-control);font-weight:600;line-height:var(--ui-leading-control);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) :is(.rt-tag,.rt-sev,.rt-test,.rt-pri,.rt-avail,.rt-scope) {font-family:var(--ui-font)!important;font-size:var(--ui-text-label);font-weight:500;line-height:var(--ui-leading-control);border-radius:4px;}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) :is(.rt-scope-external,.rt-pri-low,.rt-test-untested,.rt-test-abandoned) {background:var(--ui-subtle);color:var(--ui-muted);border-color:var(--ui-line);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) :is(.rt-scope-internal,.rt-test-no_surface) {background:var(--ui-selected);color:var(--ui-selected-text);border-color:var(--ui-line);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-pri-medium {background:var(--ui-warning-bg);color:var(--ui-warning);border-color:var(--ui-warning);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) :is(.rt-sev-critical,.rt-test-blocked) {background:var(--ui-danger-bg);color:var(--ui-danger);border-color:var(--ui-danger);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-ledger-stat-icon {background:var(--ui-subtle);color:var(--ui-muted);border-color:var(--ui-line);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-ledger-stat-accent .rt-ledger-stat-icon {background:var(--ui-selected);color:var(--ui-selected-text);border-color:var(--ui-line);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-ledger-stat-warn .rt-ledger-stat-icon {background:var(--ui-warning-bg);color:var(--ui-warning);border-color:var(--ui-line);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map-toolbar :is(.rt-input,.rt-session-map-button) {background:var(--ui-surface);border-color:var(--ui-line);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-nav-groups {flex:0 1 auto;margin-left:auto;padding:0;border:0;background:transparent;gap:4px;}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-nav .rt-tab-group {flex:0 1 auto;border-radius:var(--ui-radius-control);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-nav .rt-tab-group.on {border-color:var(--ui-line);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-cmd .rt-project-info small {display:none;}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-cmd .rt-project-card {padding:0 8px;min-height:var(--ui-control-height);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) :is(input,select,textarea) {line-height:var(--ui-leading-control);}
+
+/* Embedded mode already has the product identity in the outer frame. */
+.rt-embedded.rt-studio .rt-workspace-brand {display:none;}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-nav .rt-tab-group[data-group=resources]::after {display:none;content:none;}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-nav .rt-tab-group[data-group=resources] {margin-top:0;}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-nav-groups {justify-content:flex-start;margin-left:0;}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-settings-pagehead-copy :is(h1,.rt-settings-eyebrow) {display:none;}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-settings-pagehead-copy p {margin:0;}
+
+/* Semantic markers share one palette, including populated records. */
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) :is(.rt-tag-passive,.rt-sev-info,.rt-kb-kind.k-template,.rt-kb-kind.k-script) {color:var(--ui-link);background:var(--ui-selected);border-color:var(--ui-line);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) :is(.rt-tag-active,.rt-kb-kind.k-poc) {color:var(--ui-warning);background:var(--ui-warning-bg);border-color:var(--ui-warning);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) :is(.rt-sev-low,.rt-kb-kind.k-payload,.rt-scorepts) {color:var(--ui-success);background:var(--ui-success-bg);border-color:var(--ui-success);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-kb-kind.k-exp {color:var(--ui-danger);background:var(--ui-danger-bg);border-color:var(--ui-danger);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) :is(.rt-ov-pts-got,.rt-ov-metric-ok .rt-ov-metric-value,.rt-rep-idx,.rt-hl-req) {color:var(--ui-success);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map-note {font-size:var(--ui-text-helper);line-height:var(--ui-leading-body);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-session-map-node :is(.rt-session-map-node-id,.rt-session-map-node-meta,.rt-session-map-node-task,.rt-session-map-node-foot) {font-size:var(--ui-text-helper);font-family:var(--ui-font)!important;}
+
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-workspace-eyebrow {display:none;}
+
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) :is(.rt-stage-recon,.rt-st-recon,.rt-stage-pivot,.rt-st-pivot,.rt-stage-data,.rt-st-data){background:var(--ui-selected);color:var(--ui-selected-text);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) :is(.rt-stage-vuln,.rt-st-vuln){background:var(--ui-warning-bg);color:var(--ui-warning);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) :is(.rt-stage-exploit,.rt-st-exploit){background:var(--ui-danger-bg);color:var(--ui-danger);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) :is(.rt-stage-access,.rt-st-access){background:var(--ui-success-bg);color:var(--ui-success);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) :is(.rt-stage-other,.rt-st-other){background:var(--ui-subtle);color:var(--ui-muted);}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) :is(.rt-hit-idx,.rt-rep-step-no){background:var(--ui-selected);color:var(--ui-selected-text);}
+
+/* Navigation, command row and content form three distinct surface levels. */
+:is(.rt-dock.rt-studio,.rt-full.rt-studio)>.rt-chrome>.rt-nav{min-height:48px;padding:6px 16px;background:var(--ui-nav)!important}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio)>.rt-chrome>.rt-cmd{min-height:46px;padding:6px 20px;background:var(--ui-surface)!important}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-workspace-pagehead{padding-top:18px;padding-bottom:14px}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-nav .rt-tab-group{padding:8px 14px}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-nav .rt-tab-group.on{position:relative;color:var(--ui-selected-text);border-color:var(--ui-line-strong)}
+:is(.rt-dock.rt-studio,.rt-full.rt-studio) .rt-nav .rt-tab-group.on::after{content:"";position:absolute;left:14px;right:14px;bottom:0;height:2px;border-radius:1px;background:var(--ui-link)}

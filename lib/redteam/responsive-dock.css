@@ -1,0 +1,89 @@
+/* 窄窗自适应：右侧浮动面板默认只有 620px 宽，按「容器宽度」换布局，
+ * 不再等视口缩到手机尺寸才动；宽窗（全面浏览）走 viewport 媒体查询。 */
+
+/* ── 浮动面板：860px 以下收窄左侧导航、去掉标题占位、工具条换行 ───────── */
+@container workspace (max-width: 860px) {
+  .dshp-dock-body .rt-dock.rt-embedded { grid-template-columns: 132px minmax(0, 1fr); }
+  .rt-embedded > .rt-chrome > .rt-nav { padding: 16px 8px; }
+  .rt-embedded .rt-nav::before { display: none; content: none; }
+  .rt-embedded .rt-nav .rt-tab-group { gap: 8px; padding: 9px 8px; font-size: var(--ui-text-control); }
+  .rt-embedded .rt-nav .rt-tab-group::before { width: 16px; height: 16px; }
+  .rt-embedded > .rt-chrome > .rt-cmd,
+  .rt-embedded > .rt-subnav,
+  .rt-embedded > .rt-foot { padding-left: 14px; padding-right: 14px; }
+  .rt-embedded .rt-cmd::before { display: none; content: none; }
+  .rt-embedded .rt-cmd .rt-eng-select { flex: 1 1 220px; min-width: 0; max-width: none; }
+}
+
+/* ── 浮动面板：720px 以下导航改横排，正文吃满整宽 ─────────────────────── */
+@container workspace (max-width: 720px) {
+  .dshp-dock-body .rt-dock.rt-embedded {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  }
+  .rt-embedded > .rt-chrome > .rt-nav {
+    grid-column: 1;
+    grid-row: 1;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    padding: 8px;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--rt-border);
+  }
+  .rt-embedded .rt-nav .rt-tab-group { flex: 1 0 auto; min-height: 34px; justify-content: center; gap: 8px; padding: 7px 10px; }
+  .rt-embedded .rt-nav .rt-tab-group::before { display: none; }
+  .rt-embedded > .rt-chrome > .rt-cmd { grid-column: 1; grid-row: 2; }
+  .rt-embedded > .rt-subnav { grid-column: 1; grid-row: 3; }
+  .rt-embedded > .rt-body { grid-column: 1; grid-row: 4; }
+  .rt-embedded > .rt-foot { grid-column: 1; grid-row: 5; }
+}
+
+/* ── 两种形态通用：窄容器里禁止子项撑破，多列网格一律单列 ─────────────── */
+@container workspace (max-width: 720px) {
+  :where(.rt-dock.rt-embedded, .rt-full) > .rt-body,
+  :where(.rt-dock.rt-embedded, .rt-full) > .rt-body > * { min-width: 0; max-width: 100%; }
+  .rt-dock.rt-embedded .rt-body { overflow: auto; }
+  .rt-dock.rt-embedded .rt-body :where(
+    .rt-ov-grid, .rt-ov-hero, .rt-ov-metric-row, .rt-ov-stages,
+    .rt-collab-role-grid, .rt-settings-summary, .rt-settings-workspace,
+    .rt-skills-grid, .rt-kb-list, .rt-assets-grid, .rt-ws-grid,
+    .rt-r2-proof-grid, .rt-session-map
+  ) { grid-template-columns: minmax(0, 1fr) !important; }
+  .rt-dock.rt-embedded .rt-body :where(pre, table, .rt-r2-table-wrap) { max-width: 100%; }
+  .rt-dock.rt-embedded .rt-body :where(.rt-r2-table, .rt-skills-table, .rt-settings-table) { min-width: 0; }
+}
+
+/* ── 全面浏览：按窗口宽度分档（原来是 760/560，中间档位直接跳过） ─────── */
+@media (max-width: 1180px) {
+  .rt-full { grid-template-columns: 148px minmax(0, 1fr); }
+  .rt-full .rt-nav .rt-tab-group { padding: 9px 10px; gap: 8px; }
+  .rt-full .rt-nav::before { padding: 0 10px 12px; }
+}
+
+@media (max-width: 960px) {
+  .rt-full {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  }
+  .rt-full > .rt-chrome > .rt-nav {
+    grid-column: 1;
+    grid-row: 1;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    padding: 8px;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--rt-border);
+  }
+  .rt-full .rt-nav::before { display: none; content: none; }
+  .rt-full .rt-nav .rt-tab-group { flex: 1 0 auto; min-height: 34px; justify-content: center; padding: 7px 10px; }
+  .rt-full .rt-nav .rt-tab-group::before { display: none; }
+  .rt-full > .rt-chrome > .rt-cmd { grid-column: 1; grid-row: 2; padding: 10px 14px; }
+  .rt-full .rt-cmd::before { display: none; content: none; }
+  .rt-full > .rt-subnav { grid-column: 1; grid-row: 3; padding: 7px 14px; }
+  .rt-full > .rt-body { grid-column: 1; grid-row: 4; }
+  .rt-full > .rt-foot { grid-column: 1; grid-row: 5; padding: 7px 14px; }
+}

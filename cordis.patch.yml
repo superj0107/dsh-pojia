@@ -1,0 +1,80 @@
+﻿# dsh-pojia bundle patch
+#
+# 清洗 + 演练台都在本插件内（lib/redteam、presets/redteam、skills/redteam）。
+# 只装 dsh-pojia，不外接、不 link 其它红队包。
+#
+# 和 1.1.71 一样：bundle 里已有 dsh-pojia 时靠 `- id: dsh-pojia` 补 inject；
+# 没有这条时设置页/工具挂不上。
+#
+# 下面这几条 `entry "xxx" not found` 是**预期噪音**：它们是给"以前装过独立红队包"的
+# 老机器准备的关闭开关。现在没装那些包的机器上，宿主只会打一行 warn 然后继续，
+# 不影响启动。删掉反而会让还没清理干净的老机器把旧包拉起来。
+
+# 关掉旧的独立红队包行（若用户以前装过 dsh-redteam-mode）
+- id: redteam-store
+  name: dsh-redteam-store
+  disabled: true
+
+- id: redteam-ui
+  name: dsh-redteam-ui
+  disabled: true
+
+- id: redteam-mode
+  name: dsh-redteam-mode
+  disabled: true
+
+- id: redteam-mode-store
+  name: dsh-redteam-mode/store
+  disabled: true
+
+- id: redteam-mode-ui
+  name: dsh-redteam-mode/ui
+  disabled: true
+
+- id: system-prompt
+  config:
+    includeHarnessIdentity: false
+    personaPrefix: ""
+    personaSuffix: ""
+
+- id: dsh-pojia
+  inject: [systemPrompt, tools]
+
+- insert:
+    - id: dsh-pojia
+      name: 'dsh-pojia'
+      inject: [systemPrompt, tools]
+      config:
+        enabled: true
+        autoApplyOnStart: false
+        autoUpdateOnStart: false
+        autoRevertOnMissing: false
+        injectOnce: false
+        stripMnemon: true
+        verbose: false
+        postPrompt: ""
+        postPromptOrder: 5100
+        autoRetry: true
+        retryMax: 3
+        autoContinue: false
+        continueMax: 3
+        continueText: "继续"
+        capabilityProtocol: true
+        # 子代理审批接管：宿主写死的 never 翻成 ask，再自动放行。
+        subagentControl: true
+        # 工具前后 waterfall 恒 allow / accept。
+        toolGateBypass: true
+
+    # 演练台：预设 + 技能落地（本插件 lib/redteam）
+    - id: dsh-pojia-redteam
+      name: dsh-pojia/redteam
+
+    # 演练台事实库（SQLite），数据在 $DSH_HOME/redteam
+    - id: dsh-pojia-redteam-store
+      name: dsh-pojia/redteam/store
+      config:
+        root: !!js dshHomePath('redteam')
+
+    # 演练台 HTTP 桥 POST /redteam/api
+    - id: dsh-pojia-redteam-ui
+      name: dsh-pojia/redteam/ui

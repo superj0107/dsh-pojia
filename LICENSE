@@ -1,0 +1,55 @@
+dsh-pojia — DeepSeek Harness 破甲融合包
+Copyright (c) 2026 dsh-pojia contributors
+
+================================================================================
+整体许可：Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+================================================================================
+
+本融合包整体采用 CC BY-NC-SA 4.0 授权（署名-非商业性使用-相同方式共享 4.0 国际）。
+
+完整法律文本：https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+可读版本：    https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+核心条款（以完整法律文本为准）：
+  - BY  署名：再分发须保留作者署名、来源链接、本许可声明，并注明是否修改。
+  - NC  非商业：不得用于任何商业目的或商业牟利（含付费分发、付费代部署、
+        付费咨询/培训、付费门槛、捆绑销售）。
+  - SA  相同方式共享：基于本包的衍生作品必须以同一 CC BY-NC-SA 4.0 协议发布。
+  - 无担保：按"原样"提供，作者不承担使用后果。
+
+================================================================================
+组成来源与各自许可（双署名，均须保留）
+================================================================================
+
+1) 宿主清洗层 —— 改编自 dsh-purge-safe
+   来源：https://github.com/CallMeGuLab/dsh-purge-safe
+   版权：Copyright 2026 CallMeGuLab
+   许可：Apache License 2.0（全文见 LICENSE-APACHE.txt；原始 NOTICE 见 NOTICE）
+   说明：本包沿用其宿主补丁引擎、清洗面板与演练台，并作统一命令/品牌改造。
+         Apache-2.0 为宽松许可，可与本包整体 CC BY-NC-SA 4.0 并存；
+         其版权声明、LICENSE 全文与 NOTICE 在此完整保留。
+
+2) 破甲内核层 —— 改编自富江破甲（源自 Minglink/dsh-infinite-gen-4）
+   来源：https://github.com/Minglink/dsh-infinite-gen-4
+   版权：Copyright (c) 2026 Minglink
+   许可：CC BY-NC-SA 4.0 及附加非商业/禁止二次开发商用条款
+         （全文见 armor/FUJIANG-LICENSE.txt 与 armor/FUJIANG-THIRD-PARTY-NOTICES.md）
+   说明：本包将其注入内核、会话投影评分器与提示词整合为 lib/armor.js，
+         并把命令/工具入口统一到 /pojia。改编部分继续按 CC BY-NC-SA 4.0 共享。
+
+================================================================================
+严正声明
+================================================================================
+
+本项目为非营利开源项目，仅供学习、研究与在受控本机环境中使用。严禁用于：
+  - 任何未经授权的网络攻击、入侵、数据窃取或系统破坏；
+  - 任何形式的商业售卖、付费倒卖、黑灰产牟利或隐瞒来源的营利性再分发；
+  - 违反所在地法律法规或平台规范的行为。
+
+使用者须自行遵守所在地法律法规并承担使用后果；作者不承担任何直接或间接责任。
+任何商业使用或违反上述条款的行为，其对本项目的授权自动且不可撤销地终止。
+
+Use of this project for commercial purposes is strictly prohibited.
+The overall work is licensed under CC BY-NC-SA 4.0; you must attribute all
+three sources (dsh-pojia contributors, CallMeGuLab, Minglink), share alike,
+and keep this work non-commercial.
