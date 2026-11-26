@@ -166,6 +166,10 @@ client.js         统一面板
 presets/ skills/  预设与技能
 ```
 
+## 社区
+
+本项目在 **LINUX DO** 社区发起并接受佬友反馈：[linux.do](https://linux.do)。问题、建议、使用反馈都欢迎在社区帖或仓库 issue 里提。
+
 ## 许可与署名
 
 整体 **CC BY-NC-SA 4.0**（[LICENSE](./LICENSE)）。包含：
