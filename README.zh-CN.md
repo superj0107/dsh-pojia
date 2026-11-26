@@ -21,6 +21,8 @@
 
 macOS 首次被 Gatekeeper 拦：右键 → 打开，或先 `xattr -dr com.apple.quarantine <解压目录>`。
 
+缺 Node.js（或版本 < 18）/ pnpm 时，脚本会先问一句 `[Y/n]`：回车或 `y` 就自动装（Node 走 Homebrew 或官方二进制 + sha256 校验，装到 `<DSH home>/toolchain`；pnpm 走 `npm -g` → `corepack` → 官方脚本），不需要 sudo、不改 shell 配置，`n` 就只警告。终端里可用 `--yes` / `-Yes` 免交互，`--no-deps` / `-NoDeps` 只警告。
+
 习惯终端也行：
 
 ```sh

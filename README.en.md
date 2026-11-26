@@ -21,6 +21,8 @@ One-click install (unzip `dsh-pojia-<version>-installer.zip`, then double-click 
 
 The filenames are Chinese; the script itself prints Chinese messages too. If Gatekeeper blocks the `.command` on macOS: right-click → Open, or run `xattr -dr com.apple.quarantine <unzipped dir>` first.
 
+**Missing dependencies are offered, not forced:** if Node.js (or a version < 18) or pnpm is absent, the script prints a `[Y/n]` prompt — Enter or `y` installs it: Node.js via Homebrew, else the official tarball (sha256-verified) into `<DSH home>/toolchain`; pnpm via `npm i -g` → `corepack` → the official standalone script. No sudo and no shell-config edits; `n` only warns. Non-interactive: `--yes` / `-Yes` to auto-install, `--no-deps` / `-NoDeps` to only warn (same on Windows, which uses winget or the official zip).
+
 Terminal equivalent:
 
 ```sh

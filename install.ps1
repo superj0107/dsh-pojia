@@ -6,10 +6,14 @@
 #   .\install.ps1                       # 安装到默认 DSH（$env:DSH_HOME 或 %USERPROFILE%\.dsh）的 desktop profile
 #   .\install.ps1 -Profile web          # 装到 web profile
 #   .\install.ps1 -DshHome "D:\my\.dsh" # 指定隔离 home
+#   .\install.ps1 -Yes                  # 缺依赖（Node.js / pnpm）时不问，直接装
+#   .\install.ps1 -NoDeps               # 缺依赖时只警告，不装、不提问
 #   .\install.ps1 -Uninstall            # 卸载（删除插件目录、profile 注册与 bundle 行）
 #
 # 说明：本脚本只改你指定的 DSH home 下那一个 profile，不动其它数据目录。
 # 安装后请完全退出并重新打开 DSH，然后在会话标题旁 dsh-pojia 面板点「应用」。
+# 缺 Node.js / pnpm 时会问你要不要自动装：同意就用 winget 或官方 zip（Node）/
+# npm -g 或 corepack（pnpm）装，卸载和回滚不影响系统其它部分。
 
 [CmdletBinding()]
 param(
@@ -17,7 +21,9 @@ param(
     [ValidateSet('desktop', 'web')]
     [string]$Profile = 'desktop',
     [switch]$Uninstall,
-    [switch]$SkipPnpmInstall
+    [switch]$SkipPnpmInstall,
+    [switch]$Yes,
+    [switch]$NoDeps
 )
 
 $ErrorActionPreference = 'Stop'
@@ -39,6 +45,205 @@ if (-not $DshHome) { $DshHome = if ($env:DSH_HOME) { $env:DSH_HOME } else { Join
 $profileDir = Join-Path (Join-Path $DshHome 'profiles') $Profile
 $pluginsDir = Join-Path $DshHome 'plugins'
 $targetDir = Join-Path $pluginsDir $pluginName
+$toolchainDir = Join-Path $DshHome 'toolchain'
+
+# --- 依赖（Node.js / pnpm）探测与自动安装 ---------------------------------------
+function Ask-Yes([string]$Prompt) {
+    if ($Yes) { Write-Host "    $Prompt -> 直接装（-Yes）" -ForegroundColor Cyan; return $true }
+    if ($NoDeps) { return $false }
+    if ([Console]::IsInputRedirected) {
+        Write-Warn "非交互环境，不自动装：$Prompt（加 -Yes 可自动装）"
+        return $false
+    }
+    Write-Host -NoNewline "    $Prompt [Y/n] " -ForegroundColor Yellow
+    try { $ans = Read-Host } catch { return $false }
+    if ([string]::IsNullOrWhiteSpace($ans)) { return $true }
+    return ($ans.Trim() -match '^(y|yes|是)$')
+}
+
+function Find-Node {
+    if (Get-Command node -ErrorAction SilentlyContinue) { return $true }
+    $dirs = New-Object System.Collections.ArrayList
+    foreach ($p in @(
+        $(if ($env:ProgramFiles) { Join-Path $env:ProgramFiles 'nodejs' }),
+        $(if (${env:ProgramFiles(x86)}) { Join-Path ${env:ProgramFiles(x86)} 'nodejs' }),
+        $(if ($env:LOCALAPPDATA) { Join-Path $env:LOCALAPPDATA 'Programs\nodejs' }),
+        $(if ($env:LOCALAPPDATA) { Join-Path $env:LOCALAPPDATA 'Volta\bin' }),
+        $toolchainDir
+    )) {
+        if ($p) { [void]$dirs.Add($p) }
+    }
+    foreach ($glob in @(
+        $(if ($env:APPDATA) { Join-Path $env:APPDATA 'nvm\v*' }),
+        $(Join-Path $toolchainDir 'node-v*')
+    )) {
+        if (-not $glob) { continue }
+        Get-Item -Path $glob -ErrorAction SilentlyContinue | ForEach-Object { [void]$dirs.Add($_.FullName) }
+    }
+    foreach ($d in $dirs) {
+        if (Test-Path -LiteralPath (Join-Path $d 'node.exe')) {
+            $env:PATH = "$d;$env:PATH"
+            return $true
+        }
+    }
+    return $false
+}
+
+function Find-Pnpm {
+    if (Get-Command pnpm -ErrorAction SilentlyContinue) { return $true }
+    $dirs = New-Object System.Collections.ArrayList
+    foreach ($p in @(
+        $(if ($env:APPDATA) { Join-Path $env:APPDATA 'npm' }),
+        $(if ($env:LOCALAPPDATA) { Join-Path $env:LOCALAPPDATA 'pnpm' }),
+        $(if ($env:ProgramFiles) { Join-Path $env:ProgramFiles 'nodejs' }),
+        $toolchainDir
+    )) {
+        if ($p) { [void]$dirs.Add($p) }
+    }
+    if (Get-Command npm -ErrorAction SilentlyContinue) {
+        $prefix = (& npm prefix -g 2>$null | Out-String).Trim()
+        if ($prefix) { [void]$dirs.Add($prefix) }
+    }
+    Get-Item -Path (Join-Path $toolchainDir 'node-v*') -ErrorAction SilentlyContinue |
+        ForEach-Object { [void]$dirs.Add($_.FullName) }
+    foreach ($d in $dirs) {
+        foreach ($name in @('pnpm.cmd', 'pnpm.exe', 'pnpm.ps1')) {
+            if (Test-Path -LiteralPath (Join-Path $d $name)) {
+                $env:PATH = "$d;$env:PATH"
+                return $true
+            }
+        }
+    }
+    return $false
+}
+
+function Install-NodeAuto {
+    try { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 } catch { }
+
+    if (Get-Command winget -ErrorAction SilentlyContinue) {
+        Write-Step "用 winget 安装 Node.js LTS"
+        & winget install --id OpenJS.NodeJS.LTS -e --accept-source-agreements --accept-package-agreements --disable-interactivity
+        if ($env:ProgramFiles) {
+            $std = Join-Path $env:ProgramFiles 'nodejs'
+            if (Test-Path -LiteralPath (Join-Path $std 'node.exe')) { $env:PATH = "$std;$env:PATH" }
+        }
+        if (Find-Node) {
+            Write-Ok "Node $(& node -v) 已就绪（winget）"
+            return $true
+        }
+        Write-Warn "winget 没装成，改用官方 zip"
+    }
+
+    $arch = if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') { 'win-arm64' } else { 'win-x64' }
+    Write-Step "下载 Node.js 官方 zip（$arch）"
+    $sums = $null; $file = $null; $url = $null
+    foreach ($base in @('latest-v22.x', 'latest-v24.x', 'latest')) {
+        try {
+            $sums = (Invoke-WebRequest -UseBasicParsing -TimeoutSec 30 "https://nodejs.org/dist/$base/SHASUMS256.txt").Content
+        } catch { continue }
+        $m = [regex]::Match($sums, "node-v[0-9][0-9.]*-$arch\.zip")
+        if ($m.Success) { $file = $m.Value; $url = "https://nodejs.org/dist/$base/$file"; break }
+    }
+    if (-not $url) {
+        Write-Err "取不到 Node.js 下载地址（网络不通？）。手动装：https://nodejs.org/"
+        return $false
+    }
+
+    $tmp = Join-Path ([System.IO.Path]::GetTempPath()) ("pojia-node-" + [guid]::NewGuid().ToString('N').Substring(0, 8))
+    New-Item -ItemType Directory -Path $tmp -Force | Out-Null
+    try {
+        $zip = Join-Path $tmp $file
+        Invoke-WebRequest -UseBasicParsing -TimeoutSec 600 -Uri $url -OutFile $zip
+        $want = ($sums -split "`n" | Where-Object { $_ -match [regex]::Escape($file) } | ForEach-Object { ($_ -split '\s+')[0] } | Select-Object -First 1)
+        $got = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLower()
+        if ($want -and $want.ToLower() -ne $got) {
+            Write-Err "sha256 校验失败，已中止（可能有中间人/下载损坏）"
+            return $false
+        }
+        New-Item -ItemType Directory -Path $toolchainDir -Force | Out-Null
+        Expand-Archive -LiteralPath $zip -DestinationPath $toolchainDir -Force
+        $nodeDir = Join-Path $toolchainDir ([System.IO.Path]::GetFileNameWithoutExtension($file))
+        if (-not (Test-Path -LiteralPath (Join-Path $nodeDir 'node.exe'))) {
+            Write-Err "解压完成但找不到 node.exe：$nodeDir"
+            return $false
+        }
+        $env:PATH = "$nodeDir;$env:PATH"
+        $userPath = [Environment]::GetEnvironmentVariable('PATH', 'User')
+        if ($userPath -notlike "*$nodeDir*") {
+            [Environment]::SetEnvironmentVariable('PATH', "$nodeDir;$userPath", 'User')
+            Write-Warn "已把 $nodeDir 写进用户 PATH（新开的终端生效）"
+        }
+        Write-Ok "Node $(& node -v) 已装到 $nodeDir"
+        return $true
+    } catch {
+        Write-Err "下载/解压失败：$($_.Exception.Message)"
+        return $false
+    } finally {
+        Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function Ensure-Node {
+    if (Find-Node) {
+        $major = 0
+        try { $major = [int]((& node -p "process.versions.node.split('.')[0]" 2>$null | Out-String).Trim()) } catch { $major = 0 }
+        if ($major -ge 18) { Write-Ok "Node $(& node -v)"; return $true }
+        Write-Warn "Node 版本偏低（$(& node -v)），DSH 需要 >= 18"
+        if (-not (Ask-Yes "要我自动装一份 Node.js LTS 到 $toolchainDir 吗？")) { return $false }
+        return (Install-NodeAuto)
+    }
+    Write-Warn "没检测到 Node.js（DSH 本身需要 >= 18）"
+    if (-not (Ask-Yes "要我自动帮你装 Node.js 吗？")) { return $false }
+    return (Install-NodeAuto)
+}
+
+function Install-PnpmAuto {
+    if (Get-Command npm -ErrorAction SilentlyContinue) {
+        Write-Step "用 npm 全局安装 pnpm"
+        & npm install -g pnpm --no-fund --no-audit
+        if ($LASTEXITCODE -eq 0 -and (Find-Pnpm)) {
+            Write-Ok "pnpm $(& pnpm -v) 已就绪（npm）"
+            return $true
+        }
+        Write-Warn "npm -g 没装成（常见原因：全局目录没有写权限）"
+    }
+
+    if (Get-Command corepack -ErrorAction SilentlyContinue) {
+        Write-Step "用 corepack 启用 pnpm"
+        & corepack enable pnpm 2>$null
+        if ($LASTEXITCODE -ne 0) { & corepack prepare pnpm@latest --activate 2>$null }
+        if (Find-Pnpm) {
+            Write-Ok "pnpm $(& pnpm -v) 已就绪（corepack）"
+            return $true
+        }
+        Write-Warn "corepack 没能启用 pnpm"
+    }
+
+    if (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
+        Write-Step "本机没有 npm，先装一份私有 Node.js（自带 npm）"
+        if ((Install-NodeAuto) -and (Get-Command npm -ErrorAction SilentlyContinue)) {
+            & npm install -g pnpm --no-fund --no-audit
+            if ($LASTEXITCODE -eq 0 -and (Find-Pnpm)) {
+                Write-Ok "pnpm $(& pnpm -v) 已就绪"
+                return $true
+            }
+        }
+    }
+
+    Write-Err "pnpm 自动安装没成功。手动装：npm i -g pnpm（或见 https://pnpm.io/installation）"
+    return $false
+}
+
+function Ensure-Pnpm {
+    if (Find-Pnpm) {
+        Write-Ok "pnpm $(& pnpm -v)"
+        return $true
+    }
+    Write-Warn "没检测到 pnpm（安装 profile 依赖要用它）"
+    if (-not (Ask-Yes "要我自动帮你装 pnpm 吗？")) { return $false }
+    return (Install-PnpmAuto)
+}
+
 
 Write-Step "目标 home: $DshHome"
 if (-not (Test-Path -LiteralPath (Join-Path $DshHome 'profiles') -PathType Container)) {
@@ -150,17 +355,24 @@ Write-Ok "插件已复制"
 Edit-ProfilePackage $true
 Edit-ProfilePatch $true
 
-# --- pnpm install（写依赖到 node_modules）---
+# --- 依赖检查：Node.js / pnpm（缺了会问你要不要自动装）---
+$nodeReady = Ensure-Node
+if (-not $nodeReady) {
+    Write-Warn "缺 Node.js：注册已经写好，但 DSH 跑插件需要 Node.js >= 18，装好后重启 DSH。"
+}
+
 if (-not $SkipPnpmInstall) {
-    Write-Step "安装依赖（pnpm）"
-    $pnpmCmd = Get-Command pnpm -ErrorAction SilentlyContinue
-    if ($pnpmCmd) {
+    if (Ensure-Pnpm) {
+        Write-Step "安装 profile 依赖（pnpm install）"
         Push-Location $profileDir
-        try { & pnpm install --config.confirmModulesPurge=false 2>&1 | Out-String | Write-Host }
+        try {
+            & pnpm install --config.confirmModulesPurge=false 2>&1 | Out-String | Write-Host
+            if ($LASTEXITCODE -eq 0) { Write-Ok "pnpm install 完成" }
+            else { Write-Warn "pnpm install 失败，DSH 启动前请在该 profile 目录手动重跑：pnpm install" }
+        }
         finally { Pop-Location }
-        Write-Ok "pnpm install 完成"
     } else {
-        Write-Warn "未找到 pnpm，跳过依赖安装。请先安装 Node.js 20+ 与 pnpm，然后手动在该 profile 目录运行 pnpm install。"
+        Write-Warn "跳过 pnpm install。装好 pnpm 后手动跑：cd `"$profileDir`"; pnpm install"
     }
 }
 

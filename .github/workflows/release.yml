@@ -36,6 +36,7 @@ jobs:
           bash -n install.sh
           bash -n uninstall.sh
           bash -n test/install-sh-smoke.sh
+          bash -n test/install-deps-smoke.sh
           for f in *.command; do bash -n "$f"; done
 
       - name: Unit tests
@@ -43,6 +44,9 @@ jobs:
 
       - name: install.sh smoke test (macOS/Linux 一键安装)
         run: bash test/install-sh-smoke.sh
+
+      - name: dependency handling smoke test
+        run: bash test/install-deps-smoke.sh
 
       - name: Verify release notes
         run: |

@@ -1,3 +1,31 @@
+# 1.0.2
+
+缺依赖不再只是报错：脚本会先问你一句，同意了就自己装好。
+
+### 中文
+
+- 安装脚本（`install.sh` / `install.ps1`）新增依赖体检：Node.js 缺失或版本 < 18、pnpm 缺失时，打印 `[Y/n]` 询问「要我帮你装吗」；回车或 `y` 直接装，`n` 只警告，非交互终端不擅自安装。
+- Node.js 自动安装：macOS 优先 `brew install node`；没有 Homebrew 就用官方二进制包（先按 `SHASUMS256.txt` 校验 sha256，再解压到 `<DSH home>/toolchain`），全程不需要 sudo。
+- Windows 侧：优先 `winget install OpenJS.NodeJS.LTS`，没有 winget 就走官方 zip，解压到 `<DSH home>/toolchain` 并写进用户 PATH（会明确提示）。
+- pnpm 自动安装：依次尝试 `npm i -g pnpm` → `corepack enable pnpm` → pnpm 官方独立安装脚本，成功后就地继续跑 `pnpm install`，失败才回落到「手动装」提示。
+- 免交互开关：`--yes` / `-Yes`（缺了直接装）、`--no-deps` / `-NoDeps`（只警告、不提问）；双击脚本（`.command` / `.bat`）本来就是交互终端，直接按提示回一句就行。
+- 交互读取加了 120 秒超时与 `/dev/tty` 兜底（`POJIA_ASK_TIMEOUT` 可调），保证无 tty 的 CI/管道场景不会卡死、也不会把「读不到输入」误判成同意。
+- 新增 `test/install-deps-smoke.sh`：`--no-deps` 不装、缺 Node 时答 n 明确退出且不改 profile、非交互不擅自装；加 `POJIA_TEST_NETWORK=1` 还会真下载官方 Node 二进制与 pnpm 跑一遍完整链路。CI 默认跑无网络子集。
+- 本地实测：WSL 下真实下载 Node 22 官方二进制（sha256 通过）+ 自动装 pnpm + `pnpm install` 全链路通过；Windows 下 `-Yes` 走 npm 桩验证 pnpm 自动安装、完全无 Node 时走官方 zip 自动安装并回滚用户 PATH。
+
+### English
+
+- Both installers now check dependencies: when Node.js is missing/older than 18 or pnpm is absent, they print a `[Y/n]` prompt — Enter or `y` installs it, `n` only warns, and non-interactive runs never install silently.
+- Node.js auto-install: Homebrew first on macOS; otherwise the official binary tarball, sha256-verified against `SHASUMS256.txt`, unpacked into `<DSH home>/toolchain`. No sudo anywhere.
+- Windows: `winget install OpenJS.NodeJS.LTS` first, else the official zip, unpacked into `<DSH home>/toolchain` and appended to the user PATH (announced explicitly).
+- pnpm auto-install: `npm i -g pnpm` → `corepack enable pnpm` → the official standalone installer; on success the run continues straight into `pnpm install`, otherwise it falls back to the manual hint.
+- Non-interactive switches: `--yes` / `-Yes` (install) and `--no-deps` / `-NoDeps` (warn only). The double-click scripts already run in a terminal, so the prompt just works.
+- Prompt reads are bounded (120 s, `POJIA_ASK_TIMEOUT`) with a `/dev/tty` fallback, so pipes and CI never hang and an empty read is never mistaken for consent.
+- Added `test/install-deps-smoke.sh`: verifies `--no-deps`, the decline path (no profile edits) and the non-interactive path; `POJIA_TEST_NETWORK=1` additionally downloads the real Node tarball and installs pnpm end to end. CI runs the offline subset.
+- Verified locally: real WSL download of the Node 22 tarball (sha256 checked) + automatic pnpm install + `pnpm install`; on Windows, `-Yes` exercised pnpm auto-install through an npm stub, and the no-Node case installed from the official zip with the user PATH restored afterwards.
+
+---
+
 # 1.0.1
 
 一键安装补齐 macOS / Linux / WSL，并加上「双击就好」的图形化入口。

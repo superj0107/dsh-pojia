@@ -21,6 +21,8 @@ DeepSeek Harness 向けの統合プラグインです。**ホスト側クリー�
 
 ファイル名とスクリプト内のメッセージは中国語です。macOS で Gatekeeper に止められた場合は、右クリック → 開く、または `xattr -dr com.apple.quarantine <展開先>` を先に実行してください。
 
+**依存関係は勝手に入れず、まず確認します**：Node.js（または 18 未満）や pnpm が無い場合、スクリプトは `[Y/n]` を表示します。Enter か `y` で自動インストール（Node.js は Homebrew、無ければ公式 tarball を sha256 検証して `<DSH home>/toolchain` へ。pnpm は `npm i -g` → `corepack` → 公式スタンドアロンの順）。sudo 不要、シェル設定も変更しません。`n` なら警告のみ。非対話なら `--yes` / `-Yes` で自動、`--no-deps` / `-NoDeps` で警告のみ（Windows は winget または公式 zip を使用）。
+
 ターミナルで実行する場合：
 
 ```sh

@@ -37,6 +37,14 @@
 
 脚本会自己找 DSH home（`$DSH_HOME` → macOS 桌面版 `~/Library/Application Support/DeepSeek Harness/dsh-home` → `~/.dsh`），复制插件、写 profile 依赖与 bundle、跑 `pnpm install`，跑完窗口停住给你看结果。
 
+**缺依赖时会先问你一句再装**：没有 Node.js（或版本 < 18）、没有 pnpm 时，脚本会显示
+
+```
+    没检测到 Node.js（DSH 本身需要 >= 18） [Y/n]
+```
+
+回车或输入 `y` 就自动装：Node.js 优先走 Homebrew，没有 Homebrew 就下官方二进制包（带 sha256 校验）装到 `<DSH home>/toolchain`，并把路径并进当前进程；pnpm 依次试 `npm i -g pnpm` → `corepack enable pnpm` → 官方独立脚本。全程不需要 sudo，也不改你的 shell 配置；输入 `n` 就只警告、不装。想在终端里免交互：`--yes`（直接装）/ `--no-deps`（只警告）。
+
 macOS 首次可能被 Gatekeeper 拦（"无法打开，因为来自身份不明的开发者"）：右键 → 打开；或在「终端」里先跑一次
 
 ```sh
@@ -52,6 +60,8 @@ cd dsh-pojia-<版本>-installer
 bash install.sh                            # 装到自动探测的 DSH home 的 desktop profile
 bash install.sh --profile web              # 装到 web profile
 bash install.sh --dsh-home "$HOME/my-dsh"  # 装到隔离 home
+bash install.sh --yes                      # 缺依赖（Node.js / pnpm）不问，直接自动装
+bash install.sh --no-deps                  # 缺依赖只警告，不装
 bash uninstall.sh                          # 卸载（等价 install.sh --uninstall）
 ```
 
@@ -61,6 +71,8 @@ Windows：
 powershell -ExecutionPolicy Bypass -File .\install.ps1
 .\install.ps1 -Profile web                 # 装到 web profile
 .\install.ps1 -DshHome "D:\my\.dsh"        # 装到隔离 home
+.\install.ps1 -Yes                         # 缺依赖直接自动装（win 侧走 winget 或官方 zip）
+.\install.ps1 -NoDeps                      # 缺依赖只警告
 powershell -ExecutionPolicy Bypass -File .\uninstall.ps1    # 卸载
 ```
 
