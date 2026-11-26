@@ -33,9 +33,14 @@ jobs:
           node --check lib/persona.js
           node --check lib/effect-check.js
           node --check client.js
+          bash -n install.sh
+          bash -n test/install-sh-smoke.sh
 
       - name: Unit tests
         run: npm test
+
+      - name: install.sh smoke test (macOS/Linux 一键安装)
+        run: bash test/install-sh-smoke.sh
 
       - name: Verify release notes
         run: |
@@ -58,6 +63,9 @@ jobs:
           cp -a package/. "$staged/"
           rm -rf package
           cp install.ps1 "$staged/install.ps1"
+          # macOS / Linux / WSL one-click script, keep exec bit
+          cp install.sh "$staged/install.sh"
+          chmod +x "$staged/install.sh"
           zip -qr "dsh-pojia-${version}-installer.zip" "$staged"
           ls -lh dsh-pojia-*.tgz dsh-pojia-*-installer.zip
 

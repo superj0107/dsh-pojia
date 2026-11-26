@@ -11,6 +11,7 @@
 - 破甲内核状态文件独立为 `$DSH_HOME/dsh-pojia-armor.state.json`，与旧富江隔离。
 - 品牌统一：面板标题、状态输出、CLI、帮助文案、多语言 README 均改为 dsh-pojia；内部 HTTP 路由 `/dsh-purge-safe/*` 保持兼容不变。
 - 许可证：整体 CC BY-NC-SA 4.0；保留 Apache-2.0 与富江 CC BY-NC-SA 4.0 原协议及三方署名。
+- 一键安装补齐 macOS / Linux / WSL：新增 `install.sh`（bash 3.2+，与 `install.ps1` 功能等价），Releases 的 installer 包同时附带两个脚本。
 
 上游 dsh-purge-safe 的详细补丁变更历史见 [README-upstream-purge-safe.md](./README-upstream-purge-safe.md) 与其原 release-notes（本融合包不逐条继承其历史条目）。
 
@@ -23,3 +24,4 @@
 - Armor state isolated to `$DSH_HOME/dsh-pojia-armor.state.json`.
 - Branding unified; internal HTTP routes `/dsh-purge-safe/*` kept for compatibility.
 - Licensed CC BY-NC-SA 4.0 overall, with Apache-2.0 and Fujiang CC BY-NC-SA 4.0 texts and three-way attribution retained.
+- One-click install now covers macOS / Linux / WSL via `install.sh` (bash 3.2+, feature-equivalent to `install.ps1`); the Release installer zip ships both scripts.

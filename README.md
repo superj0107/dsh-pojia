@@ -22,21 +22,32 @@
 
 面向 **DSH 0.2.2-rc.5**（桌面 + Web）。
 
-**方式一：一键脚本（Windows，最省事）**
+**方式一：一键脚本（macOS / Linux / WSL / Windows，最省事）**
 
-到 [Releases](https://github.com/superj0107/dsh-pojia/releases/latest) 下载 `dsh-pojia-<版本>-installer.zip`，解压后在目录里右键「用 PowerShell 运行」：
+到 [Releases](https://github.com/superj0107/dsh-pojia/releases/latest) 下载 `dsh-pojia-<版本>-installer.zip`，解压后按平台跑：
+
+macOS / Linux / WSL（`install.sh`，bash 3.2+，macOS 自带即可）：
+
+```sh
+cd dsh-pojia-<版本>-installer
+bash install.sh                            # 装到自动探测的 DSH home 的 desktop profile
+bash install.sh --profile web              # 装到 web profile
+bash install.sh --dsh-home "$HOME/my-dsh"  # 装到隔离 home
+bash install.sh --uninstall                # 卸载
+```
+
+home 探测顺序：`--dsh-home` → `$DSH_HOME` → `~/Library/Application Support/DeepSeek Harness/dsh-home` → `~/.dsh`。首次被 Gatekeeper 拦过的话先 `xattr -d com.apple.quarantine install.sh`。
+
+Windows（`install.ps1`）：在解压后的目录里右键「用 PowerShell 运行」，或：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\install.ps1
-```
-
-脚本会把插件装到默认 DSH 的 desktop profile（自动复制插件目录、写 profile 依赖和 bundle、跑 pnpm install）。可选项：
-
-```powershell
 .\install.ps1 -Profile web                 # 装到 web profile
 .\install.ps1 -DshHome "D:\my\.dsh"        # 装到隔离 home
 .\install.ps1 -Uninstall                   # 卸载
 ```
+
+两个脚本做同一件事：把插件装到指定 DSH 的 profile（复制插件目录、写 profile 依赖和 bundle、跑 pnpm install），写的 `cordis.patch.yml` 托管块格式一致，可互相卸载。
 
 装完完全退出并重新打开 DSH，在 dsh-pojia 面板点「应用」。
 

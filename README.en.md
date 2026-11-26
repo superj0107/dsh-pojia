@@ -8,6 +8,21 @@ A merged DeepSeek Harness plugin that combines host-level cleaning (from dsh-pur
 
 Targets **DSH 0.2.2-rc.5** (desktop and web).
 
+One-click script (after unzipping `dsh-pojia-<version>-installer.zip`):
+
+```sh
+bash install.sh                 # macOS / Linux / WSL (bash 3.2+)
+bash install.sh --uninstall     # uninstall
+```
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\install.ps1   # Windows
+```
+
+`install.sh` resolves the DSH home in this order: `--dsh-home` → `$DSH_HOME` → `~/Library/Application Support/DeepSeek Harness/dsh-home` (macOS desktop) → `~/.dsh`. If Gatekeeper blocked it once, run `xattr -d com.apple.quarantine install.sh` first.
+
+Or install manually with `dsh plugin`:
+
 ```sh
 dsh plugin --profile desktop add /absolute/path/to/dsh-pojia
 # or

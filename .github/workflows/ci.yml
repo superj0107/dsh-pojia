@@ -25,3 +25,11 @@ jobs:
           done
       - name: Unit tests
         run: npm test
+
+      - name: Installer script syntax (bash)
+        run: |
+          bash -n install.sh
+          bash -n test/install-sh-smoke.sh
+
+      - name: install.sh smoke test (macOS/Linux 一键安装)
+        run: bash test/install-sh-smoke.sh

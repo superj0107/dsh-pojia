@@ -74,24 +74,33 @@ function Edit-ProfilePackage([bool]$Install) {
     Write-Ok "package.json 已更新（$pluginName）"
 }
 
-$BEGIN = "# >>> dsh-pojia managed block (install.ps1) - do not edit inside"
+# 与 install.sh（macOS/Linux）共用同一对标记，两个脚本可互相幂等卸载。
+$BEGIN = "# >>> dsh-pojia managed block - do not edit inside"
+$BEGIN_LEGACY = "# >>> dsh-pojia managed block (install.ps1) - do not edit inside"
 $END   = "# <<< dsh-pojia managed block"
+
+function Remove-ManagedBlock([string]$Text) {
+    foreach ($marker in @($BEGIN, $BEGIN_LEGACY)) {
+        $i = $Text.IndexOf($marker)
+        while ($i -ge 0) {
+            $j = $Text.IndexOf($END, $i)
+            if ($j -lt 0) { break }
+            $j += $END.Length
+            if ($j -lt $Text.Length -and $Text[$j] -eq "`r") { $j++ }
+            if ($j -lt $Text.Length -and $Text[$j] -eq "`n") { $j++ }
+            $Text = $Text.Substring(0, $i) + $Text.Substring($j)
+            $i = $Text.IndexOf($marker)
+        }
+    }
+    return $Text
+}
 
 function Edit-ProfilePatch([bool]$Install) {
     $patch = Join-Path $profileDir 'cordis.patch.yml'
     if (-not (Test-Path $patch)) { Write-Warn "cordis.patch.yml 不存在，跳过 patch 注册"; return }
     $text = Get-Utf8 $patch
     # 先移除旧块（幂等）
-    $i = $text.IndexOf($BEGIN)
-    if ($i -ge 0) {
-        $j = $text.IndexOf($END, $i)
-        if ($j -ge 0) {
-            $j += $END.Length
-            if ($j -lt $text.Length -and $text[$j] -eq "`r") { $j++ }
-            if ($j -lt $text.Length -and $text[$j] -eq "`n") { $j++ }
-            $text = $text.Substring(0, $i) + $text.Substring($j)
-        }
-    }
+    $text = Remove-ManagedBlock $text
     if ($Install) {
         $block = ""
         if (-not $text.EndsWith("`n")) { $block += "`n" }
@@ -130,8 +139,12 @@ if (-not (Test-Path -LiteralPath $pluginsDir)) { New-Item -ItemType Directory -P
 if (Test-Path -LiteralPath $targetDir) { Remove-Item -LiteralPath $targetDir -Recurse -Force }
 Copy-Item -LiteralPath $srcDir -Destination $targetDir -Recurse -Force
 # 不把安装脚本自身和压缩包带进插件目录
-Remove-Item -LiteralPath (Join-Path $targetDir 'install.ps1') -Force -ErrorAction SilentlyContinue
-Remove-Item -LiteralPath (Join-Path $targetDir '*.zip') -Force -ErrorAction SilentlyContinue
+foreach ($junk in @('install.ps1', 'install.sh')) {
+    Remove-Item -LiteralPath (Join-Path $targetDir $junk) -Force -ErrorAction SilentlyContinue
+}
+Remove-Item -Path (Join-Path $targetDir '*.zip') -Force -ErrorAction SilentlyContinue
+Remove-Item -Path (Join-Path $targetDir '*.tgz') -Force -ErrorAction SilentlyContinue
+Remove-Item -Path (Join-Path $targetDir 'dsh-pojia-*-installer') -Recurse -Force -ErrorAction SilentlyContinue
 Write-Ok "插件已复制"
 
 Edit-ProfilePackage $true

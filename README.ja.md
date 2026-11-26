@@ -8,6 +8,21 @@ DeepSeek Harness 向けの統合プラグインです。**ホスト側クリー�
 
 対象は **DSH 0.2.2-rc.5**（デスクトップ / Web）。
 
+ワンクリックスクリプト（`dsh-pojia-<version>-installer.zip` を展開後）：
+
+```sh
+bash install.sh                 # macOS / Linux / WSL（bash 3.2 以上）
+bash install.sh --uninstall     # アンインストール
+```
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\install.ps1   # Windows
+```
+
+`install.sh` の DSH home 解決順：`--dsh-home` → `$DSH_HOME` → `~/Library/Application Support/DeepSeek Harness/dsh-home`（macOS デスクトップ）→ `~/.dsh`。Gatekeeper に一度止められた場合は `xattr -d com.apple.quarantine install.sh` を実行してください。
+
+手動で `dsh plugin` を使う場合：
+
 ```sh
 dsh plugin --profile desktop add /absolute/path/to/dsh-pojia
 # または

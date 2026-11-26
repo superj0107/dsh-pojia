@@ -20,6 +20,7 @@
   },
   "files": [
     "install.ps1",
+    "install.sh",
     "DISCLAIMER.md",
     "armor",
     "test",

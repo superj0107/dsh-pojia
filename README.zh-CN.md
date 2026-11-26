@@ -8,6 +8,19 @@
 
 面向 **DSH 0.2.2-rc.5**（桌面 + Web）。
 
+一键脚本（解压 `dsh-pojia-<版本>-installer.zip` 后）：
+
+```sh
+bash install.sh                 # macOS / Linux / WSL
+bash install.sh --uninstall     # 卸载
+```
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\install.ps1   # Windows
+```
+
+或手动用 `dsh plugin`：
+
 ```sh
 dsh plugin --profile desktop add /absolute/path/to/dsh-pojia
 # 或

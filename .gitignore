@@ -1,6 +1,8 @@
 # 不上传
 node_modules/
 *.tgz
+# 安装包解出的目录（CI / 本地打包产物，不入库）
+/dsh-pojia-*-installer/
 /intel/
 npm-debug.log*
 *.log
