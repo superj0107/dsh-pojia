@@ -22,18 +22,34 @@
 
 面向 **DSH 0.2.2-rc.5**（桌面 + Web）。
 
-**方式一：从 GitHub Release 安装（推荐）**
+**方式一：一键脚本（Windows，最省事）**
 
-到 [Releases](https://github.com/superj0107/dsh-pojia/releases/latest) 下载 `dsh-pojia-<版本>.tgz`，解压到本地目录后安装：
+到 [Releases](https://github.com/superj0107/dsh-pojia/releases/latest) 下载 `dsh-pojia-<版本>-installer.zip`，解压后在目录里右键「用 PowerShell 运行」：
 
-```sh
-# 解压后（把路径换成你实际解压的位置）
-dsh plugin --profile desktop add /absolute/path/to/dsh-pojia-<版本>
-# 或 Web
-dsh plugin --profile web add /absolute/path/to/dsh-pojia-<版本>
+```powershell
+powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
-**方式二：从源码安装**
+脚本会把插件装到默认 DSH 的 desktop profile（自动复制插件目录、写 profile 依赖和 bundle、跑 pnpm install）。可选项：
+
+```powershell
+.\install.ps1 -Profile web                 # 装到 web profile
+.\install.ps1 -DshHome "D:\my\.dsh"        # 装到隔离 home
+.\install.ps1 -Uninstall                   # 卸载
+```
+
+装完完全退出并重新打开 DSH，在 dsh-pojia 面板点「应用」。
+
+**方式二：dsh plugin 命令**
+
+下载 Release 里的 `dsh-pojia-<版本>.tgz`，解压后：
+
+```sh
+dsh plugin --profile desktop add /absolute/path/to/dsh-pojia-<版本>
+# 或 Web：把 desktop 换成 web
+```
+
+**方式三：从源码安装**
 
 ```sh
 git clone https://github.com/superj0107/dsh-pojia.git

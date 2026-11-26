@@ -19,6 +19,7 @@
     "dsh-pojia": "bin/dsh-pojia.js"
   },
   "files": [
+    "install.ps1",
     "DISCLAIMER.md",
     "armor",
     "test",

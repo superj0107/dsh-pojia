@@ -46,10 +46,20 @@ jobs:
             exit 1
           fi
 
-      - name: Build installable tgz
+      - name: Build installable tgz and one-click zip
         run: |
           npm pack --pack-destination .
-          ls -lh dsh-pojia-*.tgz
+          version="$(node -p "require('./package.json').version")"
+          # 一键安装包：解压后运行 install.ps1 即可，不依赖 dsh plugin 命令
+          staged="dsh-pojia-${version}-installer"
+          mkdir -p "$staged"
+          # 用 npm pack 的内容作为插件正文（去掉 package/ 顶层），再附上 install.ps1
+          tar -xzf "dsh-pojia-${version}.tgz"
+          cp -a package/. "$staged/"
+          rm -rf package
+          cp install.ps1 "$staged/install.ps1"
+          zip -qr "dsh-pojia-${version}-installer.zip" "$staged"
+          ls -lh dsh-pojia-*.tgz dsh-pojia-*-installer.zip
 
       - name: Publish GitHub Release with installable package
         env:
@@ -59,12 +69,14 @@ jobs:
           version="$(node -p "require('./package.json').version")"
           tag="v${version}"
           tgz="dsh-pojia-${version}.tgz"
+          zip="dsh-pojia-${version}-installer.zip"
           test -s "$tgz"
+          test -s "$zip"
           if gh release view "$tag" >/dev/null 2>&1; then
-            gh release upload "$tag" "$tgz" --clobber
+            gh release upload "$tag" "$tgz" "$zip" --clobber
             echo "updated https://github.com/${GITHUB_REPOSITORY}/releases/tag/${tag}"
           else
-            args=(release create "$tag" --title "$tag" --notes-file release-notes.md "$tgz")
+            args=(release create "$tag" --title "$tag" --notes-file release-notes.md "$tgz" "$zip")
             case "$version" in
               *beta*|*alpha*|*rc*) args+=(--prerelease) ;;
             esac
