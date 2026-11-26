@@ -19,6 +19,8 @@
 # 安装后完全退出并重新打开 DSH，然后在会话标题旁的 dsh-pojia 面板点「应用」。
 # 缺 Node.js / pnpm 时脚本会问你要不要自动装：同意就装（Homebrew 或官方二进制 /
 # npm 或 corepack），不写系统目录、不动你的 shell 配置；用 --yes 可免交互。
+# 环境变量：POJIA_ASK_TIMEOUT（提问等待秒数，默认 120）、POJIA_NO_SEARCH=1（只认 PATH，
+# 不去翻常见安装目录，测试/严格环境用）。
 # =============================================================================
 set -euo pipefail
 
@@ -164,6 +166,8 @@ ask_yes() { # ask_yes <提示> → 0 = 用户同意（回车/空行＝同意，�
 
 find_node() {
   if command -v node >/dev/null 2>&1; then return 0; fi
+  # POJIA_NO_SEARCH=1：只认 PATH，不去翻常见安装目录（测试 / 严格环境用）
+  [ "${POJIA_NO_SEARCH:-0}" = 1 ] && return 1
   for d in /usr/local/bin /opt/homebrew/bin /opt/local/bin \
            "$HOME/.local/bin" "$HOME/.volta/bin" "$HOME/.npm-global/bin" "$HOME/n/bin"; do
     if [ -x "$d/node" ]; then PATH="$d:$PATH"; export PATH; return 0; fi
@@ -179,6 +183,7 @@ find_node() {
 
 find_pnpm() {
   if command -v pnpm >/dev/null 2>&1; then return 0; fi
+  [ "${POJIA_NO_SEARCH:-0}" = 1 ] && return 1
   for d in "$HOME/Library/pnpm" "$HOME/.local/share/pnpm" \
            /usr/local/bin /opt/homebrew/bin "$HOME/.local/bin" "$HOME/.npm-global/bin"; do
     if [ -x "$d/pnpm" ]; then PATH="$d:$PATH"; export PATH; return 0; fi

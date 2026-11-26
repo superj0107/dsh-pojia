@@ -47,7 +47,7 @@ chk "注册照写" registered "$h/profiles/desktop/package.json"
 echo "== 缺 Node.js + 回答 n：明确报错退出，不乱改 profile =="
 mkbin "$tmp/bin"
 h2="$tmp/h2"; mkhome "$h2"
-printf 'n\n' | env PATH="$tmp/bin" DSH_HOME="$h2" bash "$root/install.sh" --dsh-home "$h2" >"$tmp/b.log" 2>&1
+printf 'n\\n' | env POJIA_NO_SEARCH=1 PATH="$tmp/bin" DSH_HOME="$h2" bash "$root/install.sh" --dsh-home "$h2" >"$tmp/b.log" 2>&1
 chk "退出码 1" test $? -eq 1
 chk "提示没检测到 Node.js" has_in "$tmp/b.log" '没检测到 Node.js'
 chk "问了一句" has_in "$tmp/b.log" '要我自动帮你装 Node.js 吗'
@@ -55,14 +55,14 @@ chk "没写注册" eval '! registered "$h2/profiles/desktop/package.json"'
 
 echo "== 缺 Node.js + 非交互（无 tty、无 --yes）：不擅自装 =="
 h3="$tmp/h3"; mkhome "$h3"
-env POJIA_ASK_TIMEOUT=3 PATH="$tmp/bin" DSH_HOME="$h3" bash "$root/install.sh" --dsh-home "$h3" </dev/null >"$tmp/c.log" 2>&1
+env POJIA_NO_SEARCH=1 POJIA_ASK_TIMEOUT=3 PATH="$tmp/bin" DSH_HOME="$h3" bash "$root/install.sh" --dsh-home "$h3" </dev/null >"$tmp/c.log" 2>&1
 chk "退出码 1" test $? -eq 1
 chk "没开始下载" lacks_in "$tmp/c.log" '下载 Node.js 官方二进制'
 
 if [ "${POJIA_TEST_NETWORK:-0}" = 1 ]; then
   echo "== 网络：缺 Node.js + --yes → 官方二进制 + sha256 校验（真实下载）=="
   h4="$tmp/h4"; mkhome "$h4"
-  env PATH="$tmp/bin" DSH_HOME="$h4" bash "$root/install.sh" --dsh-home "$h4" --yes --skip-pnpm-install >"$tmp/d.log" 2>&1
+  env POJIA_NO_SEARCH=1 PATH="$tmp/bin" DSH_HOME="$h4" bash "$root/install.sh" --dsh-home "$h4" --yes --skip-pnpm-install >"$tmp/d.log" 2>&1
   chk "退出码 0" test $? -eq 0
   chk "走了官方二进制" has_in "$tmp/d.log" '下载 Node.js 官方二进制'
   chk "Node 落在 toolchain" bash -c 'ls "$0"/toolchain/node-v*/bin/node' "$h4"
