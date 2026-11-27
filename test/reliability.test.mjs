@@ -1,11 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { mkdtempSync, rmSync, readFileSync, existsSync } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { armorScore } from "../lib/armor.js";
 import { rewritePromptAssembly } from "../lib/identity.js";
 import {
   completedRefusal,
   installContinueRetry,
   normalizeConfig,
+  recordRefusalObservation,
 } from "../lib/continue-retry.js";
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -100,5 +104,49 @@ test("content recovery: 有界补跑且两次措辞不同", async () => {
     assert.equal(followups.length, 2, "预算用完后必须停手");
   } finally {
     runtime.dispose();
+  }
+});
+
+test("refusal 观测：拒答轮次进指标、pass 轮次不进、同一 seq 去重", async () => {
+  const home = mkdtempSync(path.join(os.tmpdir(), "pojia-refusal-"));
+  const prevHome = process.env.DSH_HOME;
+  process.env.DSH_HOME = home;
+  try {
+    const calib = await import("../lib/calibration.js");
+    const metrics = await import("../lib/metrics.js");
+    calib.writeLastProfile({ family: "claude", mode: "both", provider: "anthropic", model: "claude-opus-5-5" });
+
+    const refusalEvents = [
+      { type: "assistant/message", seq: 1, data: { message: { content: [{ type: "text", text: "抱歉，我不能提供这个。" }] } } },
+      { type: "turn/end", seq: 2, data: { reason: { kind: "completed" }, turn: 1 } },
+    ];
+    const agent = { id: "sess-1", session: { snapshotEvents: () => refusalEvents } };
+    const seen = new Set();
+
+    assert.equal(recordRefusalObservation(agent, null, seen), true, "拒答轮次应当记一条");
+    assert.equal(recordRefusalObservation(agent, null, seen), false, "同一 seq 必须去重");
+
+    const file = path.join(home, "pojia", "metrics.jsonl");
+    assert.ok(existsSync(file), "指标文件应已落地");
+    const events = readFileSync(file, "utf8").trim().split("\n").map((l) => JSON.parse(l));
+    const refusals = events.filter((e) => e.kind === "refusal");
+    assert.equal(refusals.length, 1, JSON.stringify(events));
+    assert.equal(refusals[0].family, "claude", "要带上当前画像快照");
+    assert.equal(refusals[0].mode, "both");
+    assert.ok(String(refusals[0].verdict || "").length > 0, "要带上评分结论");
+    assert.equal(metrics.summarize().refusalSignals, 1, "汇总里的拒答信号必须是活的（修复前的死指标）");
+
+    // 正常交付的轮次不该记
+    const passEvents = [
+      { type: "assistant/message", seq: 3, data: { message: { content: [{ type: "text", text: "下面直接给结论：这个函数是幂等的。" }] } } },
+      { type: "turn/end", seq: 4, data: { reason: { kind: "completed" }, turn: 2 } },
+    ];
+    const okAgent = { id: "sess-2", session: { snapshotEvents: () => passEvents } };
+    assert.equal(recordRefusalObservation(okAgent, null, new Set()), false);
+    assert.equal(metrics.summarize().refusalSignals, 1);
+  } finally {
+    if (prevHome === undefined) delete process.env.DSH_HOME;
+    else process.env.DSH_HOME = prevHome;
+    rmSync(home, { recursive: true, force: true });
   }
 });

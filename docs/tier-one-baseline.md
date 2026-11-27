@@ -29,7 +29,7 @@
 | 1 | 与模型层对齐 | ✔ | `agent/pre-step` 的 `modelSelection` → `lib/model-profile.js` 分类 → 通道决策（v1.1.0） |
 | 2 | 与 agent loop 对齐 | ✔ | user 通道走 `agent/pre-step` 追加带 `source` 的注入消息；system 通道走 `systemPrompt.section`；从不改用户原文 |
 | 3 | 自适应有边界 | ✔ | `decideInjection()` 优先级 pinned > profile > default；`/pojia armor mode` 置 `pinnedMode` |
-| 4 | 可观测 | ✔ | `lib/metrics.js` → `$DSH_HOME/pojia/metrics.jsonl`；doctor「协同」行 + gateway fail 建议 |
+| 4 | 可观测 | ✔ | `lib/metrics.js` → `$DSH_HOME/pojia/metrics.jsonl`（注入/决策/校准/压缩/子代理/**每轮拒答判定**）；doctor「协同」行 + gateway fail 建议 |
 | 5 | 可验证 | ✔ | 内置 8 条探针 + 自定义 + 命中率 + refusal/gateway/transport 归因 |
 | 6 | 可诊断 | ✔ | `/pojia doctor` 四段结论 + 摘要 + 退出码 0/1/2 |
 | 7 | 可回滚 | ✔ | `revert` / `uninstall` 保留 `prompt-inject.md`；`--revert` 有冒烟 |
