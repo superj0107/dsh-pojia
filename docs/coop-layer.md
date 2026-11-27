@@ -81,7 +81,7 @@
 | 换了通道反而更差 | 薄差距抖动 | ≥15pp 才换 + `validate clear` 连校准一起清 |
 | 校准用的数据不真实 | validate 记录不带族/通道 | 快照 `armor-last.json` + record 时补齐 family/mode/trimmed |
 | 预算省了 token 但效果掉了 | 裁剪改内容 | 默认关 + A/B 对照 + doctor 给「关掉 injectBudgetKB」的结论 |
-| 指标恒为 0 | 事件类型只有文档、没有写入者（refusal / retry / validate 都踩过） | 每条 kind 都必须有 `metrics.record(...)` 调用点 + 单测断言汇总数字 |
+| 指标恒为 0 | 事件类型只有文档、没有写入者（refusal / retry / validate 都踩过） | `test/metrics-contract.test.mjs` 自动解析文档并断言每类 kind 都有 writer，且能进 byKind/total |
 
 ## 六、怎么验
 

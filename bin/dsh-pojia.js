@@ -9,6 +9,7 @@ import { verdictLines } from "../lib/verdict.js";
 import { buildDoctor, detectHostVersion } from "../lib/doctor.js";
 import { readProviderInfo, describeProvider } from "../lib/provider-info.js";
 import * as metrics from "../lib/metrics.js";
+import { summarizeLine } from "../lib/metrics.js";
 import { readCalibration, describeCalibration, compareBudgetAB } from "../lib/calibration.js";
 
 const args = process.argv.slice(2);
@@ -28,6 +29,10 @@ function printStatus(state, extra = {}) {
   out.push("  宿主 / surface " + surface);
   out.push("  DSH_HOME      " + state.dsh_home);
   out.push("  模型 / provider " + describeProvider(extra.provider || readProviderInfo(state.dsh_home)));
+  // 指标与 status/doctor/面板同源：CLI 也不该缺这一行。
+  try {
+    out.push("  运行时指标     " + summarizeLine(metrics.summarize()));
+  } catch { /* 指标文件读不到就不显示 */ }
   if (state.desktop_install) out.push("  桌面安装       " + state.desktop_install);
   if (state.ai_base) {
     out.push("  插件根 / root  " + state.ai_base);
