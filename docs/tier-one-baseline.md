@@ -44,28 +44,35 @@
 ## 三、差距与里程碑
 
 ### M3（已落地，等一次 CI 验证）
-1. **跨平台基线**：CI 加 `os × node` matrix（ubuntu / windows / macos × node 18 / 20），跑语法检查、`npm test` 与协同自检。
-2. **协同端到端脚本** `scripts/e2e-coop.mjs`：最小 Cordis ctx 拉起插件 → 断言命令/工具注册、pre-step 注入、画像决策、指标落盘、status/doctor 展示、用户钉住优先（14 项断言，已进 CI）。
-3. **跨平台语法检查** `scripts/check-syntax.mjs`：不依赖 bash/glob，三平台行为一致（89 个文件）。
+1. **跨平台基线**：CI 加 `os × node` matrix（ubuntu / windows / macos × node 18 / 20），跑语法检查、`npm test` 与两个自检脚本。
+2. **协同端到端脚本** `scripts/e2e-coop.mjs`：最小 Cordis ctx 拉起插件 → 断言命令/工具注册、pre-step 注入、画像决策、会话级 system 段、校准闭环、预算压缩、钉住让位（30 项断言，已进 CI）。
+3. **跨平台语法检查** `scripts/check-syntax.mjs`：不依赖 bash/glob，三平台行为一致（94 个文件）。
 
-### M4（本轮全部落地）
+### M4（已落地）
 4. **指标回流决策**：✅ doctor 把「gateway fail 多 + 中转」「注入均值偏大」变成具体建议；`fit`/`calibrated`/`trim` 事件记录决策与裁剪。
-5. **注入预算控制**：✅ `lib/budget.js` + 配置 `injectBudgetKB`（**默认关**）。按本轮领域挑段，头段（覆盖声明）与尾两段（风格/锚点）永远保留；真实内核 17.2KB → 9.6KB；无领域信号不裁；小于 256 字节的收益不裁（标记开销吃掉就没意义）。裁剪会改变效果，必须先用 validate A/B 才建议常开——这条写进了 README 与 doctor 建议。
-6. **模型画像在线校准**：✅ `lib/calibration.js` —— validate 记录带「族 × 通道」，≥6 条样本后实测最优通道覆盖规则；gateway 按净失败口径剔除；**新增防抖动**：赢家必须领先 ≥15pp 才换，否则保持现状；`validate clear` 连校准表一起清。
-7. **四入口口径统一**：✅ verdict / profile / 校准 / metrics 已同时出现在 `status` 文本、`/pojia doctor`、`pojia_status`/`pojia_doctor` 工具与 `/dsh-purge-safe/status` 载荷（`armor` + `metrics` 字段）。
+5. **注入预算控制**：✅ `lib/budget.js` + 配置 `injectBudgetKB`（**默认关**）。按本轮领域挑段，头段（覆盖声明）与尾两段（风格/锚点）永远保留；真实内核 17.2KB → 9.6KB；无领域信号不裁；收益 <256 字节不裁。
+6. **模型画像在线校准**：✅ `lib/calibration.js` —— validate 记录带「族 × 通道」，≥6 条样本后实测最优通道覆盖规则；gateway 按净失败口径剔除；防抖动：赢家领先 ≥15pp 才换；`validate clear` 连校准表一起清。
+7. **四入口口径统一**：✅ verdict / profile / 校准 / metrics 同时出现在 `status` 文本、`/pojia doctor`、`pojia_status`/`pojia_doctor` 工具与 `/dsh-purge-safe/status` 载荷。
 
-### M5（下一轮）
-8. **跨平台首跑**：push 后确认 CI matrix 三平台 × Node 18/20 全绿（基线唯一 △）。
-9. **预算 A/B 基线**：用 `metrics` 的 `trim` 事件 + validate 记录做「压缩 vs 全文」对照，够样本再考虑把 `injectBudgetKB` 变成推荐默认。
-10. **多会话隔离**：✅ 已落地——自适应路径的 system 段按 `agent.ctx.systemPrompt` 挂载（会话级），全局挂载只用于用户钉住通道；e2e 用两个不同模型的会话验证互不串味（Claude 挂 1 段、DeepSeek 挂 0 段、全局计数 0）。
+### M5（已落地）
+8. **多会话隔离**：✅ 自适应路径的 system 段按 `agent.ctx.systemPrompt` 挂载（会话级），全局挂载只用于用户钉住通道；e2e 用两个不同模型的会话验证互不串味（Claude 挂 1 段、DeepSeek 挂 0 段、全局计数 0）。
+9. **子代理语义**：✅ `subagentInject` 开关（默认注入）+ 指标 `sub:true` 单独统计子代理轮次；关掉时子代理不挂段不追消息且只记一条 skipped 指标；`scripts/e2e-subagent.mjs` 9 项断言进 CI。
+
+### M6（下一轮）
+10. **预算 A/B 基线**：用 `trim` 事件 + validate 记录做「压缩 vs 全文」对照，够样本再考虑把 `injectBudgetKB` 变成推荐默认。
+11. **面板呈现协同层**：`/dsh-purge-safe/status` 已带 `armor`/`metrics` 字段，但 `client.js` 还没渲染；在设置页加一块「画像 / 生效通道 / 校准 / 指标」只读卡片。
+12. **子代理精简档位**：在 `subagentInject` 之上再加「子代理只注入精简版」（复用 `lib/budget.js`，按任务域裁到更小）。
 
 ## 四、怎么验（给下一位维护者）
 
 ```bash
 cd dsh-pojia
-npm test                     # 27 项单测：判定 / 诊断 / 探针 / 锁 / 画像 / 指标
+npm test                        # 41 项单测：判定 / 诊断 / 探针 / 锁 / 画像 / 指标 / 校准 / 预算
+node scripts/e2e-coop.mjs       # 30 项：画像 → 注入 → 会话级 system 段 → 校准 → 预算 → 钉住
+node scripts/e2e-subagent.mjs   # 9 项：子代理注入开关
+node scripts/check-syntax.mjs   # 跨平台语法检查
 node bin/dsh-pojia.js --doctor; echo $?    # 退出码 0 全绿 / 1 有待办 / 2 有阻断
 node scripts/build-client.mjs && git diff --stat client.js   # 面板构建幂等
 ```
 
-真机验证：装好后在会话里跑 `/pojia status`，第一屏应出现 `结论 / verdict`、`模型 / provider`、`模型画像 / profile`、`注入通道 / channel` 四类信息；跑一轮对话后 `/pojia doctor` 的「协同」行应出现注入次数与均值字节。
+真机验证：装好后在会话里跑 `/pojia status`，第一屏应出现 `结论 / verdict`、`模型 / provider`、`模型画像 / profile`、`注入通道 / channel`、`校准 / calibration` 五类信息；跑一轮对话后 `/pojia doctor` 的「协同」行应出现注入次数、均值字节、子代理轮次与预算压缩统计。

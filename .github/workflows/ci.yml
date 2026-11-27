@@ -26,6 +26,9 @@ jobs:
       - name: Co-op self-check (模型画像 → 注入 → 指标 → status/doctor)
         run: node scripts/e2e-coop.mjs
 
+      - name: Subagent injection self-check (subagentInject 开关)
+        run: node scripts/e2e-subagent.mjs
+
       - name: Installer script syntax (bash)
         run: |
           bash -n install.sh
@@ -64,3 +67,5 @@ jobs:
         run: npm test
       - name: Co-op self-check
         run: node scripts/e2e-coop.mjs
+      - name: Subagent injection self-check
+        run: node scripts/e2e-subagent.mjs

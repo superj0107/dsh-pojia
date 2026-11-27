@@ -182,6 +182,15 @@ HTTP 路由面板沿用内部路径 `/dsh-purge-safe/*`（用户不可见，保�
 
 「什么叫第一梯队」不看口号看标尺：判定标准、现状自评与里程碑都在 [`docs/tier-one-baseline.md`](./docs/tier-one-baseline.md)。
 
+### 协同层配置项
+
+| 配置 | 默认 | 作用 |
+|---|---|---|
+| `autoProfile` | `true` | 按宿主 `modelSelection` 自动选注入通道（用户手动切过通道即钉住，不再覆盖） |
+| `subagentInject` | `true` | 子代理会话是否也注入内核；关掉可显著省 token（判据只看委派来源/深度） |
+| `injectBudgetKB` | `0`（关） | >0 时按本轮领域挑段压缩内核，头尾段永远保留；改完记得 `validate` 对比 |
+| `armorMode` | 空 | 显式钉住通道（`user` / `legacy` / `both`），写了就视为用户表态 |
+
 ## 可切换人设库
 
 破甲内核注入的正文来自当前人设，默认内置 `pojia-armor`（富江内核）。用户可以在 `$DSH_HOME/pojia/personas/*.md` 放带 frontmatter 的人设文件（`id` / `name` / `description` / `model` / `order`），用 `/pojia persona use <id>` 切换，**下一轮注入即生效**。格式参考 agent-purge 的人设文件，但本包不依赖其代码。切换人设只换提示词正文，不改宿主补丁和内核开关。

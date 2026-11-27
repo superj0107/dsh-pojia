@@ -90,23 +90,31 @@ test("profile: 注入决策优先级 = 用户钉住 > 模型画像 > 默认", as
 test("metrics: 记录 + 汇总 + 脏行容错 + 翻滚", async () => {
   const m = await import("../lib/metrics.js");
   assert.equal(m.record("inject", { family: "claude", bytes: 2048, mode: "both" }), true);
-  assert.equal(m.record("inject", { family: "claude", bytes: 4096, mode: "both" }), true);
+  assert.equal(m.record("inject", { family: "claude", bytes: 4096, mode: "both", sub: true }), true);
+  assert.equal(m.record("inject", { family: "deepseek", bytes: 0, mode: "user", sub: true, skipped: "subagent-inject-off" }), true);
+  assert.equal(m.record("trim", { family: "claude", saved: 4096, dropped: 3 }), true);
   assert.equal(m.record("refusal", { family: "claude" }), true);
   assert.equal(m.record("validate", { verdict: "fail", reason: "gateway" }), true);
   assert.equal(m.record("validate", { verdict: "pass" }), true);
 
   const sum = m.summarize();
-  assert.equal(sum.total, 5);
-  assert.equal(sum.byKind.inject, 2);
+  assert.equal(sum.total, 7);
+  assert.equal(sum.byKind.inject, 3);
   assert.equal(sum.families.claude.inject, 2);
-  assert.equal(sum.avgInjectBytes, 3072);
+  assert.equal(sum.avgInjectBytes, 3072, "skipped 的 inject 不计入字节均值");
   assert.equal(sum.gatewayFails, 1);
   assert.equal(sum.refusalSignals, 1);
-  assert.ok(m.summarizeLine(sum).includes("注入 2 次"));
+  assert.equal(sum.subagentTurns, 2, "子代理轮次按 sub:true 计数（含被跳过的）");
+  assert.equal(sum.trim.count, 1);
+  assert.equal(sum.trim.savedBytes, 4096);
+  const line = m.summarizeLine(sum);
+  assert.ok(line.includes("注入 3 次"), line);
+  assert.ok(line.includes("子代理轮次 2"), line);
+  assert.ok(line.includes("预算压缩 1 次"), line);
 
   // 脏行不能把汇总打挂
   appendFileSync(m.metricsPath(), "{这不是 JSON\n\n", "utf8");
-  assert.equal(m.summarize().total, 5);
+  assert.equal(m.summarize().total, 7);
 
   // 超过上限自动翻滚，旧档留 .1
   const file = m.metricsPath();
