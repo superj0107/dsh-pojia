@@ -117,6 +117,8 @@ try {
     check("校准后 doctor 显示校准行", (() => {
       return String(afterCalib.calibrationLine || "").includes("实测最优");
     })(), String(afterCalib.calibrationLine || ""));
+    const statusAfter = await registry.tools.find((t) => t.name === "pojia_status").execute({});
+    check("校准后 status 出现「校准 / calibration」行", /校准 \/ calibration/.test(statusAfter.text));
     check("校准后仍会注入（通道切了不等于停）", (decision3.messages || []).length >= 0);
   }
 
