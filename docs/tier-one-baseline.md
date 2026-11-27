@@ -28,7 +28,7 @@
 |---|---|---|---|
 | 1 | 与模型层对齐 | ✔ | `agent/pre-step` 的 `modelSelection` → `lib/model-profile.js` 分类 → 通道决策（v1.1.0） |
 | 2 | 与 agent loop 对齐 | ✔ | user 通道走 `agent/pre-step` 追加带 `source` 的注入消息；system 通道走 `systemPrompt.section`；从不改用户原文 |
-| 3 | 自适应有边界 | ✔ | `decideInjection()` 优先级 pinned > profile > default；`/pojia armor mode` 置 `pinnedMode` |
+| 3 | 自适应有边界 | ✔ | `decideInjection()` 优先级 pinned > calibrated（本机实测）> profile（规则）> default；`/pojia armor mode` 置 `pinnedMode`；防抖动 ≥15pp 才换通道，基准按会话 |
 | 4 | 可观测 | ✔ | `lib/metrics.js` → `$DSH_HOME/pojia/metrics.jsonl`（注入 / 决策 / 校准 / 预算压缩 / 子代理 / 每轮拒答判定 / 自愈重试）；四个出口：status 行、`/pojia metrics` 与 `dsh-pojia --metrics` 报表、doctor「协同」行、面板协同卡片；`test/metrics-contract.test.mjs` 钉住「文档里的事件必须有 writer」 |
 | 5 | 可验证 | ✔ | 内置 8 条探针 + 自定义 + 命中率 + refusal/gateway/transport 归因 |
 | 6 | 可诊断 | ✔ | `/pojia doctor` 四段结论 + 摘要 + 退出码 0/1/2；`--doctor --json` 给脚本/CI 判据 |
@@ -37,9 +37,9 @@
 | 9 | 并发安全 | ✔ | `validation.json` 事务（owner 校验 + 原子 rename + 严格读） |
 | 10 | 跨平台 | ✔ | GitHub CI matrix **三平台 × Node 18/20 全绿**（run 45978621591，2026-11-27）：ubuntu / windows / macos 各两档；本地另在 Windows(Node 24) 与 Linux(Node 18.19.1, WSL2) 跑过 `npm run gate` |
 | 11 | 文档即产品 | ✔ | README 30 秒自检 + 故障排查（`/pojia` 无反应四步、与 REA/CFW 的边界） |
-| 12 | 基线可回归 | ✔ | `npm test` 27 项 + `scripts/check-syntax.mjs`（跨平台语法检查）+ `scripts/e2e-coop.mjs`（协同链路 14 项断言）+ CI 三个 bash 冒烟 |
+| 12 | 基线可回归 | ✔ | `npm run gate`（跨平台，5 步）= 语法检查 + 58 项单测 + 协同自检 36 + 子代理自检 14 + 运行时状态自检 19；CI 另跑三个 install 冒烟；契约测试钉住指标口径与安装脚本编码 |
 
-综合：12 ✔ / 0 ◑ / 0 ✗（△ 项是「CI matrix 已配好但还没在真机跑过一次」）。
+综合：**12 ✔ / 0 ◑ / 0 ✗**（2026-11-27，v1.1.0）。所有结论都能在 `npm run gate` 或 CI 里复现，没有「配好了但没跑过」的项。
 
 ## 三、差距与里程碑
 
