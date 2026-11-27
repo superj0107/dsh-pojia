@@ -118,6 +118,31 @@ test("calibration: validate 记录自动带上画像，并在记录后刷新校�
   assert.deepEqual(c.readCalibration().byFamily, {});
 });
 
+test("calibration: 薄差距不换通道（防抖动）", async () => {
+  const c = await import("../lib/calibration.js");
+  // both 100%，user 92%（11 pass / 1 fail）—— 差距 8pp < 门槛 15pp：当前用 user 就先别换
+  const records = [
+    ...Array.from({ length: 6 }, () => rec("claude", "both", "pass")),
+    ...Array.from({ length: 11 }, () => rec("claude", "user", "pass")),
+    rec("claude", "user", "fail", "refusal"),
+  ];
+  const table = c.calibrate(records);
+  assert.equal(table.byFamily.claude.bestMode, "both");
+  const keep = c.applyCalibration({ family: "claude", recommendedMode: "user" }, table, { currentMode: "user" });
+  assert.equal(keep.mode, "user");
+  assert.ok(keep.reason.includes("防抖动"), keep.reason);
+
+  // 差距够大（100 vs 50）时就应该换
+  const wide = c.calibrate([
+    ...Array.from({ length: 6 }, () => rec("claude", "both", "pass")),
+    ...Array.from({ length: 3 }, () => rec("claude", "user", "pass")),
+    ...Array.from({ length: 3 }, () => rec("claude", "user", "fail", "refusal")),
+  ]);
+  const flip = c.applyCalibration({ family: "claude", recommendedMode: "user" }, wide, { currentMode: "user" });
+  assert.equal(flip.mode, "both");
+  assert.ok(flip.reason.includes("覆盖规则推荐") || flip.reason.includes("本机实测"));
+});
+
 test("cleanup", () => {
   if (tmpHome) rmSync(tmpHome, { recursive: true, force: true });
 });

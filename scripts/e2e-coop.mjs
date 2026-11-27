@@ -122,6 +122,22 @@ try {
     check("校准后仍会注入（通道切了不等于停）", (decision3.messages || []).length >= 0);
   }
 
+  // ---- 注入预算：拿真实内核正文验证「按领域挑段」不会砍掉头尾 ----
+  {
+    const budget = await import(pathToFileURL(path.join(root, "lib", "budget.js")).href);
+    const kernel = fs.readFileSync(path.join(root, "armor", "fujiang.md"), "utf8");
+    const packed = budget.compactPrompt(kernel, { maxBytes: 6 * 1024, hints: ["reverse"] });
+    check("真实内核超预算时会被压缩", packed.trimmed === true, `before=${packed.bytesBefore} after=${packed.bytesAfter}`);
+    check("压缩确实省了字节（>1KB）", packed.bytesBefore - packed.bytesAfter > 1024,
+      `${packed.bytesBefore}→${packed.bytesAfter}`);
+    check("压缩后仍保留覆盖声明", /覆盖声明/.test(packed.text));
+    check("压缩后仍保留结尾风格段", /风格/.test(packed.text));
+    check("压缩后带上预算标记", packed.text.includes("已按预算省略"));
+    // 没有领域信号时必须原样返回
+    const untouched = budget.compactPrompt(kernel, { maxBytes: 6 * 1024, hints: [] });
+    check("没有领域信号不裁剪", untouched.trimmed === false);
+  }
+
   // 用户钉住后，自适应必须让位
   const cmd = registry.commands.find((c) => c.name === "pojia");
   await cmd.handler({ rawInput: "armor mode user", agent: null });

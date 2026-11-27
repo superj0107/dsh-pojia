@@ -172,6 +172,24 @@ test("doctor: 协同行（画像 + 指标）与中转建议", async () => {
   assert.ok(doc.text.includes("注入 10 次"), doc.text);
   assert.ok(doc.text.includes("gateway fail"), doc.text);
   assert.equal(doc.exitCode, 0, doc.text);
+
+  // 注入均值偏大且没开预算 → 给具体建议，但不擅自改
+  const heavy = buildDoctor({
+    state,
+    config: { enabled: true },
+    armor: { enabled: true, mode: "both", effectiveMode: "both", pinnedMode: false, autoProfile: true, profileLine: "x / y → both（GPT）", injectBudgetKB: 0 },
+    metrics: { total: 10, byKind: { inject: 10 }, families: {}, avgInjectBytes: 40 * 1024, gatewayFails: 0, refusalSignals: 0, since: Date.now() - 86400000, lastAt: new Date().toISOString() },
+    persona: { current: "pojia-armor", total: 1 },
+    provider: { provider: "x", model: "y", baseURL: "https://api.openai.com/v1", relay: false, note: "" },
+    hostVersion: "0.2.2-rc.5",
+    targets: ["0.2.2-rc.5"],
+    pluginVersion: "1.1.0",
+    injectBytes: 40960,
+    command: { ok: true, via: "direct" },
+    validation: [{ persona: "pojia-armor", pass: 4, fail: 0, skip: 0, rate: 100, builtin: 4, custom: 0, reasons: { refusal: 0, gateway: 0, transport: 0, other: 0 } }],
+  });
+  assert.ok(heavy.text.includes("injectBudgetKB"), heavy.text);
+  assert.ok(heavy.text.includes("40.0KB"), heavy.text);
 });
 
 test("cleanup", () => {

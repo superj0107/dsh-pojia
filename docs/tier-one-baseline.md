@@ -48,11 +48,16 @@
 2. **协同端到端脚本** `scripts/e2e-coop.mjs`：最小 Cordis ctx 拉起插件 → 断言命令/工具注册、pre-step 注入、画像决策、指标落盘、status/doctor 展示、用户钉住优先（14 项断言，已进 CI）。
 3. **跨平台语法检查** `scripts/check-syntax.mjs`：不依赖 bash/glob，三平台行为一致（89 个文件）。
 
-### M4（本轮已落地一半）
-4. **指标回流决策**：doctor 把「gateway fail 多 + 中转」的结论变成具体建议；`fit`/`calibrated` 事件记录决策变更（已有）。
-5. **注入预算控制**（下一轮）：长会话里按 token 预算压缩内核段（只保留与当前任务域相关的段落），metrics 记 `bytes saved`。
-6. **模型画像在线校准**：✅ 已落地 `lib/calibration.js` —— validate 记录带上「族 × 通道」，≥6 条样本后实测最优通道覆盖规则推荐（决策来源 `calibrated`），gateway 按净失败口径剔除，`validate clear` 连校准表一起清。
-7. **四入口口径统一**（持续）：verdict 已收口（status/doctor/CLI/工具/面板载荷共用）；profile 与 metrics 已进 status/doctor/工具，面板载荷仍只有 verdict_* + provider，下一步把 profile/metrics 也写进 `/dsh-purge-safe/status`。
+### M4（本轮全部落地）
+4. **指标回流决策**：✅ doctor 把「gateway fail 多 + 中转」「注入均值偏大」变成具体建议；`fit`/`calibrated`/`trim` 事件记录决策与裁剪。
+5. **注入预算控制**：✅ `lib/budget.js` + 配置 `injectBudgetKB`（**默认关**）。按本轮领域挑段，头段（覆盖声明）与尾两段（风格/锚点）永远保留；真实内核 17.2KB → 9.6KB；无领域信号不裁；小于 256 字节的收益不裁（标记开销吃掉就没意义）。裁剪会改变效果，必须先用 validate A/B 才建议常开——这条写进了 README 与 doctor 建议。
+6. **模型画像在线校准**：✅ `lib/calibration.js` —— validate 记录带「族 × 通道」，≥6 条样本后实测最优通道覆盖规则；gateway 按净失败口径剔除；**新增防抖动**：赢家必须领先 ≥15pp 才换，否则保持现状；`validate clear` 连校准表一起清。
+7. **四入口口径统一**：✅ verdict / profile / 校准 / metrics 已同时出现在 `status` 文本、`/pojia doctor`、`pojia_status`/`pojia_doctor` 工具与 `/dsh-purge-safe/status` 载荷（`armor` + `metrics` 字段）。
+
+### M5（下一轮）
+8. **跨平台首跑**：push 后确认 CI matrix 三平台 × Node 18/20 全绿（基线唯一 △）。
+9. **预算 A/B 基线**：用 `metrics` 的 `trim` 事件 + validate 记录做「压缩 vs 全文」对照，够样本再考虑把 `injectBudgetKB` 变成推荐默认。
+10. **多会话隔离**：确认同一进程里多个会话（含 fork/子代理）各自的画像与校准不串。
 
 ## 四、怎么验（给下一位维护者）
 
