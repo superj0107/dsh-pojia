@@ -1,15 +1,31 @@
 #!/usr/bin/env node
 
+import fs from "node:fs";
 import * as core from "../lib/core.js";
 import * as rules from "../lib/rules.js";
+import * as persona from "../lib/persona.js";
+import * as effectCheck from "../lib/effect-check.js";
+import { verdictLines } from "../lib/verdict.js";
+import { buildDoctor, detectHostVersion } from "../lib/doctor.js";
+import { readProviderInfo, describeProvider } from "../lib/provider-info.js";
 
 const args = process.argv.slice(2);
 
-function printStatus(state) {
+function printStatus(state, extra = {}) {
+  const surface = state.surface || "web";
+  // 桌面版与官方打包 web 都不改 shim：`missing` / 「未定位」只是噪音。
+  const shimNA = surface === "desktop"
+    || [state.shim_cmd, state.shim_ps1, state.shim_bin].every((s) => s === "n/a");
+  const shimNote = surface === "desktop"
+    ? "n/a（桌面版不需要改 shim）"
+    : "n/a（官方打包 Web 不需要改 shim）";
   const out = [];
   out.push("dsh-pojia 状态 / Status");
-  out.push("  宿主 / surface " + (state.surface || "web"));
+  // v1.0.5：先给结论 + 下一步，再给明细（用户反馈「到底算不算成功」）。
+  out.push(...verdictLines(state, { surface }));
+  out.push("  宿主 / surface " + surface);
   out.push("  DSH_HOME      " + state.dsh_home);
+  out.push("  模型 / provider " + describeProvider(extra.provider || readProviderInfo(state.dsh_home)));
   if (state.desktop_install) out.push("  桌面安装       " + state.desktop_install);
   if (state.ai_base) {
     out.push("  插件根 / root  " + state.ai_base);
@@ -19,34 +35,83 @@ function printStatus(state) {
   } else {
     out.push("  插件根 / root  " + core.missingAiBaseMessage());
   }
-  out.push(`  shim 目录      ${state.shim_dir || "未定位 / not found"}`);
+  // 桌面版按设计不改 shim，CLI 也跟着闭嘴，别把 missing 甩给用户当报错。
+  out.push(shimNA
+    ? `  shim 目录      ${shimNote}`
+    : `  shim 目录      ${state.shim_dir || "未定位 / not found"}`);
   out.push(`  备份 / backup  ${state.has_backup ? "有 / yes" : "无 / no"}`);
   out.push(`  注入文件       ${state.override_path}`);
   out.push(`  注入状态       ${state.override_status}`);
   out.push("");
   out.push(`  补丁 ${state.patches_applied}/${core.ALL_PATCHES.length} 已清洗, ${state.patches_pending} 待清洗`);
   for (const p of core.ALL_PATCHES) {
-    const s = state.patch_status[p.id];
+    const s = state.patch_status[p.id] || "n/a";
     const mark = s === "applied" ? "✓" : s === "pending" ? "✗" : "·";
     out.push(`    ${mark} [#${String(p.id).padEnd(2)}] ${p.name.padEnd(30)} ${p.layer}/${p.layer_en} — ${s}`);
   }
   out.push("");
-  out.push(`  shim: dsh.cmd=${state.shim_cmd}  dsh.ps1=${state.shim_ps1}  dsh=${state.shim_bin}`);
+  out.push(shimNA
+    ? `  shim: ${shimNote}`
+    : `  shim: dsh.cmd=${state.shim_cmd}  dsh.ps1=${state.shim_ps1}  dsh=${state.shim_bin}`);
   return out.join("\n");
 }
 
+function readPluginTargets() {
+  try {
+    const pkg = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+    if (Array.isArray(pkg.dshTargets) && pkg.dshTargets.length) return { pkg, targets: pkg.dshTargets };
+    if (pkg.dshTarget) return { pkg, targets: [pkg.dshTarget] };
+    return { pkg, targets: [] };
+  } catch {
+    return { pkg: {}, targets: [] };
+  }
+}
+
+async function runDoctor() {
+  const state = await core.gatherState();
+  const { pkg, targets } = readPluginTargets();
+  const host = detectHostVersion(state.ai_base);
+  let personaInfo = { current: "", total: 0 };
+  try {
+    personaInfo = { current: persona.readState().current, total: persona.listPersonas().length };
+  } catch { /* 人设库还没就绪 */ }
+  let injectBytes = 0;
+  try { injectBytes = fs.statSync(state.override_path).size; } catch { /* 注入文件还没建 */ }
+  const report = buildDoctor({
+    state,
+    config: {},
+    armor: null, // CLI 读不到运行时开关，doctor 会标「不可用」而不是瞎猜
+    persona: personaInfo,
+    validation: effectCheck.report(),
+    probeWarnings: effectCheck.probeWarnings(),
+    provider: readProviderInfo(state.dsh_home),
+    hostVersion: host.version,
+    hostVersionSource: host.source,
+    targets,
+    pluginVersion: String(pkg.version || ""),
+    injectBytes,
+  });
+  console.log(report.text);
+  return report.exitCode;
+}
+
 async function main() {
-  const mode = args.find((a) => ["--apply", "--revert", "--uninstall", "--status", "--edit", "--help"].includes(a));
+  const mode = args.find((a) => ["--apply", "--revert", "--uninstall", "--status", "--doctor", "--edit", "--help"].includes(a));
 
   if (mode === "--help" || args.includes("-h")) {
     console.log(`dsh-pojia 用法:
-  dsh-pojia --status     显示状态
+  dsh-pojia --status     显示状态（第一屏就是结论 + 下一步）
+  dsh-pojia --doctor     诊断：安装 / 注入 / 有效性；退出码 0 全绿 / 1 有待办 / 2 有阻断
   dsh-pojia --apply      应用全部清洗（提示词+代码+shim+override）
   dsh-pojia --revert     回滚还原
   dsh-pojia --uninstall  卸载插件（已应用则先还原）
   dsh-pojia --edit       编辑注入文件 prompt-inject.md
   dsh-pojia --help       帮助`);
     return;
+  }
+
+  if (mode === "--doctor") {
+    process.exit(await runDoctor());
   }
 
   const state = await core.gatherState();
@@ -90,11 +155,12 @@ async function main() {
         else if (st === "missing") console.log(`  - shim ${fname} 不存在 / missing`);
         else console.log(`  ⚠ shim ${fname}: ${st}`);
       }
-    } else {
+    } else if ((state.surface || "web") !== "desktop") {
       console.log("  ⚠ 未定位 shim 目录，跳过注入");
     }
     console.log("");
     console.log("全部完成 / All done。重启 dsh 生效 / Restart dsh to take effect.");
+    console.log("下一步 / next: dsh-pojia --doctor 看结论 → /pojia validate list 跑探针");
   } else if (mode === "--revert") {
     if (state.ai_base || core.enumeratePatchAiBases().length) {
       const { reverted, errors } = await core.revertAllHosts();

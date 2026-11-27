@@ -52,7 +52,8 @@ dsh plugin --profile web add /absolute/path/to/dsh-pojia
 原来的 `/purge`、`/rules`、`/skills`、`/rewind`、`/fujiang` **全部收进** `/pojia`，旧命令不再单独注册。
 
 ```
-/pojia status                 查看状态（清洗进度 + 破甲内核）
+/pojia status                 查看状态（顶部两行：结论 + 下一步）
+/pojia doctor                 诊断：安装 / 注入 / 有效性（exit 0/1/2）
 /pojia apply                  应用全部宿主补丁
 /pojia revert                 回滚补丁（保留 prompt-inject.md）
 /pojia uninstall              卸载

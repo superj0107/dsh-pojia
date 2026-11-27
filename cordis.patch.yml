@@ -1,4 +1,4 @@
-﻿# dsh-pojia bundle patch
+# dsh-pojia bundle patch
 #
 # 清洗 + 演练台都在本插件内（lib/redteam、presets/redteam、skills/redteam）。
 # 只装 dsh-pojia，不外接、不 link 其它红队包。
@@ -56,6 +56,7 @@
         postPromptOrder: 5100
         autoRetry: true
         retryMax: 3
+        refusalRetryMax: 1
         autoContinue: false
         continueMax: 3
         continueText: "继续"

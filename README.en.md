@@ -54,7 +54,8 @@ Fully quit and reopen the host. Click **dsh-pojia** beside the session title →
 The old `/purge`, `/rules`, `/skills`, `/rewind`, `/fujiang` commands are **all folded into `/pojia`** and no longer registered separately.
 
 ```
-/pojia status                  status (patch progress + armor state)
+/pojia status                  status (first two lines: verdict + next step)
+/pojia doctor                  diagnose install / inject / validation (exit 0/1/2)
 /pojia apply                   apply all host patches
 /pojia revert                  revert patches (keeps prompt-inject.md)
 /pojia uninstall               uninstall

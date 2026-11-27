@@ -1,3 +1,40 @@
+# 1.0.5
+
+社区反馈落地：**「到底怎么算成功」**（`status` 只给明细）、**「怎么知道是被网关拦了」**（fail 分不清模型拒绝和中间层拦截）、**「探针能不能自己加」**（内置 8 条不可扩展）、**「桌面版的 missing 是报错吗」**（shim 噪音）。
+
+### 中文
+
+- **`status` 顶部两行就是结论**：第一行 `结论 / verdict:` 三态（`已就绪（补丁 N/N applied，注入开启）` / `待处理：N 项 pending …` / `异常：原因`），第二行 `下一步 / next:` 给一条能直接照抄的命令。下面的补丁明细一个字没改，脚本解析不受影响。
+- **新增 `/pojia doctor`（含 `dsh-pojia --doctor`）**：安装 / 注入 / 有效性三段结论，最后附一段可直接贴论坛的摘要；退出码全绿 `0`、有待办 `1`、有阻断 `2`。`status` 仍是全量明细，`doctor` 只回答「好了没、差什么、下一步」。
+- **shim 噪音按 surface 降噪**：桌面版输出 `shim: n/a（桌面版不需要改 shim）`，不再打印 `dsh.cmd=missing`（私信反馈里就是这个 `missing` 被当成报错）；Web/自定义 surface 输出保持原样，并注明三取值含义（missing/original/patched）。
+- **探针集可自定义**：内置 8 条不动，额外读 `$DSH_HOME/pojia/probes/*.json`（`{ id, kind, prompt, expect?, expectNo? }`，单对象或数组均可），`list` 标注 `[内置]/[自定义]`；id 冲突内置优先并给警告，脏 JSON 只跳过那一条。样例：`examples/probes/example.json`。
+- **fail 归因 + 疑似中转提示**：`record` 可带原因 `refusal` / `gateway` / `transport` / `other`；`report` 按原因出列，gateway 占多数时直接给「换官方 endpoint / 换 provider / 换 armor mode」的建议。`status`/`doctor` 显示当前 `provider / baseURL`，非官方域名标注「疑似中转，过滤行为不可控」。纯本地判定，不发网络请求、不引依赖。
+- **文档防吞**：命令文案统一写 `record 探针id`（论坛/聊天会把 `<id>` 当 HTML 标签吃掉），README 增加 30 秒自检三行；`apply` 成功后追加「下一步：`/pojia doctor` → `/pojia validate list`」。
+- 面板状态接口新增 `verdict_tier` / `verdict_text` / `verdict_next` / `provider`（`baseURL` 已剪掉查询串里的凭证），面板与脚本都不用自己拼明细。
+- 新增 `test/diagnose.test.mjs`：三态判定顺序、doctor 三场景与退出码、自定义探针合并/冲突/脏 JSON、fail 归因与建议、provider 解析与凭证剪裁，以及「仓库里不许再出现会被论坛吃掉的尖括号 id」的文案回归。
+- 面板「应用」成功后不再只弹「已完成」，而是直接给出下一步（`ok.next`：`/pojia doctor` → `/pojia validate list`）；README 补了最小自定义探针示例，`examples/` 已进 npm 包。
+- **独立引擎只读复审后加固**：doctor 的退出码把「验证全 fail / 内核关闭 / 注入总开关关闭」都算作待办（不再假绿）；doctor 只认当前人设的验证记录（不再借用别人设的高分）；探针字段类型异常不再打断整份自定义列表，探针目录读失败会出警告；provider 解析加了行尾注释与 BOM 处理、只认 `llm-pi-ai` 命名空间、屏蔽 `__proto__` 之类的键名；`validate list` 保持 `[探针id]` 在行首（来源标注移到行尾），旧解析不受影响。
+- **命令面不再静默失败**：`/pojia` 拿不到宿主的 `commands` 服务时，旧代码直接 `return`，用户侧表现就是「面板正常、命令敲了没反应」。现在先直连、再 `ctx.inject(["commands"])` 迟绑定重试，仍失败就把原因写进 `commandRegState` 与日志；`/pojia doctor` 会直接打出 `命令 /pojia 已注册 / 未注册：<原因>`（未注册计 exit 1），贴论坛摘要也带这一项。README 补了「输入 /pojia 没反应」的四步自查，以及 `/pojia` 与上游 `/fujiang` 的区分。
+- **验证记录不再并发丢数据**：`validation.json` 的读—改—写改成事务（同目录 `validation.json.lock` 互斥，原子 rename 落盘）。两个宿主共用一个 `DSH_HOME` 同时 `record` 时，后写的不会再覆盖先写的；锁被进程崩溃留下超过 10 秒按过期清理，不会一次崩死就永久写不进去。冲突时命令明确回「验证记录正被另一个进程写入，请稍后重试」，不会假装成功。
+- 同时包含 1.0.4 未发布的稳定性改动：单段内核注入（默认不再重复注入两份同文）、破甲评分对「折中话术」的窗口收窄与误判修正、continue-retry 的有界补跑。
+
+### English
+
+- `status` now opens with a verdict and a next step (`ready` / `pending` / `broken` plus one copy-pasteable command); the per-patch detail lines are byte-identical, so existing parsers keep working.
+- New `/pojia doctor` (and `dsh-pojia --doctor`): install / inject / validation conclusions plus a paste-ready summary for the forum; exit code `0` all green, `1` has todos, `2` blocked.
+- Shim noise is surface-aware: desktop prints `shim: n/a（桌面版不需要改 shim）` instead of `dsh.cmd=missing`; other surfaces keep the original line with the three states documented.
+- Probe sets are extensible: the 8 built-ins stay, plus `$DSH_HOME/pojia/probes/*.json` (`{ id, kind, prompt, expect?, expectNo? }`, object or array); `list` tags `[内置]/[自定义]`, built-in ids win on conflict with a warning, broken JSON only skips that file.
+- `record` accepts a failure reason (`refusal` / `gateway` / `transport` / `other`); `report` breaks failures down by reason and suggests switching endpoint/provider/armor mode when gateway dominates. `status`/`doctor` show the current `provider / baseURL` and flag non-official hosts as suspected relays. All local, no network calls, no new dependencies.
+- Docs no longer print command examples with a raw angle-bracket id (forums eat it as an HTML tag); README gets a 30-second self-check; a successful `apply` ends with the next step.
+- New `test/diagnose.test.mjs` covers verdict ordering, doctor exit codes, custom probe merging/conflicts/dirty JSON, failure attribution and provider parsing.
+- A successful panel Apply now shows the next step (`ok.next`: `/pojia doctor` → `/pojia validate list`); README gained a minimal custom-probe example and `examples/` ships in the npm package.
+- Hardened after an independent read-only review: doctor treats all-fail validation, disabled armor and disabled injection as todos (no more false green), only counts the current persona's validation records, tolerates malformed probe fields and unreadable probe dirs, parses provider settings with comment/BOM handling inside the `llm-pi-ai` namespace only (and rejects `__proto__`-style keys), and keeps `[probe-id]` at the start of `validate list` lines for backward-compatible parsing.
+- Also includes the unreleased 1.0.4 stability work: single-segment armor injection, tighter fallback-wording gating, bounded continue-retry.
+- Validation records can no longer be lost to concurrency: the read-modify-write of `validation.json` is now a transaction (`validation.json.lock` next to it, atomic rename on write). Two hosts sharing one `DSH_HOME` no longer overwrite each other's `record`; a lock left behind by a crashed process is treated as stale after 10s, and a real conflict answers "another process is writing, retry" instead of pretending success.
+- The command surface no longer fails silently: when the host's `commands` service is unavailable, `/pojia` is retried through `ctx.inject(["commands"])` and the failure is recorded; `/pojia doctor` now prints `command /pojia registered / not registered: <reason>` (a miss counts as exit 1), and README gained a four-step "typing /pojia does nothing" checklist plus how to tell `/pojia` apart from the upstream `/fujiang`.
+
+---
+
 # 1.0.3
 
 `pnpm install` 失败不再假装成功：如实报错、能自动修的替你修、修不了也保证插件能加载。

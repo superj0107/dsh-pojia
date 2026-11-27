@@ -54,7 +54,8 @@ dsh plugin --profile web add /absolute/path/to/dsh-pojia
 旧 `/purge` `/rules` `/skills` `/rewind` `/fujiang` は**すべて `/pojia` に統合**され、個別には登録されません。
 
 ```
-/pojia status                  状態表示（パッチ進捗 + カーネル）
+/pojia status                  状態表示（先頭 2 行が結論 + 次の一手）
+/pojia doctor                  診断：導入 / 注入 / 有効性（exit 0/1/2）
 /pojia apply                   全ホストパッチを適用
 /pojia revert                  パッチを戻す（prompt-inject.md は保持）
 /pojia uninstall               アンインストール

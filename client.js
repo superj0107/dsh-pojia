@@ -935,6 +935,7 @@ const productTheme = createProductTheme();
 			"action.revert": "还原",
 			"action.uninstall": "卸载",
 			"ok.done": "已完成",
+			"ok.next": "下一步：/pojia doctor 看结论，/pojia validate list 跑探针验证有效性",
 			"err.action": "失败: {error}",
 			"err.status": "读取失败: {error}",
 			"err.override": "读取失败: {error}",
@@ -1343,6 +1344,7 @@ const productTheme = createProductTheme();
 			"action.revert": "Restore",
 			"action.uninstall": "Uninstall",
 			"ok.done": "Done",
+			"ok.next": "Next: /pojia doctor for the verdict, /pojia validate list to run probes",
 			"err.action": "Failed: {error}",
 			"err.status": "Read failed: {error}",
 			"err.override": "Read failed: {error}",
@@ -4128,7 +4130,8 @@ body:not([data-ds-dark-theme]) .dshp-auth-ops button.primary{background:var(--ds
 								return;
 							}
 							if (action === "apply") {
-								setNotice({ kind: "ok", text: tr("ok.done") });
+								// v1.0.5：装完直接给下一步，别让用户自己猜（T7 面板 toast）。
+								setNotice({ kind: "ok", text: tr("ok.done") + " · " + tr("ok.next") });
 								loadAll();
 								if (d.ask_restart || d.restarting || d.needs_full_quit) {
 									suppressRestartAsk.current = false;
