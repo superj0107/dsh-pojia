@@ -67,7 +67,7 @@
 
 ```bash
 cd dsh-pojia
-npm run gate        # 一条命令 == 语法检查 + 48 单测 + 30 协同自检 + 14 子代理自检（跨平台，不依赖 bash 通配符）
+npm run gate        # 一条命令 == 语法检查 + 57 单测 + 33 协同自检 + 14 子代理自检 + 13 运行时状态自检（跨平台）
 npm test            # 只跑单测时用这个
 node bin/dsh-pojia.js --doctor; echo $?    # 退出码 0 全绿 / 1 有待办 / 2 有阻断
 node bin/dsh-pojia.js --doctor --json      # 机器可读（exit_code / verdict / patches / provider / summary）

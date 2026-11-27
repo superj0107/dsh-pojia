@@ -35,6 +35,7 @@ steps.push(run("语法检查 / syntax", [path.join("scripts", "check-syntax.mjs"
 steps.push(run(`单测 / unit (${testFiles.length} 个文件)`, [path.join("scripts", "run-tests.mjs")]));
 steps.push(run("协同自检 / co-op", [path.join("scripts", "e2e-coop.mjs")]));
 steps.push(run("子代理自检 / subagent", [path.join("scripts", "e2e-subagent.mjs")]));
+steps.push(run("运行时状态自检 / armor state", [path.join("scripts", "e2e-armor-state.mjs")]));
 
 process.stdout.write("\n=== 门禁汇总 / gate summary ===\n");
 for (const s of steps) process.stdout.write(`${s.ok ? "ok  " : "FAIL"} ${s.label}\n`);

@@ -80,6 +80,13 @@ try {
     };
     return agent;
   };
+  // 插件根 ctx 的 systemPrompt：默认不该被自适应路径用到（用了就说明串味）。
+  ctx.systemPrompt = {
+    section() {
+      globalSections.mounted += 1;
+      return () => { globalSections.disposed += 1; };
+    },
+  };
   const claudeAgent = makeAgent("anthropic", "claude-opus-5-5");
   const deepseekAgent = makeAgent("deepseek", "deepseek-chat");
 
@@ -140,11 +147,22 @@ try {
     const validateUrl = pathToFileURL(path.join(root, "lib", "effect-check.js")).href;
     const calib = await import(calibUrl);
     const validate = await import(validateUrl);
-    // 实测场景：user 通道 6 条全过、both 通道 6 条全被拒 → 该族最优应是 user
-    calib.writeLastProfile({ family: "claude", mode: "user", provider: "anthropic", model: "claude-opus-5-5" });
-    for (let i = 0; i < 6; i += 1) validate.recordProbe("normal-1", "pass");
-    calib.writeLastProfile({ family: "claude", mode: "both", provider: "anthropic", model: "claude-opus-5-5" });
-    for (let i = 0; i < 6; i += 1) validate.recordProbe("refuse-1", "fail", "模型拒绝", "refusal");
+    // 实测场景：user 通道 6 条全过、both 通道 6 条全被拒 → 该族最优应是 user。
+    // 必须带 sessionId 记录：没有可靠归属的结果按设计不进校准聚合。
+    const CALIB_SESSION = "sess-calib";
+    const snap = (mode) => ({ family: "claude", mode, provider: "anthropic", model: "claude-opus-5-5" });
+    calib.writeLastProfile(snap("user"), { sessionId: CALIB_SESSION });
+    for (let i = 0; i < 6; i += 1) validate.recordProbe("normal-1", "pass", "", "other", { sessionId: CALIB_SESSION });
+    calib.writeLastProfile(snap("both"), { sessionId: CALIB_SESSION });
+    for (let i = 0; i < 6; i += 1) {
+      validate.recordProbe("refuse-1", "fail", "模型拒绝", "refusal", { sessionId: CALIB_SESSION });
+    }
+    // 归属不可靠的记录必须被排除（否则别人的会话结果会污染校准）
+    const beforeUnattributed = calib.readCalibration().byFamily?.claude?.samples || 0;
+    validate.recordProbe("refuse-2", "pass");
+    const afterUnattributed = calib.readCalibration().byFamily?.claude?.samples || 0;
+    check("无归属记录不进校准聚合", beforeUnattributed === afterUnattributed,
+      `before=${beforeUnattributed} after=${afterUnattributed}`);
 
     const table = calib.readCalibration();
     check("校准表算出 claude 最优 = user", table.byFamily?.claude?.bestMode === "user",
@@ -159,7 +177,11 @@ try {
     })(), String(afterCalib.calibrationLine || ""));
     const statusAfter = await registry.tools.find((t) => t.name === "pojia_status").execute({});
     check("校准后 status 出现「校准 / calibration」行", /校准 \/ calibration/.test(statusAfter.text));
-    check("校准后仍会注入（通道切了不等于停）", (decision3.messages || []).length >= 0);
+    check(
+      "校准后仍然可用（返回结构完好、没抛异常）",
+      Boolean(decision3) && Array.isArray(decision3.messages) && afterCalib.effectiveMode === "user",
+      JSON.stringify({ effectiveMode: afterCalib.effectiveMode, messages: (decision3.messages || []).length }),
+    );
   }
 
   // ---- 注入预算：拿真实内核正文验证「按领域挑段」不会砍掉头尾 ----

@@ -99,19 +99,28 @@ test("calibration: 画像快照与校准表读写（含损坏容错）", async (
 test("calibration: validate 记录自动带上画像，并在记录后刷新校准表", async () => {
   const c = await import("../lib/calibration.js");
   const v = await import("../lib/effect-check.js");
-  c.writeLastProfile({ family: "claude", mode: "both", provider: "anthropic", model: "claude-opus-5-5" });
+  const SESSION = "sess-claude";
+  c.writeLastProfile({ family: "claude", mode: "both", provider: "anthropic", model: "claude-opus-5-5" }, { sessionId: SESSION });
 
-  assert.equal(v.recordProbe("refuse-1", "pass").ok, true);
+  assert.equal(v.recordProbe("refuse-1", "pass", "", "other", { sessionId: SESSION }).ok, true);
   const rows = v.readValidation().records;
   assert.equal(rows[0].family, "claude");
   assert.equal(rows[0].mode, "both");
+  assert.equal(rows[0].attribution, "session", "给了 sessionId 就必须是可靠归属");
 
   // 再灌到门槛，校准表应出现 measured
-  for (let i = 0; i < 5; i += 1) v.recordProbe("refuse-1", "pass");
-  for (let i = 0; i < 6; i += 1) v.recordProbe("normal-1", "fail", "", "refusal");
+  for (let i = 0; i < 5; i += 1) v.recordProbe("refuse-1", "pass", "", "other", { sessionId: SESSION });
+  for (let i = 0; i < 6; i += 1) v.recordProbe("normal-1", "fail", "", "refusal", { sessionId: SESSION });
   const cal = c.readCalibration();
   assert.ok(cal.byFamily.claude, JSON.stringify(cal));
   assert.equal(cal.byFamily.claude.modes.both.pass, 6);
+
+  // 归属不可靠的记录（没给 sessionId）保留，但不进校准聚合
+  const before = c.readCalibration().byFamily.claude.samples;
+  assert.equal(v.recordProbe("refuse-2", "fail", "", "refusal").ok, true);
+  const last = v.readValidation().records.at(-1);
+  assert.equal(last.attribution, "fallback", "没给会话 id 时标 fallback");
+  assert.equal(c.readCalibration().byFamily.claude.samples, before, "fallback 记录不许改变校准");
 
   // 清空验证记录必须同时清校准，避免没有数据支撑的「最优通道」
   v.clearValidation();
@@ -188,6 +197,27 @@ test("calibration: 历史只在结论变化时追加，且可读回", async () =
   // 清空校准也要落一条历史（否则看不出「什么时候被清过」）
   c.writeCalibration({ byFamily: {} });
   assert.equal(c.readCalibrationHistory(5).length, 3);
+});
+
+test("calibration: 门槛按有效样本算（gateway 不计入资格）", async () => {
+  const c = await import("../lib/calibration.js");
+  // 1 pass + 5 gateway：原始 6 条，但有效样本只有 1 条 → 不许判 measured
+  const thin = c.calibrate([
+    rec("claude", "both", "pass"),
+    ...Array.from({ length: 5 }, () => rec("claude", "both", "fail", "gateway")),
+  ]);
+  assert.equal(thin.byFamily.claude.modes.both.samples, 6, "原始条数照实展示");
+  assert.equal(thin.byFamily.claude.modes.both.effectiveSamples, 1, "有效样本剔除 gateway");
+  assert.equal(thin.byFamily.claude.confidence, "insufficient");
+  assert.equal(thin.byFamily.claude.bestMode, "");
+
+  // 补到 6 条有效样本才允许覆盖
+  const enough = c.calibrate([
+    ...Array.from({ length: 6 }, () => rec("claude", "both", "pass")),
+    ...Array.from({ length: 5 }, () => rec("claude", "both", "fail", "gateway")),
+  ]);
+  assert.equal(enough.byFamily.claude.confidence, "measured");
+  assert.equal(enough.byFamily.claude.bestMode, "both");
 });
 
 test("cleanup", () => {

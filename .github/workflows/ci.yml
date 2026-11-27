@@ -29,6 +29,8 @@ jobs:
 
       - name: Subagent injection self-check (subagentInject 开关)
         run: node scripts/e2e-subagent.mjs
+      - name: Armor state self-check (迁移 / both / off-on / 子代理段)
+        run: node scripts/e2e-armor-state.mjs
 
       - name: Installer script syntax (bash)
         run: |
@@ -70,3 +72,5 @@ jobs:
         run: node scripts/e2e-coop.mjs
       - name: Subagent injection self-check
         run: node scripts/e2e-subagent.mjs
+      - name: Armor state self-check (迁移 / both / off-on / 子代理段)
+        run: node scripts/e2e-armor-state.mjs
