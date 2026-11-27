@@ -20,7 +20,8 @@ jobs:
           node-version: '20'
       - name: Syntax check
         run: node scripts/check-syntax.mjs
-      - name: Unit tests
+      # npm test 指向 scripts/run-tests.mjs：自己枚举测试文件，避免 Windows 上通配符不展开（CI 曾因此假失败）
+      - name: Unit tests (cross-platform launcher)
         run: npm test
 
       - name: Co-op self-check (模型画像 → 注入 → 指标 → status/doctor)
@@ -63,7 +64,7 @@ jobs:
           node-version: ${{ matrix.node }}
       - name: Syntax check
         run: node scripts/check-syntax.mjs
-      - name: Unit tests
+      - name: Unit tests (cross-platform launcher)
         run: npm test
       - name: Co-op self-check
         run: node scripts/e2e-coop.mjs

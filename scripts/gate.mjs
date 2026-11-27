@@ -32,7 +32,7 @@ const testFiles = readdirSync(path.join(root, "test"))
 
 const steps = [];
 steps.push(run("语法检查 / syntax", [path.join("scripts", "check-syntax.mjs")]));
-steps.push(run(`单测 / unit (${testFiles.length} 个文件)`, ["--test", ...testFiles]));
+steps.push(run(`单测 / unit (${testFiles.length} 个文件)`, [path.join("scripts", "run-tests.mjs")]));
 steps.push(run("协同自检 / co-op", [path.join("scripts", "e2e-coop.mjs")]));
 steps.push(run("子代理自检 / subagent", [path.join("scripts", "e2e-subagent.mjs")]));
 
