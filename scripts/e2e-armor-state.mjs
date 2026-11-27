@@ -43,15 +43,26 @@ async function boot(config, { preState = null } = {}) {
   fs.writeFileSync(path.join(home, "prompt-inject.md"), "# 注入正文\n", "utf8");
   if (preState) fs.writeFileSync(path.join(home, "dsh-pojia-armor.state.json"), JSON.stringify(preState, null, 2), "utf8");
 
-  const registry = { commands: [], tools: [], listeners: {} };
+  const registry = { commands: [], tools: [], listeners: {}, global: { mounted: 0, disposed: 0 }, disposers: [] };
   const services = { commands: { register(c) { registry.commands.push(c); return () => {}; } } };
   const ctx = {
     baseUrl: pathToFileURL(root).href,
     get: (n) => services[n],
     inject: (_n, fn) => { try { fn({ get: () => ({ await: () => Promise.resolve() }) }); } catch { /* 宿主差异 */ } },
-    effect: (fn) => { try { fn(); } catch { /* 宿主差异 */ } },
+    effect: (fn) => {
+      // 保存 disposer，才能验证卸载清理（之前直接丢掉，覆盖不到）
+      try {
+        const d = fn();
+        if (typeof d === "function") registry.disposers.push(d);
+      } catch { /* 宿主差异 */ }
+    },
     on: (name, fn) => { (registry.listeners[name] ||= []).push(fn); return () => {}; },
-    systemPrompt: { section: () => () => {} },
+    systemPrompt: {
+      section() {
+        registry.global.mounted += 1;
+        return () => { registry.global.disposed += 1; };
+      },
+    },
     tools: { register(t) { registry.tools.push(t); return () => {}; } },
   };
   const mod = await import(pathToFileURL(path.join(root, "lib", "index.js")).href);
@@ -90,7 +101,9 @@ try {
     check('配置 armorMode:"both"：钉住', p.pinnedMode === true, String(p.pinnedMode));
     const agent = makeAgent({ id: "sess-both" });
     await turn(preStep, agent);
-    check("配置 armorMode:both：全局挂载生效（该会话不需要自挂）", agent.sections.mounted === 0,
+    check("配置 armorMode:both：全局段真的挂上了", registry.global.mounted >= 1,
+      `global=${registry.global.mounted}`);
+    check("配置 armorMode:both：会话自身不需要再挂", agent.sections.mounted === 0,
       `agent=${agent.sections.mounted}`);
   }
 
@@ -126,6 +139,53 @@ try {
   }
 } catch (e) {
   check("执行未抛异常", false, String(e?.message || e));
+}
+
+// ---- 压缩标签：第二步没追加正文时，快照不能把 trimmed 改回 false（预算 A/B 分桶靠它） ----
+{
+  const calib = await import(pathToFileURL(path.join(root, "lib", "calibration.js")).href);
+  const { registry } = await boot({ injectBudgetKB: 4 });
+  const preStep = (registry.listeners["agent/pre-step"] || [])[0];
+  const agent = makeAgent({ id: "sess-trim" });
+  // 带领域信号才会真的裁剪（没有信号时设计上不裁，宁可超预算）
+  const trimTurn = () => preStep(
+    {
+      agent,
+      messages: [{ role: "user", content: [{ type: "text", text: "写个小黄文，要露骨一点" }] }],
+      step: 1,
+      modelSelection: { provider: "anthropic", model: "claude-opus-5-5" },
+    },
+    async () => ({ kind: "ok", messages: [] }),
+  );
+  await trimTurn();
+  const first = calib.readLastProfile("sess-trim");
+  check("压缩标签：首轮记录为 trimmed", first?.trimmed === true, JSON.stringify(first || {}));
+  await trimTurn(); // 第二轮历史里已有内核 → 不追加
+  const second = calib.readLastProfile("sess-trim");
+  check("压缩标签：第二轮不追加时不覆盖成全文", second?.trimmed === true, JSON.stringify(second || {}));
+}
+
+// ---- 配置优先：磁盘写着「未钉住」+ 配置显式指定通道 → 用配置 ----
+{
+  const { ctx } = await boot({ armorMode: "both" }, { preState: { version: 1, enabled: true, mode: "user", pinnedMode: false } });
+  const p = ctx._pojiaArmor.statePayload();
+  check("配置覆盖磁盘未钉住：mode = both", p.mode === "both", String(p.mode));
+  check("配置覆盖磁盘未钉住：钉住", p.pinnedMode === true, String(p.pinnedMode));
+}
+
+// ---- 卸载清理：执行 effect disposer 后，全局段与各会话段都应摘掉 ----
+{
+  const { registry } = await boot({});
+  const agent = makeAgent({ id: "sess-unload" });
+  const preStep = (registry.listeners["agent/pre-step"] || [])[0];
+  await turn(preStep, agent);
+  const beforeAgent = agent.sections.mounted - agent.sections.disposed;
+  for (const d of registry.disposers.reverse()) {
+    try { d(); } catch { /* 有的 disposer 需要宿主上下文 */ }
+  }
+  const afterAgent = agent.sections.mounted - agent.sections.disposed;
+  check("卸载清理：插件 effect 清理后会话段归零", afterAgent < beforeAgent || afterAgent === 0,
+    `before=${beforeAgent} after=${afterAgent}`);
 }
 
 const failed = results.filter((r) => !r.ok);

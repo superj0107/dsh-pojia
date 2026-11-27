@@ -220,6 +220,19 @@ test("calibration: 门槛按有效样本算（gateway 不计入资格）", async
   assert.equal(enough.byFamily.claude.bestMode, "both");
 });
 
+test("calibration: 有效命中率并列时判 tie（样本数不等也算）", async () => {
+  const c2 = await import("../lib/calibration.js");
+  // 两个通道都 100%，但样本数 6 vs 7 —— 仍是并列，不许判 measured（否则会在两个一样好的通道间抖）
+  const table = c2.calibrate([
+    ...Array.from({ length: 6 }, () => rec("claude", "both", "pass")),
+    ...Array.from({ length: 7 }, () => rec("claude", "user", "pass")),
+  ]);
+  assert.equal(table.byFamily.claude.confidence, "tie");
+  assert.equal(table.byFamily.claude.bestMode, "");
+  const applied = c2.applyCalibration({ family: "claude", recommendedMode: "both" }, table, { currentMode: "both" });
+  assert.equal(applied.source, "profile", "tie 时继续用规则推荐");
+});
+
 test("cleanup", () => {
   if (tmpHome) rmSync(tmpHome, { recursive: true, force: true });
 });
