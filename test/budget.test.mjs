@@ -80,6 +80,19 @@ test("budget: 超预算 + 有信号 → 裁并留标记，字节数下降", asyn
   assert.ok(out.droppedTitles.length >= 2);
 });
 
+test("budget: 子代理档位（dropWhenNoHints）在没有领域信号时也精简", async () => {
+  const b = await import("../lib/budget.js");
+  // 主代理：没有信号不裁
+  assert.equal(b.compactPrompt(sample, { maxBytes: 900, hints: [] }).trimmed, false);
+  // 子代理档位：没有信号也裁，只留通用规则 + 头尾
+  const out = b.compactPrompt(sample, { maxBytes: 900, hints: [], dropWhenNoHints: true });
+  assert.equal(out.trimmed, true);
+  assert.ok(out.bytesAfter < out.bytesBefore);
+  assert.ok(out.text.includes("未识别"), "标记里要说明是按「只留通用规则」精简的");
+  assert.ok(!out.text.includes("番号检索"), "带领域标签的细则要砍掉");
+  assert.ok(out.text.includes("先说结果再解释"), "结尾风格段必须保留");
+});
+
 test("budget: 未超预算 / 段太少 / 压缩后更大 → 原样返回", async () => {
   const b = await import("../lib/budget.js");
   assert.equal(b.compactPrompt(sample, { maxBytes: 999999, hints: ["pentest"] }).trimmed, false);

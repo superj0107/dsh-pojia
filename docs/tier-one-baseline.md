@@ -58,10 +58,10 @@
 8. **多会话隔离**：✅ 自适应路径的 system 段按 `agent.ctx.systemPrompt` 挂载（会话级），全局挂载只用于用户钉住通道；e2e 用两个不同模型的会话验证互不串味（Claude 挂 1 段、DeepSeek 挂 0 段、全局计数 0）。
 9. **子代理语义**：✅ `subagentInject` 开关（默认注入）+ 指标 `sub:true` 单独统计子代理轮次；关掉时子代理不挂段不追消息且只记一条 skipped 指标；`scripts/e2e-subagent.mjs` 9 项断言进 CI。
 
-### M6（本轮已落地第 11 项）
+### M6（本轮全部落地）
 10. **预算 A/B 基线**（下一轮）：用 `trim` 事件 + validate 记录做「压缩 vs 全文」对照，够样本再考虑把 `injectBudgetKB` 变成推荐默认。
 11. **面板呈现协同层**：✅ 设置页「清洗」章新增只读协同卡片（画像 / 生效通道 / 校准 / 指标），CSS 走 `lib/glass-skin.css` 源文件 + `build:client` 进包，`test/client-contract.test.mjs` 4 项守住四类信息、中英文案、CSS 进包与「只读无按钮」。
-12. **子代理精简档位**（下一轮）：在 `subagentInject` 之上再加「子代理只注入精简版」。
+12. **子代理精简档位**：✅ 配置 `subagentBudgetKB`（KB）。>0 时子代理只拿「通用规则 + 头尾」的精简内核（无领域信号也精简），主代理保持全文；实测 17.2KB → 2.1KB，`e2e-subagent.mjs` 14 项断言覆盖（含 `trim` 事件 `sub:true`、省下字节数）。
 
 ## 四、怎么验（给下一位维护者）
 

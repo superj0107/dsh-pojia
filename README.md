@@ -191,6 +191,7 @@ HTTP 路由面板沿用内部路径 `/dsh-purge-safe/*`（用户不可见，保�
 | `autoProfile` | `true` | 按宿主 `modelSelection` 自动选注入通道（用户手动切过通道即钉住，不再覆盖） |
 | `subagentInject` | `true` | 子代理会话是否也注入内核；关掉可显著省 token（判据只看委派来源/深度） |
 | `injectBudgetKB` | `0`（关） | >0 时按本轮领域挑段压缩内核，头尾段永远保留；改完记得 `validate` 对比 |
+| `subagentBudgetKB` | `0`（关） | 子代理专用的更小额度（KB）：>0 时子代理只拿「通用规则 + 头尾」的精简版，主代理仍用全文 |
 | `armorMode` | 空 | 显式钉住通道（`user` / `legacy` / `both`），写了就视为用户表态 |
 
 ## 可切换人设库

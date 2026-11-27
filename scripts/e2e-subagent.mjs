@@ -122,6 +122,32 @@ try {
     const summary = (await registry.tools.find((t) => t.name === "pojia_status").execute({})).text;
     check("关闭后：status 仍能出结论行", /结论 \/ verdict/.test(summary));
   }
+
+  // ---- subagentBudgetKB：子代理拿压缩版内核，主代理保持全文 ----
+  {
+    const { home, registry } = await boot({ subagentBudgetKB: 4 });
+    const preStep = (registry.listeners["agent/pre-step"] || [])[0];
+
+    const child = makeAgent({ delegationDepth: 1 });
+    const childDecision = await runTurn(preStep, child, "deepseek", "deepseek-chat");
+    const textOf = (m) => (Array.isArray(m?.content) ? m.content.map((c) => c?.text || "").join("") : String(m?.content || ""));
+    const childArmor = (childDecision.messages || []).find((m) => m?.source?.kind === "fujiang-armor");
+    const childText = textOf(childArmor);
+    const childBytes = Buffer.byteLength(childText);
+    check("子代理拿到压缩版内核（<8KB）", childBytes > 0 && childBytes < 8 * 1024, `bytes=${childBytes}`);
+    check("压缩版仍带预算标记", childText.includes("已按预算省略"));
+
+    const root = makeAgent({}, "deepseek", "deepseek-chat");
+    const rootDecision = await runTurn(preStep, root, "deepseek", "deepseek-chat");
+    const rootArmor = (rootDecision.messages || []).find((m) => m?.source?.kind === "fujiang-armor");
+    const rootBytes = Buffer.byteLength(textOf(rootArmor));
+    check("主代理仍是全文内核（> 子代理）", rootBytes > childBytes, `root=${rootBytes} child=${childBytes}`);
+
+    const events = readEvents(home);
+    const trims = events.filter((e) => e.kind === "trim");
+    check("压缩事件带 sub:true", trims.some((t) => t.sub === true), JSON.stringify(trims[0] || {}));
+    check("指标里能看到省下的字节", (trims[0]?.saved || 0) > 1024, String(trims[0]?.saved || 0));
+  }
 } catch (e) {
   check("执行未抛异常", false, String(e?.message || e));
 }
