@@ -31,7 +31,7 @@
 | 3 | 自适应有边界 | ✔ | `decideInjection()` 优先级 pinned > profile > default；`/pojia armor mode` 置 `pinnedMode` |
 | 4 | 可观测 | ✔ | `lib/metrics.js` → `$DSH_HOME/pojia/metrics.jsonl`（注入/决策/校准/压缩/子代理/**每轮拒答判定**）；doctor「协同」行 + gateway fail 建议 |
 | 5 | 可验证 | ✔ | 内置 8 条探针 + 自定义 + 命中率 + refusal/gateway/transport 归因 |
-| 6 | 可诊断 | ✔ | `/pojia doctor` 四段结论 + 摘要 + 退出码 0/1/2 |
+| 6 | 可诊断 | ✔ | `/pojia doctor` 四段结论 + 摘要 + 退出码 0/1/2；`--doctor --json` 给脚本/CI 判据 |
 | 7 | 可回滚 | ✔ | `revert` / `uninstall` 保留 `prompt-inject.md`；`--revert` 有冒烟 |
 | 8 | 失败不静默 | ✔ | 命令面注册失败会进 `commandRegState` 并在 doctor 打印；锁冲突/注入缺失都报错 |
 | 9 | 并发安全 | ✔ | `validation.json` 事务（owner 校验 + 原子 rename + 严格读） |
@@ -70,6 +70,7 @@ cd dsh-pojia
 npm run gate        # 一条命令 == 语法检查 + 48 单测 + 30 协同自检 + 14 子代理自检（跨平台，不依赖 bash 通配符）
 npm test            # 只跑单测时用这个
 node bin/dsh-pojia.js --doctor; echo $?    # 退出码 0 全绿 / 1 有待办 / 2 有阻断
+node bin/dsh-pojia.js --doctor --json      # 机器可读（exit_code / verdict / patches / provider / summary）
 node scripts/build-client.mjs && git diff --stat client.js   # 面板构建幂等（改过面板 CSS/JSX 才需要）
 ```
 

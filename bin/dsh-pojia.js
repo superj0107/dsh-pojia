@@ -8,6 +8,7 @@ import * as effectCheck from "../lib/effect-check.js";
 import { verdictLines } from "../lib/verdict.js";
 import { buildDoctor, detectHostVersion } from "../lib/doctor.js";
 import { readProviderInfo, describeProvider } from "../lib/provider-info.js";
+import * as metrics from "../lib/metrics.js";
 
 const args = process.argv.slice(2);
 
@@ -67,7 +68,7 @@ function readPluginTargets() {
   }
 }
 
-async function runDoctor() {
+async function collectDoctor() {
   const state = await core.gatherState();
   const { pkg, targets } = readPluginTargets();
   const host = detectHostVersion(state.ai_base);
@@ -77,6 +78,7 @@ async function runDoctor() {
   } catch { /* 人设库还没就绪 */ }
   let injectBytes = 0;
   try { injectBytes = fs.statSync(state.override_path).size; } catch { /* 注入文件还没建 */ }
+  const provider = readProviderInfo(state.dsh_home);
   const report = buildDoctor({
     state,
     config: {},
@@ -84,24 +86,63 @@ async function runDoctor() {
     persona: personaInfo,
     validation: effectCheck.report(),
     probeWarnings: effectCheck.probeWarnings(),
-    provider: readProviderInfo(state.dsh_home),
+    metrics: (() => { try { return metrics.summarize(); } catch { return null; } })(),
+    provider,
     hostVersion: host.version,
     hostVersionSource: host.source,
     targets,
     pluginVersion: String(pkg.version || ""),
     injectBytes,
   });
+  return { report, state, provider, targets, host, pluginVersion: String(pkg.version || "") };
+}
+
+async function runDoctor() {
+  const { report } = await collectDoctor();
   console.log(report.text);
   return report.exitCode;
 }
 
+/** 机器可读输出：给 CI / 脚本判据用，别让人去正则匹配中文。 */
+async function runDoctorJson() {
+  const { report, state, provider, targets, host, pluginVersion } = await collectDoctor();
+  const payload = {
+    ok: report.exitCode === 0,
+    exit_code: report.exitCode,
+    verdict: {
+      tier: report.verdict.tier,
+      text: report.verdict.text,
+      next: report.verdict.next,
+    },
+    surface: state.surface || "",
+    plugin_version: pluginVersion,
+    host_version: host.version || "",
+    host_version_source: host.source || "",
+    targets,
+    patches: {
+      applied: report.verdict.applied,
+      total: report.verdict.total,
+      pending: report.verdict.pending,
+      skipped: report.verdict.skipped,
+      gap: report.verdict.gap,
+    },
+    provider: { provider: provider.provider, model: provider.model, base_url: provider.baseURL, relay: provider.relay },
+    summary: report.summary,
+    text: report.text,
+  };
+  console.log(JSON.stringify(payload, null, 2));
+  return report.exitCode;
+}
+
 async function main() {
+  const asJson = args.includes("--json");
   const mode = args.find((a) => ["--apply", "--revert", "--uninstall", "--status", "--doctor", "--edit", "--help"].includes(a));
 
   if (mode === "--help" || args.includes("-h")) {
     console.log(`dsh-pojia 用法:
   dsh-pojia --status     显示状态（第一屏就是结论 + 下一步）
-  dsh-pojia --doctor     诊断：安装 / 注入 / 有效性；退出码 0 全绿 / 1 有待办 / 2 有阻断
+  dsh-pojia --doctor     诊断：安装 / 注入 / 有效性 / 命令面；退出码 0 全绿 / 1 有待办 / 2 有阻断
+  dsh-pojia --doctor --json   同上，输出机器可读 JSON（给脚本/CI 用）
   dsh-pojia --apply      应用全部清洗（提示词+代码+shim+override）
   dsh-pojia --revert     回滚还原
   dsh-pojia --uninstall  卸载插件（已应用则先还原）
@@ -112,7 +153,8 @@ async function main() {
 
   if (mode === "--doctor") {
     // 不要 process.exit() 硬砍：POSIX 管道背压下会截断诊断输出。
-    process.exitCode = await runDoctor();
+    if (asJson) process.exitCode = await runDoctorJson();
+    else process.exitCode = await runDoctor();
     return;
   }
 

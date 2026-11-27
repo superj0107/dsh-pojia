@@ -99,7 +99,9 @@ test("metrics: 记录 + 汇总 + 脏行容错 + 翻滚", async () => {
 
   const sum = m.summarize();
   assert.equal(sum.total, 7);
-  assert.equal(sum.byKind.inject, 3);
+  assert.equal(sum.byKind.inject, 3, "inject 类事件共 3 条（含一条 skipped）");
+  assert.equal(sum.injectCount, 2, "真正注入的次数不能把 skipped 算进去");
+  assert.equal(sum.injectSkipped, 1);
   assert.equal(sum.families.claude.inject, 2);
   assert.equal(sum.avgInjectBytes, 3072, "skipped 的 inject 不计入字节均值");
   assert.equal(sum.gatewayFails, 1);
@@ -108,7 +110,8 @@ test("metrics: 记录 + 汇总 + 脏行容错 + 翻滚", async () => {
   assert.equal(sum.trim.count, 1);
   assert.equal(sum.trim.savedBytes, 4096);
   const line = m.summarizeLine(sum);
-  assert.ok(line.includes("注入 3 次"), line);
+  assert.ok(line.includes("注入 2 次"), line);
+  assert.ok(line.includes("跳过 1"), line);
   assert.ok(line.includes("子代理轮次 2"), line);
   assert.ok(line.includes("预算压缩 1 次"), line);
 

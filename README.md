@@ -180,7 +180,7 @@ HTTP 路由面板沿用内部路径 `/dsh-purge-safe/*`（用户不可见，保�
 - 每轮注入都记一条指标到 `$DSH_HOME/pojia/metrics.jsonl`（模型族 / 通道 / 字节 / 是否中转 / 决策来源），**每轮结束还会做一次拒答判定并记录**（即使关掉自动补跑）；512KB 自动翻滚，写失败绝不影响注入。
 - `/pojia status` 会同时给出 `模型画像 / profile` 与 `注入通道 / channel`（用户选择 vs 实际生效）；`/pojia doctor` 多一行「协同」：注入次数、均值字节、拒答信号、gateway fail，中转域名上出现 gateway fail 会直接建议换官方 endpoint 或换 provider。
 
-「什么叫第一梯队」不看口号看标尺：判定标准、现状自评与里程碑都在 [`docs/tier-one-baseline.md`](./docs/tier-one-baseline.md)。
+「什么叫第一梯队」不看口号看标尺：判定标准、现状自评与里程碑都在 [`docs/tier-one-baseline.md`](./docs/tier-one-baseline.md)。协同层怎么运转（数据流、优先级、不变量、指标口径、失败模式）见 [`docs/coop-layer.md`](./docs/coop-layer.md)。
 
 面板（设置页「清洗」章）现在也有一块**只读协同卡片**：模型画像（哪个 provider/model → 推荐通道）、注入通道（实际生效 + 是否钉住）、校准（本机实测最优通道）、运行时指标（注入次数 / 均值字节 / 子代理轮次 / 预算压缩省下的字节 / gateway fail）。数据来自同一份 `/dsh-purge-safe/status` 载荷，和 `status` / `doctor` / 工具完全同源。
 
