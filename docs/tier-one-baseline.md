@@ -35,16 +35,16 @@
 | 7 | 可回滚 | ✔ | `revert` / `uninstall` 保留 `prompt-inject.md`；`--revert` 有冒烟 |
 | 8 | 失败不静默 | ✔ | 命令面注册失败会进 `commandRegState` 并在 doctor 打印；锁冲突/注入缺失都报错 |
 | 9 | 并发安全 | ✔ | `validation.json` 事务（owner 校验 + 原子 rename + 严格读） |
-| 10 | 跨平台 | △ | 代码路径覆盖 Windows/macOS/Linux；CI 已加 `os × node(18/20)` matrix（首次运行需 push 验证，未跑过不算 ✔） |
+| 10 | 跨平台 | ◑ | Windows(Node 24) 与 Linux(Node 18.19.1, WSL2) 上 `npm run gate` 全绿（48 单测 + 30 协同 + 14 子代理 + 95 语法）；macOS 与 GitHub CI matrix 仍需首次运行 |
 | 11 | 文档即产品 | ✔ | README 30 秒自检 + 故障排查（`/pojia` 无反应四步、与 REA/CFW 的边界） |
 | 12 | 基线可回归 | ✔ | `npm test` 27 项 + `scripts/check-syntax.mjs`（跨平台语法检查）+ `scripts/e2e-coop.mjs`（协同链路 14 项断言）+ CI 三个 bash 冒烟 |
 
-综合：11 ✔ / 1 △ / 0 ✗（△ 项是「CI matrix 已配好但还没在真机跑过一次」）。
+综合：11 ✔ / 1 ◑ / 0 ✗（△ 项是「CI matrix 已配好但还没在真机跑过一次」）。
 
 ## 三、差距与里程碑
 
 ### M3（已落地，等一次 CI 验证）
-1. **跨平台基线**：CI 加 `os × node` matrix（ubuntu / windows / macos × node 18 / 20），跑语法检查、`npm test` 与两个自检脚本。
+1. **跨平台基线**：CI 加 `os × node` matrix（ubuntu / windows / macos × node 18 / 20）。本地已实测两端：Windows + Node 24（2026-11-27）与 **Linux + Node 18.19.1**（WSL2 Ubuntu，2026-11-27）`npm run gate` 均 4/4 步通过；macOS 与 GitHub Runner 需首次 push 后确认。
 2. **协同端到端脚本** `scripts/e2e-coop.mjs`：最小 Cordis ctx 拉起插件 → 断言命令/工具注册、pre-step 注入、画像决策、会话级 system 段、校准闭环、预算压缩、钉住让位（30 项断言，已进 CI）。
 3. **跨平台语法检查** `scripts/check-syntax.mjs`：不依赖 bash/glob，三平台行为一致（94 个文件）。
 
@@ -67,12 +67,13 @@
 
 ```bash
 cd dsh-pojia
-npm test                        # 41 项单测：判定 / 诊断 / 探针 / 锁 / 画像 / 指标 / 校准 / 预算
-node scripts/e2e-coop.mjs       # 30 项：画像 → 注入 → 会话级 system 段 → 校准 → 预算 → 钉住
-node scripts/e2e-subagent.mjs   # 9 项：子代理注入开关
-node scripts/check-syntax.mjs   # 跨平台语法检查
+npm run gate        # 一条命令 == 语法检查 + 48 单测 + 30 协同自检 + 14 子代理自检（跨平台，不依赖 bash 通配符）
+npm test            # 只跑单测时用这个
 node bin/dsh-pojia.js --doctor; echo $?    # 退出码 0 全绿 / 1 有待办 / 2 有阻断
-node scripts/build-client.mjs && git diff --stat client.js   # 面板构建幂等
+node scripts/build-client.mjs && git diff --stat client.js   # 面板构建幂等（改过面板 CSS/JSX 才需要）
 ```
+
+> Linux / Node 18 验证方式（Windows 上没有 macOS/Linux 机器时）：
+> `wsl -e bash -lc "cd /mnt/f/pojia/dsh-pojia && node scripts/gate.mjs"` —— 已在 Node 18.19.1 + WSL2 Ubuntu 实测 4/4 通过。
 
 真机验证：装好后在会话里跑 `/pojia status`，第一屏应出现 `结论 / verdict`、`模型 / provider`、`模型画像 / profile`、`注入通道 / channel`、`校准 / calibration` 五类信息；跑一轮对话后 `/pojia doctor` 的「协同」行应出现注入次数、均值字节、子代理轮次与预算压缩统计。

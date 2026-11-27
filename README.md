@@ -269,6 +269,15 @@ presets/ skills/  预设与技能
 
 **不需要 CFW / 内网穿透**：本插件纯本地（读/改本机宿主文件 + 写会话注入），不发网络请求、不接管代理。只有「手机访问电脑上的 DSH web」才需要穿透，那是 DSH 自带 mobile gateway 的事，和插件无关。模型 API 走不走代理也与插件无关——`status` / `doctor` 里那行「疑似中转」只是诊断提示，不是要求。
 
+## 开发者：本地门禁
+
+```bash
+npm run gate     # 语法检查 + 48 项单测 + 协同自检(30) + 子代理自检(14)，三平台行为一致
+npm test         # 只跑单测
+```
+
+Windows 与 Linux/Node 18（WSL2）都已实测 4/4 通过；macOS 走 GitHub CI matrix。
+
 ## 社区
 
 本项目在 **LINUX DO** 社区发起并接受佬友反馈：[linux.do](https://linux.do)。问题、建议、使用反馈都欢迎在社区帖或仓库 issue 里提。
