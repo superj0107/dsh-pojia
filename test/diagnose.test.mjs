@@ -213,6 +213,12 @@ test("validate: fail 归因 + report 建议 + skip 覆盖 fail", async () => {
   // 同一探针后写 skip 覆盖前一条
   assert.equal(v.recordProbe("normal-1", "skip").ok, true);
   assert.equal(v.report()[0].skip, 1);
+
+  // validate 事件必须进运行时指标（否则 doctor 的 gateway fail 建议永远不触发）
+  const m = await import("../lib/metrics.js");
+  const sum = m.summarize();
+  assert.equal(sum.byKind.validate, 4, JSON.stringify(sum.byKind));
+  assert.equal(sum.gatewayFails, 2, "两条 gateway 归因的 fail 要进汇总");
   v.clearValidation();
 });
 
