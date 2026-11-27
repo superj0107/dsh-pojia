@@ -10,9 +10,11 @@
 - **运行时协同指标（新增 `lib/metrics.js`）**：每轮注入记一条 `inject`（模型族 / 通道 / 字节 / 是否中转 / 决策来源），另有 `fit` / `validate` / `refusal` 事件，落 `$DSH_HOME/pojia/metrics.jsonl`；512KB 自动翻滚，脏行容忍，写失败绝不影响注入。
 - **doctor 新增「协同」行**：`画像 wx / GLM-5.2 → user（GLM） · 人设 pojia-armor · 疑似中转 | 7 天共 N 条：注入 X 次（均值 Y KB）· 拒答信号 A · gateway fail B`；中转域名上出现 gateway fail 时直接给换 endpoint / 换 provider 的建议。
 - **status 摊开决策**：新增 `模型画像 / profile` 与 `注入通道 / channel` 两行，能同时看到「用户选择」与「实际生效」，钉住状态也标出来；`pojia_status` 工具与 `/pojia armor status` 返回同样的字段（`profile` / `decision` / `effectiveMode` / `pinnedMode`）。
-- **第一梯队基线（新增 `docs/tier-one-baseline.md`）**：12 项判定标准 + 当前自评（10 ✔ / 2 △）+ 差距清单与里程碑，免得「世界第一梯队」只停留在口号。
+- **第一梯队基线（新增 `docs/tier-one-baseline.md`）**：12 项判定标准 + 当前自评（11 ✔ / 1 △）+ 差距清单与里程碑，免得「世界第一梯队」只停留在口号。
+- **在线校准闭环（新增 `lib/calibration.js`）**：规则负责冷启动，实测负责收敛。armor 每轮写一份画像快照（`armor-last.json`），`validate record` 会把「这条结果跑在哪个模型族 / 哪个通道」一起存下来；每次记录后自动重算 `calibration.json`（同一族 × 同一通道 ≥6 条样本才算数），下一次注入就用实测最优通道覆盖规则推荐（决策来源标 `calibrated`，并在 reason 里写清「本机实测 user 更优（100%，12 条）→ 覆盖规则推荐 both」）。gateway 类失败按「净失败」口径剔除，不会因为中转把某个通道冤枉死；`validate clear` 会连校准表一起清，避免用没数据支撑的「最优通道」。
 - 新增 `test/profile.test.mjs`（7 项）：模型族识别、画像与 relay 提示、人设按 model 匹配、决策优先级、指标汇总/脏行/翻滚、doctor 协同行。
-- **CI 升级为跨平台基线**：新增 `os × node` matrix（ubuntu / windows / macos × node 18 / 20）；`scripts/check-syntax.mjs` 做跨平台语法检查（不依赖 bash），`scripts/e2e-coop.mjs` 用最小宿主夹具跑 14 项协同断言（命令/工具注册、注入、画像决策、指标落盘、钉住优先），两者都进 CI。
+- 新增 `test/calibration.test.mjs`（7 项）：样本门槛、覆盖语义、净失败口径、老记录跳过、快照/校准表读写容错、记录后自动刷新。
+- **CI 升级为跨平台基线**：新增 `os × node` matrix（ubuntu / windows / macos × node 18 / 20）；`scripts/check-syntax.mjs` 做跨平台语法检查（不依赖 bash），`scripts/e2e-coop.mjs` 用最小宿主夹具跑 19 项协同断言（命令/工具注册、注入、画像决策、校准闭环、指标落盘、钉住优先），两者都进 CI。
 
 ### English
 
@@ -23,7 +25,9 @@
 - **doctor gained a `协同` line** with the profile, the injected-turn count, average bytes, refusal signals and gateway failures, plus a concrete suggestion when gateway failures happen on a relayed endpoint.
 - **status shows both decisions**: new `模型画像 / profile` and `注入通道 / channel` lines distinguish the user's choice from the effective channel and mark the pinned state; the `pojia_status` tool and `/pojia armor status` expose the same fields.
 - **Tier-1 baseline (`docs/tier-one-baseline.md`)**: twelve criteria, a 10 ✔ / 2 △ self-assessment and the milestone list, so "world-class" is measurable instead of a slogan.
+- **Online calibration loop (`lib/calibration.js`)**: rules cold-start, measurements converge. armor writes a profile snapshot (`armor-last.json`) every turn, `validate record` stores which family/channel each result ran on, and every record recomputes `calibration.json` (a family × channel needs ≥6 samples to count). The next injection then uses the measured best channel over the rule recommendation, marked `calibrated` with the reason spelled out ("measured user better (100%, 12 records) → overrides both"). Gateway failures are discounted as net failures so a relay cannot kill a channel; `validate clear` wipes the calibration too.
 - New `test/profile.test.mjs` (7 tests) covers classification, profile/relay notes, persona matching, decision priority, metrics aggregation/rotation and the doctor co-op line.
+- New `test/calibration.test.mjs` (7 tests) covers thresholds, override semantics, net-failure scoring, legacy-record skipping, snapshot/table I/O resilience and the auto-refresh on record.
 - **CI is now a cross-platform baseline**: new `os × node` matrix (ubuntu / windows / macos × node 18 / 20); `scripts/check-syntax.mjs` checks syntax without bash and `scripts/e2e-coop.mjs` runs 14 co-op assertions against a minimal host fixture (command/tool registration, injection, profile decision, metrics persistence, pinning), both wired into CI.
 
 ---

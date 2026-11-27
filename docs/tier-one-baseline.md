@@ -48,11 +48,11 @@
 2. **协同端到端脚本** `scripts/e2e-coop.mjs`：最小 Cordis ctx 拉起插件 → 断言命令/工具注册、pre-step 注入、画像决策、指标落盘、status/doctor 展示、用户钉住优先（14 项断言，已进 CI）。
 3. **跨平台语法检查** `scripts/check-syntax.mjs`：不依赖 bash/glob，三平台行为一致（89 个文件）。
 
-### M4（下一轮）
-4. **指标回流决策**：doctor 把「gateway fail 多 + 中转」的结论写回配置建议（换 endpoint / 切通道），并在 metrics 里记「决策变更」事件，形成闭环。
-5. **注入预算控制**：长会话里按 token 预算压缩内核段（只保留与当前任务域相关的段落），metrics 记 `bytes saved`。
-6. **模型画像在线校准**：用 validate 结果反推每族最优通道（A/B 记录），画像从「静态规则」升级为「规则 + 本机实测」。
-7. **四入口口径统一**：面板 / 命令 / 工具 / CLI 共用同一份 verdict + profile + metrics（verdict 已收口，继续把 profile/metrics 收口）。
+### M4（本轮已落地一半）
+4. **指标回流决策**：doctor 把「gateway fail 多 + 中转」的结论变成具体建议；`fit`/`calibrated` 事件记录决策变更（已有）。
+5. **注入预算控制**（下一轮）：长会话里按 token 预算压缩内核段（只保留与当前任务域相关的段落），metrics 记 `bytes saved`。
+6. **模型画像在线校准**：✅ 已落地 `lib/calibration.js` —— validate 记录带上「族 × 通道」，≥6 条样本后实测最优通道覆盖规则推荐（决策来源 `calibrated`），gateway 按净失败口径剔除，`validate clear` 连校准表一起清。
+7. **四入口口径统一**（持续）：verdict 已收口（status/doctor/CLI/工具/面板载荷共用）；profile 与 metrics 已进 status/doctor/工具，面板载荷仍只有 verdict_* + provider，下一步把 profile/metrics 也写进 `/dsh-purge-safe/status`。
 
 ## 四、怎么验（给下一位维护者）
 

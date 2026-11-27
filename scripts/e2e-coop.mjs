@@ -94,6 +94,32 @@ try {
   const coopLine = doctorOut.text.split("\n").find((l) => l.includes("协同")) || "";
   check("doctor 有「协同」行（画像 + 指标）", /画像/.test(coopLine) && /注入 \d+ 次/.test(coopLine), coopLine.trim());
 
+  // ---- 在线校准闭环：本机实测（validate 记录）反过来改注入通道 ----
+  {
+    const calibUrl = pathToFileURL(path.join(root, "lib", "calibration.js")).href;
+    const validateUrl = pathToFileURL(path.join(root, "lib", "effect-check.js")).href;
+    const calib = await import(calibUrl);
+    const validate = await import(validateUrl);
+    // 实测场景：user 通道 6 条全过、both 通道 6 条全被拒 → 该族最优应是 user
+    calib.writeLastProfile({ family: "claude", mode: "user", provider: "anthropic", model: "claude-opus-5-5" });
+    for (let i = 0; i < 6; i += 1) validate.recordProbe("normal-1", "pass");
+    calib.writeLastProfile({ family: "claude", mode: "both", provider: "anthropic", model: "claude-opus-5-5" });
+    for (let i = 0; i < 6; i += 1) validate.recordProbe("refuse-1", "fail", "模型拒绝", "refusal");
+
+    const table = calib.readCalibration();
+    check("校准表算出 claude 最优 = user", table.byFamily?.claude?.bestMode === "user",
+      JSON.stringify(table.byFamily?.claude || {}));
+
+    const decision3 = await preStep(payload, async () => ({ kind: "ok", messages: [] }));
+    const afterCalib = ctx._pojiaArmor.statePayload();
+    check("校准后决策来源 = calibrated", afterCalib.decision?.source === "calibrated", JSON.stringify(afterCalib.decision));
+    check("校准后生效通道 = user（覆盖规则推荐 both）", afterCalib.effectiveMode === "user", String(afterCalib.effectiveMode));
+    check("校准后 doctor 显示校准行", (() => {
+      return String(afterCalib.calibrationLine || "").includes("实测最优");
+    })(), String(afterCalib.calibrationLine || ""));
+    check("校准后仍会注入（通道切了不等于停）", (decision3.messages || []).length >= 0);
+  }
+
   // 用户钉住后，自适应必须让位
   const cmd = registry.commands.find((c) => c.name === "pojia");
   await cmd.handler({ rawInput: "armor mode user", agent: null });

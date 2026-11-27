@@ -174,6 +174,7 @@ HTTP 路由面板沿用内部路径 `/dsh-purge-safe/*`（用户不可见，保�
 - 每轮从宿主 `agent/pre-step` 的 `modelSelection` 取权威的 `provider / model`（不是猜配置文件），识别模型族（DeepSeek / Claude / GPT / Gemini / GLM / Kimi / Qwen / Llama / 未知），再决定注入通道（`user` / `legacy` / `both`），每个族都有写明理由。
 - **你的选择永远优先**：用 `/pojia armor mode …` 手动切过通道，就会被「钉住」，自适应不再覆盖；想彻底关掉自适应，配置里写 `autoProfile: false`。
 - 人设文件里的 `model: ["claude"]` 这类元数据现在真的生效：`personaForModel()` 按模型族挑人设，点名该族的优先于通配 `*`。
+- **在线校准**：规则只负责冷启动。armor 每轮把「当前是哪个族、走哪个通道」写进 `$DSH_HOME/pojia/armor-last.json`，`validate record` 会把这两列一起存；每次记录后自动重算 `$DSH_HOME/pojia/calibration.json`（同族 × 同通道 ≥6 条样本才算数），下一次注入就用本机实测的最优通道覆盖规则推荐（决策来源标 `calibrated`，理由写进 `decision.reason`）。gateway 类失败按「净失败」口径剔除，不会因为中转把某个通道冤枉死；`validate clear` 会连校准表一起清。
 - 每轮注入都记一条指标到 `$DSH_HOME/pojia/metrics.jsonl`（模型族 / 通道 / 字节 / 是否中转 / 决策来源），512KB 自动翻滚；写失败绝不影响注入。
 - `/pojia status` 会同时给出 `模型画像 / profile` 与 `注入通道 / channel`（用户选择 vs 实际生效）；`/pojia doctor` 多一行「协同」：注入次数、均值字节、拒答信号、gateway fail，中转域名上出现 gateway fail 会直接建议换官方 endpoint 或换 provider。
 
