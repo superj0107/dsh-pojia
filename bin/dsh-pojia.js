@@ -111,7 +111,9 @@ async function main() {
   }
 
   if (mode === "--doctor") {
-    process.exit(await runDoctor());
+    // 不要 process.exit() 硬砍：POSIX 管道背压下会截断诊断输出。
+    process.exitCode = await runDoctor();
+    return;
   }
 
   const state = await core.gatherState();
