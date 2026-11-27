@@ -35,16 +35,16 @@
 | 7 | 可回滚 | ✔ | `revert` / `uninstall` 保留 `prompt-inject.md`；`--revert` 有冒烟 |
 | 8 | 失败不静默 | ✔ | 命令面注册失败会进 `commandRegState` 并在 doctor 打印；锁冲突/注入缺失都报错 |
 | 9 | 并发安全 | ✔ | `validation.json` 事务（owner 校验 + 原子 rename + 严格读） |
-| 10 | 跨平台 | ◑ | Windows(Node 24) 与 Linux(Node 18.19.1, WSL2) 上 `npm run gate` 全绿（48 单测 + 30 协同 + 14 子代理 + 95 语法）；macOS 与 GitHub CI matrix 仍需首次运行 |
+| 10 | 跨平台 | ✔ | GitHub CI matrix **三平台 × Node 18/20 全绿**（run 45978621591，2026-11-27）：ubuntu / windows / macos 各两档；本地另在 Windows(Node 24) 与 Linux(Node 18.19.1, WSL2) 跑过 `npm run gate` |
 | 11 | 文档即产品 | ✔ | README 30 秒自检 + 故障排查（`/pojia` 无反应四步、与 REA/CFW 的边界） |
 | 12 | 基线可回归 | ✔ | `npm test` 27 项 + `scripts/check-syntax.mjs`（跨平台语法检查）+ `scripts/e2e-coop.mjs`（协同链路 14 项断言）+ CI 三个 bash 冒烟 |
 
-综合：11 ✔ / 1 ◑ / 0 ✗（△ 项是「CI matrix 已配好但还没在真机跑过一次」）。
+综合：12 ✔ / 0 ◑ / 0 ✗（△ 项是「CI matrix 已配好但还没在真机跑过一次」）。
 
 ## 三、差距与里程碑
 
 ### M3（已落地，等一次 CI 验证）
-1. **跨平台基线**：CI 加 `os × node` matrix（ubuntu / windows / macos × node 18 / 20）。本地已实测两端：Windows + Node 24（2026-11-27）与 **Linux + Node 18.19.1**（WSL2 Ubuntu，2026-11-27）`npm run gate` 均 4/4 步通过；macOS 与 GitHub Runner 需首次 push 后确认。
+1. **跨平台基线**：✅ CI matrix（ubuntu / windows / macos × node 18 / 20）已实跑全绿（run 45978621591）。首次 push 立刻暴露一个真问题：`npm test` 的 `test/*.test.mjs` 通配符在 Windows runner 上不展开，两档 Node 全部假失败 —— 改成 `scripts/run-tests.mjs` 自己枚举后修复。这条也证明 matrix 不是摆设。
 2. **协同端到端脚本** `scripts/e2e-coop.mjs`：最小 Cordis ctx 拉起插件 → 断言命令/工具注册、pre-step 注入、画像决策、会话级 system 段、校准闭环、预算压缩、钉住让位（30 项断言，已进 CI）。
 3. **跨平台语法检查** `scripts/check-syntax.mjs`：不依赖 bash/glob，三平台行为一致（94 个文件）。
 
