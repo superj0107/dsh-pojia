@@ -143,6 +143,33 @@ test("calibration: 薄差距不换通道（防抖动）", async () => {
   assert.ok(flip.reason.includes("覆盖规则推荐") || flip.reason.includes("本机实测"));
 });
 
+test("calibration: 预算 A/B 对照（压缩 vs 全文）", async () => {
+  const c = await import("../lib/calibration.js");
+  const recs = [
+    { family: "claude", mode: "both", verdict: "pass", trimmed: true },
+    { family: "claude", mode: "both", verdict: "pass", trimmed: true },
+    { family: "claude", mode: "both", verdict: "fail", reason: "refusal", trimmed: true },
+    { family: "claude", mode: "both", verdict: "pass" },
+    { family: "claude", mode: "both", verdict: "pass" },
+    { family: "claude", mode: "both", verdict: "pass" },
+  ];
+  const table = c.calibrate(recs);
+  const ab = table.byFamily.claude.modes.both.ab;
+  assert.equal(ab.trimmed.pass, 2);
+  assert.equal(ab.trimmed.fail, 1);
+  assert.equal(ab.full.pass, 3);
+
+  const out = c.compareBudgetAB(table, "claude");
+  assert.equal(out.verdict, "trim-worse", out.line);
+  assert.ok(out.line.includes("压缩"), out.line);
+  assert.ok(out.line.includes("关掉 injectBudgetKB"), out.line);
+
+  // 样本不足时不给结论
+  const thin = c.calibrate([{ family: "claude", mode: "user", verdict: "pass", trimmed: true }]);
+  assert.equal(c.compareBudgetAB(thin, "claude").verdict, "insufficient");
+  assert.ok(c.compareBudgetAB({ byFamily: {} }).line.includes("还没有样本"));
+});
+
 test("cleanup", () => {
   if (tmpHome) rmSync(tmpHome, { recursive: true, force: true });
 });
