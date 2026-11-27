@@ -10,7 +10,7 @@ import { buildDoctor, detectHostVersion } from "../lib/doctor.js";
 import { readProviderInfo, describeProvider } from "../lib/provider-info.js";
 import * as metrics from "../lib/metrics.js";
 import { summarizeLine } from "../lib/metrics.js";
-import { readCalibration, describeCalibration, compareBudgetAB } from "../lib/calibration.js";
+import { readCalibration, describeCalibration, describeCalibrationHistory, compareBudgetAB } from "../lib/calibration.js";
 
 const args = process.argv.slice(2);
 
@@ -174,6 +174,7 @@ async function main() {
     const provider = readProviderInfo(state.dsh_home);
     console.log(metrics.formatReport(summary, {
       calibrationLine: calibration ? describeCalibration(calibration, family) : "",
+      calibrationHistory: describeCalibrationHistory(3),
       budgetABLine: calibration ? compareBudgetAB(calibration, family).line : "",
     }));
     if (provider.baseURL) console.log(`\n当前 provider: ${describeProvider(provider)}`);

@@ -170,6 +170,26 @@ test("calibration: 预算 A/B 对照（压缩 vs 全文）", async () => {
   assert.ok(c.compareBudgetAB({ byFamily: {} }).line.includes("还没有样本"));
 });
 
+test("calibration: 历史只在结论变化时追加，且可读回", async () => {
+  const c = await import("../lib/calibration.js");
+  assert.equal(c.describeCalibrationHistory(3), "", "没有历史时应为空串");
+
+  c.writeCalibration({ byFamily: { claude: { bestMode: "both", confidence: "measured", samples: 6, bestRate: 100 } } });
+  c.writeCalibration({ byFamily: { claude: { bestMode: "both", confidence: "measured", samples: 7, bestRate: 100 } } }); // 结论没变 → 不重复记
+  c.writeCalibration({ byFamily: { claude: { bestMode: "user", confidence: "measured", samples: 12, bestRate: 100 } } }); // 换了 → 追加
+
+  const rows = c.readCalibrationHistory(5);
+  assert.equal(rows.length, 2, JSON.stringify(rows));
+  assert.equal(rows[0].byFamily.claude.best, "user", "最新的在最前");
+  assert.equal(rows[1].byFamily.claude.best, "both");
+  const text = c.describeCalibrationHistory(2);
+  assert.ok(text.includes("claude→user(measured,12)"), text);
+
+  // 清空校准也要落一条历史（否则看不出「什么时候被清过」）
+  c.writeCalibration({ byFamily: {} });
+  assert.equal(c.readCalibrationHistory(5).length, 3);
+});
+
 test("cleanup", () => {
   if (tmpHome) rmSync(tmpHome, { recursive: true, force: true });
 });

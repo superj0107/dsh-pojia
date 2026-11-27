@@ -51,7 +51,7 @@
 ### M4（已落地）
 4. **指标回流决策**：✅ doctor 把「gateway fail 多 + 中转」「注入均值偏大」变成具体建议；`fit`/`calibrated`/`trim` 事件记录决策与裁剪。
 5. **注入预算控制**：✅ `lib/budget.js` + 配置 `injectBudgetKB`（**默认关**）。按本轮领域挑段，头段（覆盖声明）与尾两段（风格/锚点）永远保留；真实内核 17.2KB → 9.6KB；无领域信号不裁；收益 <256 字节不裁。
-6. **模型画像在线校准**：✅ `lib/calibration.js` —— validate 记录带「族 × 通道」，≥6 条样本后实测最优通道覆盖规则；gateway 按净失败口径剔除；防抖动：赢家领先 ≥15pp 才换；`validate clear` 连校准表一起清。
+6. **模型画像在线校准**：✅ `lib/calibration.js` —— validate 记录带「族 × 通道」，≥6 条样本后实测最优通道覆盖规则；gateway 按净失败口径剔除；防抖动：赢家领先 ≥15pp 才换；`validate clear` 连校准表一起清；**决策变化写 `calibration-history.jsonl` 可审计**。
 7. **四入口口径统一**：✅ verdict / profile / 校准 / metrics 同时出现在 `status` 文本、`/pojia doctor`、`pojia_status`/`pojia_doctor` 工具与 `/dsh-purge-safe/status` 载荷。
 
 ### M5（已落地）

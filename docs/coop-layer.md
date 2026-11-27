@@ -42,7 +42,7 @@
 | 文件 | 职责 | 边界 |
 |---|---|---|
 | `lib/model-profile.js` | 模型族识别、人设匹配、决策优先级 | 纯函数，无 I/O（人设列表除外） |
-| `lib/calibration.js` | 画像快照、校准表读写、聚合、防抖动、预算 A/B | 只碰 `$DSH_HOME/pojia/*.json` |
+| `lib/calibration.js` | 画像快照、校准表读写、聚合、防抖动、预算 A/B、决策历史 | 只碰 `$DSH_HOME/pojia/*.json` / `*.jsonl` |
 | `lib/metrics.js` | 事件记录（JSONL）、汇总、翻滚 | 写失败一律吞掉，绝不影响注入 |
 | `lib/budget.js` | 切段、领域推断、按预算挑段 | 纯函数；默认关 |
 | `lib/armor.js` | 会话内注入、system 段生命周期、开关 | 负责「注入」本身与 per-agent 挂载 |

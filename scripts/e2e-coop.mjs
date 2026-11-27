@@ -122,6 +122,13 @@ try {
   const statusOut = await registry.tools.find((t) => t.name === "pojia_status").execute({});
   check("status 有「模型画像 / profile」行", /模型画像 \/ profile/.test(statusOut.text));
   check("status 有「注入通道 / channel」行", /注入通道 \/ channel/.test(statusOut.text));
+  // 结构化字段：agent 直接读，不用解析中文
+  check("pojia_status 返回结构化 verdict/patches/metrics",
+    typeof statusOut.verdict === "string" && typeof statusOut.patches_total === "number" && statusOut.metrics && typeof statusOut.metrics.inject === "number",
+    JSON.stringify({ verdict: statusOut.verdict, patches: statusOut.patches_total, metrics: statusOut.metrics }));
+  const effectiveNow = ctx._pojiaArmor?.statePayload?.()?.effectiveMode || "";
+  check("pojia_status 的 channel 与实际生效通道一致", Boolean(effectiveNow) && statusOut.channel === effectiveNow,
+    `tool=${statusOut.channel} armor=${effectiveNow}`);
 
   const doctorOut = await registry.tools.find((t) => t.name === "pojia_doctor").execute({});
   const coopLine = doctorOut.text.split("\n").find((l) => l.includes("协同")) || "";
