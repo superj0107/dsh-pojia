@@ -182,6 +182,8 @@ HTTP 路由面板沿用内部路径 `/dsh-purge-safe/*`（用户不可见，保�
 
 「什么叫第一梯队」不看口号看标尺：判定标准、现状自评与里程碑都在 [`docs/tier-one-baseline.md`](./docs/tier-one-baseline.md)。
 
+面板（设置页「清洗」章）现在也有一块**只读协同卡片**：模型画像（哪个 provider/model → 推荐通道）、注入通道（实际生效 + 是否钉住）、校准（本机实测最优通道）、运行时指标（注入次数 / 均值字节 / 子代理轮次 / 预算压缩省下的字节 / gateway fail）。数据来自同一份 `/dsh-purge-safe/status` 载荷，和 `status` / `doctor` / 工具完全同源。
+
 ### 协同层配置项
 
 | 配置 | 默认 | 作用 |

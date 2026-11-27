@@ -497,3 +497,10 @@
   backdrop-filter:none !important;
   -webkit-backdrop-filter:none !important;
 }
+
+/* 协同层只读卡片（v1.1.0）：模型画像 / 生效通道 / 校准 / 运行时指标 */
+.dshp-coop{grid-column:1/-1;display:grid;gap:4px;margin:0;padding:var(--ui-space-2) var(--ui-space-3);border:1px solid var(--dshp-line);border-radius:var(--ui-radius-panel);background:var(--dshp-paper)}
+.dshp-coop-row{display:grid;grid-template-columns:96px minmax(0,1fr);gap:var(--ui-space-2);font-size:var(--ui-text-helper);line-height:var(--ui-leading-body)}
+.dshp-coop-row>span{color:var(--dshp-mute)}
+.dshp-coop-row>b{font-weight:500;font-family:var(--dshp-mono);overflow-wrap:anywhere}
+@media (max-width:640px){.dshp-coop-row{grid-template-columns:minmax(0,1fr)}}

@@ -936,6 +936,17 @@ const productTheme = createProductTheme();
 			"action.uninstall": "卸载",
 			"ok.done": "已完成",
 			"ok.next": "下一步：/pojia doctor 看结论，/pojia validate list 跑探针验证有效性",
+			"coop.profile": "模型画像",
+			"coop.channel": "注入通道",
+			"coop.calibration": "校准",
+			"coop.metrics": "运行时指标",
+			"coop.pinned": " · 已钉住",
+			"coop.autoOff": " · 自适应关",
+			"coop.unknown": "未识别（还没跑过一轮）",
+			"coop.injectN": "注入 {n} 次（均值 {kb}）",
+			"coop.subN": "子代理 {n}",
+			"coop.trimN": "压缩 {n} 次省 {kb}KB",
+			"coop.gwN": "gateway fail {n}",
 			"err.action": "失败: {error}",
 			"err.status": "读取失败: {error}",
 			"err.override": "读取失败: {error}",
@@ -1345,6 +1356,17 @@ const productTheme = createProductTheme();
 			"action.uninstall": "Uninstall",
 			"ok.done": "Done",
 			"ok.next": "Next: /pojia doctor for the verdict, /pojia validate list to run probes",
+			"coop.profile": "Model profile",
+			"coop.channel": "Injection channel",
+			"coop.calibration": "Calibration",
+			"coop.metrics": "Runtime metrics",
+			"coop.pinned": " · pinned",
+			"coop.autoOff": " · auto off",
+			"coop.unknown": "unidentified (no turn yet)",
+			"coop.injectN": "{n} injections (avg {kb})",
+			"coop.subN": "subagent {n}",
+			"coop.trimN": "{n} trims saving {kb}KB",
+			"coop.gwN": "gateway fail {n}",
 			"err.action": "Failed: {error}",
 			"err.status": "Read failed: {error}",
 			"err.override": "Read failed: {error}",
@@ -3328,6 +3350,13 @@ body:not([data-ds-dark-theme]) .dshp-auth-ops button.primary{background:var(--ds
   -webkit-backdrop-filter:none !important;
 }
 
+/* 协同层只读卡片（v1.1.0）：模型画像 / 生效通道 / 校准 / 运行时指标 */
+.dshp-coop{grid-column:1/-1;display:grid;gap:4px;margin:0;padding:var(--ui-space-2) var(--ui-space-3);border:1px solid var(--dshp-line);border-radius:var(--ui-radius-panel);background:var(--dshp-paper)}
+.dshp-coop-row{display:grid;grid-template-columns:96px minmax(0,1fr);gap:var(--ui-space-2);font-size:var(--ui-text-helper);line-height:var(--ui-leading-body)}
+.dshp-coop-row>span{color:var(--dshp-mute)}
+.dshp-coop-row>b{font-weight:500;font-family:var(--dshp-mono);overflow-wrap:anywhere}
+@media (max-width:640px){.dshp-coop-row{grid-template-columns:minmax(0,1fr)}}
+
 
 /* Workspace layout: one navigation rail, one context row, then page content.
  * Compact mode is measured from the actual plugin width, including full views. */
@@ -4306,6 +4335,43 @@ body:not([data-ds-dark-theme]) .dshp-auth-ops button.primary{background:var(--ds
 			if (tally.skipped) metricNotes.push(t("metric.skipShort", { n: tally.skipped }));
 
 			const localVer = s && typeof s.plugin_version === "string" ? s.plugin_version.trim() : ((updateInfo && updateInfo.localVersion) || "");
+
+			// 协同层只读卡片（v1.1.0）：把「按哪个模型、走哪条通道、实测校准、跑了多少」摊在面板上。
+			// 数据来自 /dsh-purge-safe/status 的 armor / metrics 字段；缺字段就整块不渲染，不猜。
+			const coopStrip = (() => {
+				if (!s) return null;
+				const a = s.armor || null;
+				const m = s.metrics || null;
+				if (!a && !m) return null;
+				const rows = [];
+				const prof = a && a.profile ? a.profile : null;
+				const profText = prof
+					? (([prof.provider, prof.model].filter(Boolean).join(" / ") || prof.label || prof.family || "")
+						+ (prof.recommendedMode ? " → " + prof.recommendedMode : ""))
+					: t("coop.unknown");
+				rows.push(h("div", { className: "dshp-coop-row", key: "profile" },
+					h("span", null, t("coop.profile")), h("b", null, profText)));
+				const channelText = (a ? (a.effective_mode || a.mode || "—") : "—")
+					+ (a && a.pinned ? t("coop.pinned") : (a && a.auto_profile === false ? t("coop.autoOff") : ""));
+				rows.push(h("div", { className: "dshp-coop-row", key: "channel" },
+					h("span", null, t("coop.channel")), h("b", null, channelText)));
+				if (a && a.calibration) {
+					rows.push(h("div", { className: "dshp-coop-row", key: "calibration" },
+						h("span", null, t("coop.calibration")), h("b", null, a.calibration)));
+				}
+				if (m) {
+					const parts = [];
+					const injectN = (m.byKind && m.byKind.inject) || 0;
+					const kb = m.avgInjectBytes ? (m.avgInjectBytes / 1024).toFixed(1) + "KB" : "—";
+					parts.push(t("coop.injectN", { n: injectN, kb: kb }));
+					if (m.subagentTurns) parts.push(t("coop.subN", { n: m.subagentTurns }));
+					if (m.trim && m.trim.count) parts.push(t("coop.trimN", { n: m.trim.count, kb: (m.trim.savedBytes / 1024).toFixed(1) }));
+					if (m.gatewayFails) parts.push(t("coop.gwN", { n: m.gatewayFails }));
+					rows.push(h("div", { className: "dshp-coop-row", key: "metrics" },
+						h("span", null, t("coop.metrics")), h("b", null, parts.join(" · "))));
+				}
+				return h("div", { className: "dshp-coop", "data-coop": "1", "aria-label": t("coop.profile") }, rows);
+			})();
 			return h("section", { className: "dshp-clean-page dshp-studio-purgify", "aria-label": t("purge.title") },
 				h("div", {
 					className: "dshp-studio-chapter dshp-studio-patches",
@@ -4357,6 +4423,7 @@ body:not([data-ds-dark-theme]) .dshp-auth-ops button.primary{background:var(--ds
 						),
 						h("div", { className: "dshp-clean-progress" }, h("span", null, t("clean.progress")), h("b", null, located && total ? pct + "%" : "—")),
 						h("div", { className: "dshp-bar", role: "progressbar", "aria-label": t("clean.progress"), "aria-valuemin": 0, "aria-valuemax": 100, "aria-valuenow": located && total ? pct : undefined }, h("i", { style: { width: pct + "%" } })),
+						coopStrip,
 					),
 					h("div", { className: "dshp-clean-grid" },
 						h("section", { className: "dshp-clean-card dshp-clean-patches", "aria-labelledby": "dshp-clean-patches-title" },
@@ -15725,6 +15792,13 @@ const productTheme = createProductTheme();
   backdrop-filter:none !important;
   -webkit-backdrop-filter:none !important;
 }
+
+/* 协同层只读卡片（v1.1.0）：模型画像 / 生效通道 / 校准 / 运行时指标 */
+.dshp-coop{grid-column:1/-1;display:grid;gap:4px;margin:0;padding:var(--ui-space-2) var(--ui-space-3);border:1px solid var(--dshp-line);border-radius:var(--ui-radius-panel);background:var(--dshp-paper)}
+.dshp-coop-row{display:grid;grid-template-columns:96px minmax(0,1fr);gap:var(--ui-space-2);font-size:var(--ui-text-helper);line-height:var(--ui-leading-body)}
+.dshp-coop-row>span{color:var(--dshp-mute)}
+.dshp-coop-row>b{font-weight:500;font-family:var(--dshp-mono);overflow-wrap:anywhere}
+@media (max-width:640px){.dshp-coop-row{grid-template-columns:minmax(0,1fr)}}
 
 
 /* Detail surfaces are the last presentation layer for dense, expanded data.
