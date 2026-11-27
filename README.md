@@ -230,6 +230,8 @@ HTTP 路由面板沿用内部路径 `/dsh-purge-safe/*`（用户不可见，保�
 
 `status` / `doctor` 会显示当前 `provider / baseURL`；非官方域名标注「疑似中转，过滤行为不可控」——这就是「有的模型提供商会过滤拦截」那条反馈的定位入口。
 
+**记录的归属**：每条 validate 记录都会带上「当前会话 → 当时用的模型族/通道」，这样校准才能只在**同族同通道**的样本上算。命令 `/pojia validate record` 与工具 `pojia_validate` 都会自动取当前会话（工具从宿主传的 `exec.agent` 取，也可显式传 `sessionId`）；万一拿不到会话，记录照存但标成 `fallback`，**不参与校准聚合**——把 A 会话的结果算到 B 的模型头上，比少几条样本更糟。
+
 验证记录存在 `$DSH_HOME/pojia/validation.json`。
 
 ## 注入文件

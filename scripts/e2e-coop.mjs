@@ -164,6 +164,19 @@ try {
     check("无归属记录不进校准聚合", beforeUnattributed === afterUnattributed,
       `before=${beforeUnattributed} after=${afterUnattributed}`);
 
+    // 但工具路径能自动归属：宿主会把 agent 作为 execute 的第二个参数传进来
+    const validateTool = registry.tools.find((t) => t.name === "pojia_validate");
+    const viaTool = validateTool.execute(
+      { action: "record", probeId: "normal-2", verdict: "pass" },
+      { agent: { id: "sess-calib", session: { id: "sess-calib" } } },
+    );
+    check("工具记录返回成功", viaTool?.ok === true, JSON.stringify(viaTool));
+    const lastRec = validate.readValidation().records.at(-1);
+    check("工具路径按 exec.agent 自动归属（session）", lastRec?.attribution === "session", String(lastRec?.attribution));
+    const samplesAfterTool = calib.readCalibration().byFamily?.claude?.samples || 0;
+    check("自动归属的记录进了校准聚合", samplesAfterTool === afterUnattributed + 1,
+      `before=${afterUnattributed} after=${samplesAfterTool}`);
+
     const table = calib.readCalibration();
     check("校准表算出 claude 最优 = user", table.byFamily?.claude?.bestMode === "user",
       JSON.stringify(table.byFamily?.claude || {}));
