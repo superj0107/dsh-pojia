@@ -9,11 +9,13 @@ import { fileURLToPath } from "node:url";
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const client = readFileSync(path.join(root, "client.js"), "utf8");
 
-test("面板：协同卡片渲染四类信息（画像 / 通道 / 校准 / 指标）", () => {
+test("面板：协同卡片渲染四类信息（画像 / 通道 / 校准 / 指标）+ 预算 A/B", () => {
   assert.ok(client.includes('"data-coop": "1"'), "缺少协同卡片根节点");
   for (const key of ["profile", "channel", "calibration", "metrics"]) {
     assert.ok(client.includes(`dshp-coop-row", key: "${key}"`), `缺少 ${key} 行`);
   }
+  // 预算 A/B 只有开了预算才有值，行本身要在
+  assert.ok(client.includes('key: "budget_ab"'), "缺少预算 A/B 行");
 });
 
 test("面板：协同文案中英双语齐全", () => {
@@ -23,6 +25,7 @@ test("面板：协同文案中英双语齐全", () => {
     ["coop.calibration", "校准", "Calibration"],
     ["coop.metrics", "运行时指标", "Runtime metrics"],
     ["coop.unknown", "未识别（还没跑过一轮）", "unidentified (no turn yet)"],
+    ["coop.budgetAb", "预算 A/B", "Budget A/B"],
   ];
   for (const [key, zh, en] of pairs) {
     assert.ok(client.includes(`"${key}": "${zh}"`), `${key} 缺中文`);

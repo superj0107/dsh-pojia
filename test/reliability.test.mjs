@@ -144,6 +144,26 @@ test("refusal 观测：拒答轮次进指标、pass 轮次不进、同一 seq �
     const okAgent = { id: "sess-2", session: { snapshotEvents: () => passEvents } };
     assert.equal(recordRefusalObservation(okAgent, null, new Set()), false);
     assert.equal(metrics.summarize().refusalSignals, 1);
+
+    // 关键回归：标记只出现在代码块/行内代码里 → 不是拒答（曾把长会话刷出几十条假信号）
+    const quotedEvents = [
+      {
+        type: "assistant/message",
+        seq: 5,
+        data: {
+          message: {
+            content: [{
+              type: "text",
+              text: "我把内核里的拒答标记列一下：\n```js\nconst MARKERS = [\"我不写\", \"这条线是固定的\"];\n```\n行内示例：`我不写`。其余内容照常交付。",
+            }],
+          },
+        },
+      },
+      { type: "turn/end", seq: 6, data: { reason: { kind: "completed" }, turn: 3 } },
+    ];
+    const quotedAgent = { id: "sess-3", session: { snapshotEvents: () => quotedEvents } };
+    assert.equal(recordRefusalObservation(quotedAgent, null, new Set()), false, "代码块里的标记不算拒答");
+    assert.equal(metrics.summarize().refusalSignals, 1);
   } finally {
     if (prevHome === undefined) delete process.env.DSH_HOME;
     else process.env.DSH_HOME = prevHome;

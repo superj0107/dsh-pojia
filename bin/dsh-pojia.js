@@ -9,6 +9,7 @@ import { verdictLines } from "../lib/verdict.js";
 import { buildDoctor, detectHostVersion } from "../lib/doctor.js";
 import { readProviderInfo, describeProvider } from "../lib/provider-info.js";
 import * as metrics from "../lib/metrics.js";
+import { readCalibration, describeCalibration, compareBudgetAB } from "../lib/calibration.js";
 
 const args = process.argv.slice(2);
 
@@ -136,13 +137,14 @@ async function runDoctorJson() {
 
 async function main() {
   const asJson = args.includes("--json");
-  const mode = args.find((a) => ["--apply", "--revert", "--uninstall", "--status", "--doctor", "--edit", "--help"].includes(a));
+  const mode = args.find((a) => ["--apply", "--revert", "--uninstall", "--status", "--doctor", "--metrics", "--edit", "--help"].includes(a));
 
   if (mode === "--help" || args.includes("-h")) {
     console.log(`dsh-pojia 用法:
   dsh-pojia --status     显示状态（第一屏就是结论 + 下一步）
   dsh-pojia --doctor     诊断：安装 / 注入 / 有效性 / 命令面；退出码 0 全绿 / 1 有待办 / 2 有阻断
   dsh-pojia --doctor --json   同上，输出机器可读 JSON（给脚本/CI 用）
+  dsh-pojia --metrics    运行时指标：注入次数 / 模型族 / 拒答信号 / 预算压缩 / 校准
   dsh-pojia --apply      应用全部清洗（提示词+代码+shim+override）
   dsh-pojia --revert     回滚还原
   dsh-pojia --uninstall  卸载插件（已应用则先还原）
@@ -155,6 +157,21 @@ async function main() {
     // 不要 process.exit() 硬砍：POSIX 管道背压下会截断诊断输出。
     if (asJson) process.exitCode = await runDoctorJson();
     else process.exitCode = await runDoctor();
+    return;
+  }
+
+  if (mode === "--metrics") {
+    const state = await core.gatherState();
+    const summary = metrics.summarize();
+    let calibration = null;
+    try { calibration = readCalibration(); } catch { /* 没有校准表 */ }
+    const family = "";
+    const provider = readProviderInfo(state.dsh_home);
+    console.log(metrics.formatReport(summary, {
+      calibrationLine: calibration ? describeCalibration(calibration, family) : "",
+      budgetABLine: calibration ? compareBudgetAB(calibration, family).line : "",
+    }));
+    if (provider.baseURL) console.log(`\n当前 provider: ${describeProvider(provider)}`);
     return;
   }
 

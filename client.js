@@ -947,6 +947,8 @@ const productTheme = createProductTheme();
 			"coop.subN": "子代理 {n}",
 			"coop.trimN": "压缩 {n} 次省 {kb}KB",
 			"coop.gwN": "gateway fail {n}",
+			"coop.budgetAb": "Budget A/B",
+			"coop.budgetAb": "预算 A/B",
 			"err.action": "失败: {error}",
 			"err.status": "读取失败: {error}",
 			"err.override": "读取失败: {error}",
@@ -4358,6 +4360,10 @@ body:not([data-ds-dark-theme]) .dshp-auth-ops button.primary{background:var(--ds
 				if (a && a.calibration) {
 					rows.push(h("div", { className: "dshp-coop-row", key: "calibration" },
 						h("span", null, t("coop.calibration")), h("b", null, a.calibration)));
+				}
+				if (a && a.budget_ab) {
+					rows.push(h("div", { className: "dshp-coop-row", key: "budget_ab" },
+						h("span", null, t("coop.budgetAb")), h("b", null, a.budget_ab)));
 				}
 				if (m) {
 					const parts = [];

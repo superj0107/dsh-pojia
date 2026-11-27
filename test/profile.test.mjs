@@ -115,6 +115,17 @@ test("metrics: 记录 + 汇总 + 脏行容错 + 翻滚", async () => {
   assert.ok(line.includes("子代理轮次 2"), line);
   assert.ok(line.includes("预算压缩 1 次"), line);
 
+  // 多行报表（/pojia metrics、--metrics、面板共用）
+  const report = m.formatReport(sum, {
+    calibrationLine: "claude 实测最优 both（100%，6 条）",
+    budgetABLine: "claude/both：压缩 67%（3 条） vs 全文 100%（3 条） → 压缩更差，建议先关掉 injectBudgetKB",
+  });
+  for (const needle of ["运行时指标", "事件 / events", "注入 / inject", "模型族 / families", "预算 / budget", "质量 / quality", "校准 / calibration", "预算 A/B", "最近一条 / last"]) {
+    assert.ok(report.includes(needle), `报表缺「${needle}」：\n${report}`);
+  }
+  assert.ok(report.includes("claude 2 次"), report);
+  assert.ok(m.formatReport({ total: 0 }).includes("最近没有数据"));
+
   // 脏行不能把汇总打挂
   appendFileSync(m.metricsPath(), "{这不是 JSON\n\n", "utf8");
   assert.equal(m.summarize().total, 7);

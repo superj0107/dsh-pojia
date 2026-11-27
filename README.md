@@ -136,6 +136,8 @@ dsh plugin --profile desktop add /absolute/path/to/dsh-pojia
 /pojia validate list [kind]               列出探针任务（标注 [内置]/[自定义]）
 /pojia validate record 探针id <pass|fail|skip> [拒绝/网关/传输/其它] [备注]  记录一条结果
 /pojia validate report [人设id]           查看各人设命中率与 fail 归因
+
+/pojia metrics                            运行时指标：注入次数 / 模型族分布 / 拒答信号 / 预算压缩 / 校准
 /pojia validate clear                     清空验证记录
 
 /pojia rules list | use <id> | create <id> | delete <id> | reset
