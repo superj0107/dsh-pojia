@@ -615,7 +615,7 @@ if [ "$deps_ok" = 1 ]; then
   printf '%s安装完成。%s\n' "$c_ok" "$c_off"
   printf '  1) 完全退出并重新打开 DSH\n'
   printf '  2) 在会话标题旁 dsh-pojia 面板点「应用」（Clean → Apply），宿主会自动重启一次\n'
-  printf '  3) 之后在会话里用 /pojia status 查看状态\n'
+  printf '  3) 之后在会话里 /pojia doctor 看结论（全绿 exit 0 / 有待办 1 / 有阻断 2），或双击「点我检查是否生效」\n'
   printf '\n  卸载：bash install.sh --uninstall\n'
 else
   printf '%s安装动作做完了，但有依赖没弄好（看上面的 [!]）。%s\n' "$c_warn" "$c_off"

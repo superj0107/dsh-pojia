@@ -25,15 +25,21 @@ echo Plugin   : %CLI%
 echo.
 
 where node >nul 2>nul
-if errorlevel 1 (
-  echo [!] node not found, skipping the status check. Install Node.js 18+ and rerun.
-) else (
-  node "%CLI%" --status
-)
+if errorlevel 1 goto nonode
+node "%CLI%" --doctor
+set "RC=%ERRORLEVEL%"
+echo.
+echo exit code: %RC%  (0 = all green / 1 = has todos / 2 = blocked)
+goto endcheck
+
+:nonode
+echo [!] node not found, skipping the doctor. Install Node.js 18+ and rerun.
+
+:endcheck
 
 echo.
 echo ==============================================
-echo   Real effect: run /pojia status inside a DSH session.
+echo   Real effect: run /pojia doctor inside a DSH session.
 echo   Apply once in the dsh-pojia panel and restart DSH first.
 echo ==============================================
 echo.

@@ -33,14 +33,17 @@ echo "插件    : $cli"
 echo
 
 if command -v node >/dev/null 2>&1; then
-  node "$cli" --status 2>&1
+  node "$cli" --doctor 2>&1
+  rc=$?
+  echo
+  echo "退出码: $rc（0 全绿 / 1 有待办 / 2 有阻断）"
 else
-  echo "[!] 没找到 node，跳过状态检查。装好 Node.js 18+ 再跑一次。"
+  echo "[!] 没找到 node，跳过诊断。装好 Node.js 18+ 再跑一次。"
 fi
 
 echo
 echo "=============================================="
-echo "  真正的破甲效果请在 DSH 会话里发 /pojia status 看。"
+echo "  真正的破甲效果请在 DSH 会话里发 /pojia doctor 看（第一行就是 verdict）。"
 echo "  面板里的「应用」点过一次、宿主重启过，才算生效。"
 echo "=============================================="
 echo

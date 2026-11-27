@@ -487,6 +487,7 @@ if (-not $SkipPnpmInstall) {
 Write-Host ""
 if ($depsOk -and $nodeReady) {
     Write-Host "安装完成。请完全退出并重新打开 DSH，然后在 dsh-pojia 面板点「应用」。" -ForegroundColor Green
+    Write-Host "  之后用 /pojia doctor 看结论（全绿 exit 0 / 有待办 1 / 有阻断 2），或双击「点我检查是否生效-Windows.bat」。" -ForegroundColor Green
 } else {
     Write-Host "安装动作做完了，但有依赖没弄好（看上面的 [!]）。" -ForegroundColor Yellow
     Write-Host "  插件本身已就位；把依赖问题修掉后，在 $profileDir 里重跑 pnpm install，再重启 DSH 点「应用」。" -ForegroundColor Yellow
