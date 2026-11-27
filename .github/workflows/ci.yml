@@ -19,12 +19,12 @@ jobs:
         with:
           node-version: '20'
       - name: Syntax check
-        run: |
-          for f in lib/*.js lib/redteam/*.js bin/*.js client.js test/*.mjs; do
-            [ -f "$f" ] && node --check "$f"
-          done
+        run: node scripts/check-syntax.mjs
       - name: Unit tests
         run: npm test
+
+      - name: Co-op self-check (模型画像 → 注入 → 指标 → status/doctor)
+        run: node scripts/e2e-coop.mjs
 
       - name: Installer script syntax (bash)
         run: |
@@ -43,3 +43,24 @@ jobs:
 
       - name: pnpm failure reporting smoke test
         run: bash test/install-fail-smoke.sh
+
+  # 跨平台 / 跨 Node 版本的基线：代码路径不区分平台，但注入/锁/原子写的行为必须实测。
+  cross:
+    name: cross ${{ matrix.os }} · node ${{ matrix.node }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node: ['18', '20']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Syntax check
+        run: node scripts/check-syntax.mjs
+      - name: Unit tests
+        run: npm test
+      - name: Co-op self-check
+        run: node scripts/e2e-coop.mjs

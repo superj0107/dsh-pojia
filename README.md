@@ -167,6 +167,18 @@ HTTP 路由面板沿用内部路径 `/dsh-purge-safe/*`（用户不可见，保�
 
 关掉内核：`/pojia armor off` 不影响宿主补丁；回滚宿主：`/pojia revert` 不影响内核开关。两者独立。
 
+## 模型自适应与协同指标（v1.1.0）
+
+插件不再用一套固定形态打天下，而是**跟着宿主告诉它的模型走**：
+
+- 每轮从宿主 `agent/pre-step` 的 `modelSelection` 取权威的 `provider / model`（不是猜配置文件），识别模型族（DeepSeek / Claude / GPT / Gemini / GLM / Kimi / Qwen / Llama / 未知），再决定注入通道（`user` / `legacy` / `both`），每个族都有写明理由。
+- **你的选择永远优先**：用 `/pojia armor mode …` 手动切过通道，就会被「钉住」，自适应不再覆盖；想彻底关掉自适应，配置里写 `autoProfile: false`。
+- 人设文件里的 `model: ["claude"]` 这类元数据现在真的生效：`personaForModel()` 按模型族挑人设，点名该族的优先于通配 `*`。
+- 每轮注入都记一条指标到 `$DSH_HOME/pojia/metrics.jsonl`（模型族 / 通道 / 字节 / 是否中转 / 决策来源），512KB 自动翻滚；写失败绝不影响注入。
+- `/pojia status` 会同时给出 `模型画像 / profile` 与 `注入通道 / channel`（用户选择 vs 实际生效）；`/pojia doctor` 多一行「协同」：注入次数、均值字节、拒答信号、gateway fail，中转域名上出现 gateway fail 会直接建议换官方 endpoint 或换 provider。
+
+「什么叫第一梯队」不看口号看标尺：判定标准、现状自评与里程碑都在 [`docs/tier-one-baseline.md`](./docs/tier-one-baseline.md)。
+
 ## 可切换人设库
 
 破甲内核注入的正文来自当前人设，默认内置 `pojia-armor`（富江内核）。用户可以在 `$DSH_HOME/pojia/personas/*.md` 放带 frontmatter 的人设文件（`id` / `name` / `description` / `model` / `order`），用 `/pojia persona use <id>` 切换，**下一轮注入即生效**。格式参考 agent-purge 的人设文件，但本包不依赖其代码。切换人设只换提示词正文，不改宿主补丁和内核开关。
