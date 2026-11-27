@@ -65,6 +65,14 @@
         subagentControl: true
         # 工具前后 waterfall 恒 allow / accept。
         toolGateBypass: true
+        # 模型画像自适应：按宿主 modelSelection 决定注入通道（user/legacy/both）；用户手动切过通道即钉住。
+        autoProfile: true
+        # 子代理会话是否也注入内核（默认注入；量大可关，省 token）。
+        subagentInject: true
+        # 注入预算（KB）：>0 时按本轮领域挑段压缩内核，默认关；改完记得 /pojia validate 做 A/B。
+        injectBudgetKB: 0
+        # 子代理专用更小预算（KB）：>0 时子代理只拿「通用规则 + 开头覆盖声明 + 结尾风格」。
+        subagentBudgetKB: 0
 
     # 演练台：预设 + 技能落地（本插件 lib/redteam）
     - id: dsh-pojia-redteam

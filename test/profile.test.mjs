@@ -126,9 +126,19 @@ test("metrics: 记录 + 汇总 + 脏行容错 + 翻滚", async () => {
   assert.ok(report.includes("claude 2 次"), report);
   assert.ok(m.formatReport({ total: 0 }).includes("最近没有数据"));
 
+  // 自愈事件（retry）也要进汇总与报表
+  assert.equal(m.record("retry", { reason: "refusal", attempt: 1 }), true);
+  assert.equal(m.record("retry", { reason: "request-error", code: "ECONNRESET" }), true);
+  const withRetry = m.summarize();
+  assert.equal(withRetry.retryCount, 2);
+  assert.equal(withRetry.retryByReason.refusal, 1);
+  assert.equal(withRetry.retryByReason["request-error"], 1);
+  assert.ok(m.summarizeLine(withRetry).includes("自动重试 2"), m.summarizeLine(withRetry));
+  assert.ok(m.formatReport(withRetry).includes("自愈 / retry: 2 次"), m.formatReport(withRetry));
+
   // 脏行不能把汇总打挂
   appendFileSync(m.metricsPath(), "{这不是 JSON\n\n", "utf8");
-  assert.equal(m.summarize().total, 7);
+  assert.equal(m.summarize().total, 9, "7 条基础事件 + 2 条 retry；脏行不计入");
 
   // 超过上限自动翻滚，旧档留 .1
   const file = m.metricsPath();

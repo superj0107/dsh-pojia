@@ -66,6 +66,7 @@
 | `fit` | 生效通道发生变化时 | family / mode / source / reason |
 | `trim` | 预算裁剪生效时 | bytesBefore / bytesAfter / saved / dropped / domains / sub |
 | `refusal` | 每轮结束判定为拒绝/折中时（与自动补跑解耦） | family / mode / verdict / words / seq |
+| `retry` | 自动重试 / 拒答补跑 / 自动续跑时 | reason(request-error\|refusal\|continue) / attempt / code / session |
 | `validate` | 手工记录探针结果时 | probeId / verdict / reason / persona / family / mode / trimmed |
 
 `metrics.summarize()` 的口径：`injectCount` 只数真正注入的（不含 skipped），`byKind.inject` 是事件数，`avgInjectBytes` 只对真正注入取均值。

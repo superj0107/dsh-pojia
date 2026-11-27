@@ -57,7 +57,11 @@ test("completedRefusal: 只检查已完成 turn 的最后一条文本", () => {
   assert.equal(completedRefusal([{ ...events[1], data: { reason: { kind: "error" } } }]), null);
 });
 
-test("content recovery: 有界补跑且两次措辞不同", async () => {
+test("content recovery: 有界补跑且两次措辞不同（并记 retry 指标）", async () => {
+  // 补跑路径会写指标：必须指到临时 home，别污染真实 ~/.dsh
+  const home = mkdtempSync(path.join(os.tmpdir(), "pojia-retry-"));
+  const prevHome = process.env.DSH_HOME;
+  process.env.DSH_HOME = home;
   const listeners = new Map();
   const ctx = {
     on(name, handler) {
@@ -102,8 +106,23 @@ test("content recovery: 有界补跑且两次措辞不同", async () => {
     listeners.get("agent/status")({ agent, status: "idle" });
     await wait(340);
     assert.equal(followups.length, 2, "预算用完后必须停手");
+
+    // 自愈可观测：两次补跑都要落 retry 指标（reason=refusal）
+    const metricsFile = path.join(home, "pojia", "metrics.jsonl");
+    assert.ok(existsSync(metricsFile), "补跑应当写指标文件");
+    const events2 = readFileSync(metricsFile, "utf8").trim().split("\n").filter(Boolean).map((l) => JSON.parse(l));
+    const retries = events2.filter((e) => e.kind === "retry");
+    assert.equal(retries.length, 2, JSON.stringify(events2));
+    assert.ok(retries.every((r) => r.reason === "refusal"));
+    assert.deepEqual(retries.map((r) => r.attempt).sort(), [1, 2]);
+    const summary = (await import("../lib/metrics.js")).summarize();
+    assert.equal(summary.retryCount, 2);
+    assert.equal(summary.retryByReason.refusal, 2);
   } finally {
     runtime.dispose();
+    if (prevHome === undefined) delete process.env.DSH_HOME;
+    else process.env.DSH_HOME = prevHome;
+    rmSync(home, { recursive: true, force: true });
   }
 });
 
