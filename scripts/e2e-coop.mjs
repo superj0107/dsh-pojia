@@ -63,8 +63,28 @@ try {
   check("agent/pre-step 监听已挂", Boolean(preStep));
   if (!preStep) throw new Error("没有 pre-step 监听，后续断言无意义");
 
+  // 会话级 section 计数器：验证 system 段是按 agent 挂的（不串会话）。
+  const globalSections = { mounted: 0, disposed: 0 };
+  const makeAgent = (provider, model) => {
+    const agent = {
+      session: { requestHeader: () => ({ config: { provider, model } }) },
+      sections: { mounted: 0, disposed: 0 },
+    };
+    agent.ctx = {
+      systemPrompt: {
+        section() {
+          agent.sections.mounted += 1;
+          return () => { agent.sections.disposed += 1; };
+        },
+      },
+    };
+    return agent;
+  };
+  const claudeAgent = makeAgent("anthropic", "claude-opus-5-5");
+  const deepseekAgent = makeAgent("deepseek", "deepseek-chat");
+
   const payload = {
-    agent: { session: { requestHeader: () => ({ config: { provider: "anthropic", model: "claude-opus-5-5" } }) } },
+    agent: claudeAgent,
     messages: [],
     step: 1,
     modelSelection: { provider: "anthropic", model: "claude-opus-5-5" },
@@ -77,6 +97,19 @@ try {
   check("画像识别为 Claude 且推荐 both", /（Claude）/.test(String(armor.profileLine || "")), String(armor.profileLine || ""));
   check("自适应生效通道 = both", armor.effectiveMode === "both", String(armor.effectiveMode));
   check("决策来源 = profile（不是 pinned）", armor.decision?.source === "profile", JSON.stringify(armor.decision));
+  check("both → system 段挂到该会话（不是全局）", claudeAgent.sections.mounted >= 1 && globalSections.mounted === 0,
+    `agent=${claudeAgent.sections.mounted} global=${globalSections.mounted}`);
+
+  // 多会话隔离：另一个会话用 DeepSeek（推荐 user），不能影响 Claude 会话已挂的 system 段
+  await preStep(
+    { agent: deepseekAgent, messages: [], step: 1, modelSelection: { provider: "deepseek", model: "deepseek-chat" } },
+    async () => ({ kind: "ok", messages: [] }),
+  );
+  check("DeepSeek 会话走 user（不挂 system 段）", deepseekAgent.sections.mounted === 0,
+    `agent=${deepseekAgent.sections.mounted}`);
+  check("Claude 会话的 system 段仍在（互不串味）", claudeAgent.sections.mounted >= 1 && claudeAgent.sections.disposed === 0,
+    `mounted=${claudeAgent.sections.mounted} disposed=${claudeAgent.sections.disposed}`);
+  check("全局 section 始终没被自适应使用", globalSections.mounted === 0, `global=${globalSections.mounted}`);
 
   const metricsFile = path.join(home, "pojia", "metrics.jsonl");
   const events = fs.existsSync(metricsFile)
